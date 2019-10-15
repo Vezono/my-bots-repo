@@ -1,4 +1,2 @@
 pyTelegramBotAPI
-redis
-emoji
 pymongo
