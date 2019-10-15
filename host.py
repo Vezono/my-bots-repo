@@ -2,7 +2,7 @@ import threading
 
 def hostloshod(test):
     print('Launching "loshadkin.py"...')
-    execfile("loshadkin.py")
+    exec(open("loshadkin.py").read())
     
 threading.Timer(1,hostloshod,args=['test']).start()
 
