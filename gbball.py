@@ -1,1 +1,1 @@
-print(gbball.py: App launched!')
+print('gbball.py: App launched!')
