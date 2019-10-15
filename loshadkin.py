@@ -1,1 +1,1 @@
-print('gotcha!')
+print('Loshadkin.py: App launched!')
