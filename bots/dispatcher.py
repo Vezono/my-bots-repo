@@ -1,1 +1,1 @@
-print('It works!')
+print('Dispatcher works!')
