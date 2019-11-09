@@ -1,1 +1,1 @@
-
+print('Admin works!')
