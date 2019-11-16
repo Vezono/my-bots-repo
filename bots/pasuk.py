@@ -161,7 +161,6 @@ def google(m):
 # ---------------------RUNNER OF BOTS----------------------------------------
 # ---------------------------------------------------------------------------
 runner = BotsRunner([creator, -1001249266392])
-runner.add_bot("Dispatcher", dispatcher)
 runner.add_bot("Pasuk", pasuk)
-runner.set_main_bot(dispatcher)
+runner.set_main_bot(pasuk)
 runner.run()
