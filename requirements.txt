@@ -1,2 +1,4 @@
 pyTelegramBotAPI
 pymongo
+bs4
+lxml
