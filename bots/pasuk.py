@@ -14,10 +14,10 @@ creator = 792414733
 admin = creator
 pasukid = 441399484
 
-pasuk = TeleBot('976911963:AAFzMGQBIlKruwL9HUVzy2Bsc4XjW0bYK2I')
+pasuk = TeleBot(os.environ['pasuk'])
 
 bot_id = pasuk.get_me().id
-client=MongoClient('mongodb://gbball:onionland@database-shard-00-00-fcfmt.gcp.mongodb.net:27017,database-shard-00-01-fcfmt.gcp.mongodb.net:27017,database-shard-00-02-fcfmt.gcp.mongodb.net:27017/test?ssl=true&replicaSet=database-shard-0&authSource=admin&retryWrites=true&w=majority')
+client=MongoClient(os.environ['database'])
 db=client.loshadkin
 phrases=db.phrases
 lophrase = []
