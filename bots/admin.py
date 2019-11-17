@@ -25,7 +25,7 @@ group_admins = ['administrator', 'creator']
 
 @bot.message_handler(commands=['status'])
 def status(m):
-    pasuk.reply_to(m, runner.get_status())
+    bot.reply_to(m, runner.get_status())
     
 @bot.message_handler(commands=['info'])
 def ping(m):
