@@ -13,12 +13,12 @@ from manybotslib import BotsRunner
 token = os.environ['god']
 bot = telebot.TeleBot(token)
 
-neiro = apiai.ApiAI(os.eviron['neirogod'])
+neiro = apiai.ApiAI(os.environ['neirogod'])
 parent='projects/small-talk-rshahq/Small-Talk'
 
 agent = Agent(
 'cipraded',
-os.eviron['neirogod'],
+os.environ['neirogod'],
 os.environ['neirogoduser'],
 )
 
