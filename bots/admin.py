@@ -34,6 +34,7 @@ def ping(m):
         tts = tts.format(str(m.chat.id), m.chat.type, m.reply_to_message.from_user.first_name, str(m.reply_to_message.from_user.id))
     else:
         tts = tts.format(str(m.chat.id), m.chat.type, m.from_user.first_name, str(m.from_user.id))
+    bot.send_message(m.chat.id, tts)
 @bot.message_handler()
 def txt(m):
     pass
