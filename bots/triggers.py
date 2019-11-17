@@ -37,7 +37,7 @@ def gettriggers(m):
             tts += '{}|{}\n'.format(trigger, chat_triggers)
         t += 1
     bot.reply_to(m, tts)
-@bot.message_handler(commands=['gettriggers'])
+@bot.message_handler(commands=['addtrigger'])
 def addtrigger(m):
     if m.text.count(' ') and m.text.count('/') == 1:
         text = m.text.split(' ', 1)
