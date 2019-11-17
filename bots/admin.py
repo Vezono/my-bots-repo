@@ -23,9 +23,9 @@ bot = telebot.TeleBot(token)
 global_admins = [268486177, 792414733, 441399484]
 group_admins = ['administrator', 'creator']
 
-@bot.message_handler(commands=['ping'])
-def ping(m):
-    bot.reply_to(m, 'Успешно!')
+@bot.message_handler(commands=['status'])
+def status(m):
+    pasuk.reply_to(m, runner.get_status())
     
 @bot.message_handler(commands=['info'])
 def ping(m):
