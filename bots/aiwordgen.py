@@ -25,6 +25,7 @@ endsymbols=['!', '.', '?', ')']
 @bot.message_handler(commands=['adddict'])
 def adddict(m):
     if m.from_user.id==admin:
+        words.insert_one({'words':{}})
         words.update_one({},{'$set':{'words2':{}}})
         words.update_one({},{'$set':{'words':{}}})
         bot.send_message(admin, 'yes')
