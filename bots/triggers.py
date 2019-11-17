@@ -42,7 +42,7 @@ def addtrigger(m):
     if m.text.count(' ') and m.text.count('/') == 2:
         text = m.text.split(' ', 1)
         args = text[1].split('/')
-        triggs.update_one({'chat':m.chat.id}, {args[0]:args[1]})
+        triggs.update_one({'chat':m.chat.id}, {'$set':{args[0]:args[1]}})
         bot.reply_to(m, 'Триггер успешно добавлен!')
 @bot.message_handler()
 def texthandler(m):
