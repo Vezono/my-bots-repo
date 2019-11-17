@@ -15,7 +15,7 @@ admins = [792414733]
 fighters=[]
 btimer=10
 
-names=['Волк', 'Осёл', 'Кроль', 'Пажилая чимчима', 'Сосааать']
+names=['Gentoo', 'Arch']
 
 @bot.message_handler(commands=['start'])
 def start(m):
