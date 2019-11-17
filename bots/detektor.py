@@ -43,7 +43,9 @@ def question(m):
         bot.send_message(m.chat.id, so)
     except:
         bot.send_message(792414733, traceback.format_exc())
-    
+@bot.message_handler(commands=['status'])
+def status(m):
+    bot.reply_to(m, runner.get_status())    
 @bot.inline_handler(func=lambda query: len(query.query) > 0)
 def query_text(query):
     try:
