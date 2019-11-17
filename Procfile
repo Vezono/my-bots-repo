@@ -1,1 +1,1 @@
-bot: bash main.sh
+bot: bash ./main.sh
