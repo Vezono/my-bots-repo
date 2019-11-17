@@ -13,7 +13,7 @@ import traceback
 
 from pymongo import MongoClient
 
-teachers = [268486177, 792414733, 441399484]
+teachers = [792414733]
 
 token = os.environ['god']
 bot = telebot.TeleBot(token)
