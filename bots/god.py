@@ -38,9 +38,8 @@ def react(m):
     responseJson = json.loads(request.getresponse().read().decode('utf-8'))
     response = responseJson['result']['fulfillment']['speech'] # Разбираем JSON и вытаскиваем ответ
     return response
-print('7777')
+print('God works!')
 runner = BotsRunner(teachers) # pass empty list if you don't want to receive error messages on fail
 runner.add_bot("God", bot)
 runner.set_main_bot(bot)
 runner.run()
-bot.polling(none_stop=True,timeout=600)
