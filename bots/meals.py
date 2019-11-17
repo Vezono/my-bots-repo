@@ -95,4 +95,5 @@ def inline(call):
 runner = BotsRunner(global_admins) # pass empty list if you don't want to receive error messages on fail
 runner.add_bot("Cooker", bot)
 runner.set_main_bot(controller)
+print('Cooker works!')
 runner.run()
