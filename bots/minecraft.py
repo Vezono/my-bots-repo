@@ -13,7 +13,7 @@ import traceback
 
 mine_token = os.environ['mine_token']
 mine_bot = telebot.TeleBot(mine_token)
-
+bot = mine_bot
 client=MongoClient(os.environ['database'])
 
 mine_users = client.farmer.users
