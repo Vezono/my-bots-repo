@@ -28,7 +28,7 @@ x = phrases.find_one({})
 for ids in x:
     lophrase.append(x[ids])
 lophrase.remove(lophrase[0])
-
+bot = pasuk
 
 #---------------------------------------------------------------------------
 #---------------------PASUK  HANDLERS---------------------------------------
