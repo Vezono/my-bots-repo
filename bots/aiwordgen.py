@@ -9,7 +9,7 @@ from pymongo import MongoClient
 import traceback
 admin = 792414733
 
-token = os.environ['TELEGRAM_TOKEN']
+token = os.environ['aiwordgen']
 bot = telebot.TeleBot(token)
 
 
@@ -178,7 +178,7 @@ def addword(m):
                         while nextword[len(nextword)-1]==".":
                             nextword=nextword[:len(nextword)-1]
                     except Exception as e:
-                        bot.send_message(441399484, traceback.format_exc())
+                        bot.send_message(admin, traceback.format_exc())
                     if currentword not in toupdate:     
                         if "." not in currentword and "." not in nextword:
                             toupdate.update({currentword:{nextword:1}})
