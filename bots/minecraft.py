@@ -25,7 +25,6 @@ recipes = ['furnance', 'cookedmeat', 'fountain', 'bread', 'fishingrod', 'fishham
            'bucket', 'battery',
            'autobur']
 x = 0
-mine_users = 1
 
 @mine_bot.message_handler(commands=['update'])
 def upd(m):
