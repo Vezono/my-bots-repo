@@ -35,6 +35,9 @@ def eat(m):
             cookto(m, meal)
         except:
             bot.send_message(m.chat.id, traceback.format_exc())
+@bot.message_handler(commands=['status'])
+def status(m):
+    bot.reply_to(m, runner.get_status())
 @bot.message_handler(commands=['append'])
 def appendix(m):
     try:
