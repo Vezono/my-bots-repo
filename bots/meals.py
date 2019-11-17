@@ -1,10 +1,15 @@
 import telebot
+from manybotslib import BotsRunner
+from telebot import types
+
 import os
+
 import time
 import random
 import threading
-from telebot import types
+
 import traceback
+
 global_admins = [792414733]
 bot_token = os.environ['cooker']
 bot = telebot.TeleBot(bot_token)
@@ -87,3 +92,7 @@ def inline(call):
             medit(call.message.chat.id, mid,  tts, reply_markup=None)     
     else:
         bot.answer_callback_query(call.id, 'Это не ваше меню!')
+runner = BotsRunner(global_admins) # pass empty list if you don't want to receive error messages on fail
+runner.add_bot("Cooker", bot)
+runner.set_main_bot(controller)
+runner.run()
