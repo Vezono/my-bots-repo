@@ -31,9 +31,11 @@ def gettriggers(m):
     for trigger in triggers.keys():
         chat_triggers.update({trigger:triggers[trigger]})
     tts = 'Ваши триггеры:\n'
+    t = 0
     for trigger in chat_triggers.keys():
-        if not trigger == 'chat' or not trigger == 'id':
+        if t > 3:
             tts += '{}|{}\n'.format(trigger, chat_triggers)
+        t += 1
     bot.reply_to(m, tts)
 @bot.message_handler(commands=['gettriggers'])
 def addtrigger(m):
