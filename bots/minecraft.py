@@ -24,9 +24,6 @@ craftable = ['Бутерброд с рыбой', 'Приготовленное �
 recipes = ['furnance', 'cookedmeat', 'fountain', 'bread', 'fishingrod', 'fishhamburger', 'woodsword', 'farm', 'hoe',
            'bucket', 'battery',
            'autobur']
-
-client = MongoClient(os.environ['database'])
-mine_users = client.farmer.users
 x = 0
 mine_users = 1
 
@@ -592,7 +589,7 @@ def text(m):
                                     if x['water'] > 0:
                                         mine_users.update_one({'id': m.from_user.id}, {'$set': {'farming': 1}})
                                         mine_bot.send_message(m.chat.id,
-                                                         'Вы отправились сажать семяна. Вернётесь через 3 минуты.')
+                                                         'Вы отправились сажать семtеа. Вернётесь через 3 минуты.')
                                         t = threading.Timer(180, seeding, args=[m.from_user.id, z])
                                         t.start()
                                     else:
@@ -1005,14 +1002,9 @@ def cave(id):
             mine_users.update_one({'id': y['id']}, {'$set': {'huntingto': None}})
             mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
             mine_users.update_one({'id': y['id']}, {'$set': {'hunting': 0}})
-            try:
-                mine_bot.send_message(id, text + recources)
-            except:
-                pass
-            try:
-                mine_bot.send_message(y['id'], 'Вы решили не атаковать, и цель ушла с ресурсами.')
-            except:
-                pass
+            mine_bot.send_message(id, text + recources)
+            mine_bot.send_message(y['id'], 'Вы решили не атаковать, и цель ушла с ресурсами.')
+
     else:
 
         mine_users.update_one({'id': id}, {'$inc': {'rock': grock}})
@@ -1022,12 +1014,10 @@ def cave(id):
         mine_users.update_one({'id': id}, {'$inc': {'diamond': gdiamond}})
         mine_users.update_one({'id': id}, {'$inc': {'ruby': gruby}})
         mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
-        try:
-            mine_bot.send_message(id, text + recources)
-        except:
-            pass
-
-    mobs = ['Червя-камнееда']
+        mine_bot.send_message(id, text + recources)
+       
+    ddd = 0
+    mobs = ['Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда', 'ОДИЧАВШИХ МЕНХЕРУ И ДВАЧТЯН']
     text = ''
     enemy = random.randint(1, 100)
     recources = ''
@@ -1044,8 +1034,14 @@ def cave(id):
                 if leither <= 50:
                     gleither = random.randint(1, 5)
                     recources += '⚪️Чешуя: ' + str(gleither) + '\n'
+            elif mob == 'ОДИЧАВШИХ МЕНХЕРУ И ДВАЧТЯН':
+                leither = random.randint(1, 1000)
+                if leither >= 50:
+                    ddd = 1
+                    recources += 'Бритский Алмаз!\n'        
             text2 = 'Вы оказались сильнее, и убили врага. Полученные ресурсы:\n' + recources
             mine_users.update_one({'id': id}, {'$inc': {'squama': gleither}})
+            mine_users.update_one({'id': id}, {'$inc': {'diamonds': ddd}})
             breakk = random.randint(1, 100)
             if breakk <= 3 and x['craftable']['woodsword'] > 0:
                 mine_users.update_one({'id': id}, {'$inc': {'craftable.woodsword': -1}})
@@ -1059,13 +1055,10 @@ def tforest(id):
     kb = types.ReplyKeyboardMarkup()
     kb.add(types.KeyboardButton('🔨Постройка'))
     mine_users.update_one({'id': id}, {'$set': {'wood': 0}})
-    try:
-        mine_bot.send_message(id,
+    mine_bot.send_message(id,
                          'Прошло пол часа. С помощью топора, который вы взяли с собой в путь, вы добыли 1000 ед. дерева -' +
                          ' Этого должно хватить на постройку дома. Чтобы начать постройку, нажмите кнопку "🔨Постройка", и выберите пункт "⛺️Дом".',
                               reply_markup=kb)
-    except:
-        pass
 
 
 def thouse(id):
@@ -1073,13 +1066,10 @@ def thouse(id):
     kb.add('Добыча')
     kb.add('Дом')
     kb.add('Обо мне')
-    try:
-        mine_bot.send_message(id,
+    mine_bot.send_message(id,
                          'Поздравляю! Вы построили себе дом! Здесь вы сможете спастись от дикой природы и от холода.' +
                          ' Дальше выживать придётся самостоятельно. Но осторожнее: добывая ресурсы, вы можете встретить других игроков, и если' +
                          ' они будут сильнее вас - добычу придётся отдать.', reply_markup=kb)
-    except:
-        pass
     mine_users.update_one({'id': id}, {'$set': {'tutorial': 0}})
 
 
@@ -1140,9 +1130,7 @@ def createuser(id, name):
 
 
 
-runner = BotsRunner([admin1, admin2, admin3]) # pass empty list if you don't want to receive error messages on fail
-runner.add_bot("Coolbot", bot1)
-runner.add_bot("Coolbot", bot2)
-runner.add_bot("Controller", controller)
-runner.set_main_bot(controller)
+runner = BotsRunner(vip) # pass empty list if you don't want to receive error messages on fail
+runner.add_bot("MineCraft", bot)
+runner.set_main_bot(bot)
 runner.run()
