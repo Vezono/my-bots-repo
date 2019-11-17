@@ -21,7 +21,9 @@ bot = telebot.TeleBot(token)
 client=MongoClient(os.environ['database'])
 db=client.triggerbot
 triggs=db.triggs
-
+@bot.message_handler(commands=['status'])
+def status(m):
+    bot.reply_to(m, runner.get_status())
 @bot.message_handler(commands=['gettriggers'])
 def gettriggers(m):
     triggers = tiggs.find_one({'chat':m.chat.id})
