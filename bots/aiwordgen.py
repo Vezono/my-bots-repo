@@ -224,6 +224,6 @@ reload()
 
 print('Aiwordgen works!')
 runner = BotsRunner([admin]) # pass empty list if you don't want to receive error messages on fail
-runner.add_bot("Lifegame", bot)
+runner.add_bot("Aiwordgen", bot)
 runner.set_main_bot(bot)
 runner.run()
