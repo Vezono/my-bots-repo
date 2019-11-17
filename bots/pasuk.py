@@ -98,7 +98,7 @@ def handler(m):
 
 @pasuk.message_handler()
 def texthandler(m):
-    if pinloshadkin(m) or random.randint(1, 50) > 48:
+    if pinloshadkin(m) or random.randint(1, 100) > 99:
         try:
             pasuk.reply_to(m, random.choice(lophrase))
         except:
