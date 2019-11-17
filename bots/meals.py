@@ -97,6 +97,6 @@ def inline(call):
         bot.answer_callback_query(call.id, 'Это не ваше меню!')
 runner = BotsRunner(global_admins) # pass empty list if you don't want to receive error messages on fail
 runner.add_bot("Cooker", bot)
-runner.set_main_bot(controller)
+runner.set_main_bot(bot)
 print('Cooker works!')
 runner.run()
