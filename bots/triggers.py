@@ -41,7 +41,7 @@ def addtrigger(m):
         bot.reply_to(m, 'Триггер успешно добавлен!')
 @bot.message_handler()
 def texthandler(m):
-    if not tiggs.find_one({'chat':m.chat.id}):
+    if not triggs.find_one({'chat':m.chat.id}):
         triggs.insert_one({'chat':m.chat.id})
     else:
         pass
