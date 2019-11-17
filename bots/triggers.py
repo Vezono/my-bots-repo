@@ -49,7 +49,7 @@ def texthandler(m):
     triggers = tiggs.find_one({'chat':m.chat.id})
     for trigger in triggers:
         chat_triggers.update({trigger:triggers[trigger]})
-    for i in chat_triggers.keys()
+    for i in chat_triggers.keys():
         if m.text.lower() in i:
             bot.reply_to(m, chat_triggers[i])
 print('Triggers works!')
