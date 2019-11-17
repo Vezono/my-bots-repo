@@ -8,6 +8,7 @@ from pymongo import MongoClient
 import traceback
 import apiai, json
 from api.ai import Agent
+from manybotslib import BotsRunner
 
 token = os.environ['god']
 bot = telebot.TeleBot(token)
@@ -38,4 +39,8 @@ def react(m):
     response = responseJson['result']['fulfillment']['speech'] # Разбираем JSON и вытаскиваем ответ
     return response
 print('7777')
+runner = BotsRunner(teachers) # pass empty list if you don't want to receive error messages on fail
+runner.add_bot("God", bot)
+runner.set_main_bot(bot)
+runner.run()
 bot.polling(none_stop=True,timeout=600)
