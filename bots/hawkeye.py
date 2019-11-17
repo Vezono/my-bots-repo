@@ -97,7 +97,7 @@ def fight():
                 target['killer']=ids['name']
                 text+='Вы убили цель!\n'
             else:
-                if random.randint(1,100)<=ids['killchance']:
+                if random.randint(1, 1000)<=ids['killchance']:
                     target['hp']=0
                     ids['killed']+=1
                     target['killer']=ids['name']
