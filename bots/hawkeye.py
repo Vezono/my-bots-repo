@@ -87,11 +87,13 @@ def fight():
                 alive.append(idss)
         if len(alive)>0:
             text=''
+            tts = ''
             target=random.choice(alive)
             dmg=ids['damage']+ids['damage']*(random.randint(-20, 20)/100)
             target['hp']-=dmg
             target['hitted']+=1
             text+='Вы попали в '+target['name']+'! Нанесено '+str(dmg)+' урона.\n'
+            tts+='В вас попал {}! Нанесено {} урона'.format(ids['name'], str(dmg))
             if target['hp']<=0:
                 ids['killed']+=1
                 target['killer']=ids['name']
@@ -102,8 +104,10 @@ def fight():
                     ids['killed']+=1
                     target['killer']=ids['name']
                     text+='Вы прострелили яйцо цели! Та погибает.\n'
+                    tts+='Вам прострелили яйцо. Вы погибаете.'
             try:
                 bot.send_message(ids['id'], text)
+                bot.send_message(target['id'], tts)
             except:
                 pass
     dellist=[]
