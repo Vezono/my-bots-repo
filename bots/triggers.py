@@ -48,7 +48,7 @@ def texthandler(m):
     else:
         pass
     chat_triggers = {}
-    triggers = tiggs.find_one({'chat':m.chat.id})
+    triggers = triggs.find_one({'chat':m.chat.id})
     for trigger in triggers:
         chat_triggers.update({trigger:triggers[trigger]})
     for i in chat_triggers.keys():
