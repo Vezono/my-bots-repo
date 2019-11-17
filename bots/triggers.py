@@ -39,7 +39,7 @@ def gettriggers(m):
     bot.reply_to(m, tts)
 @bot.message_handler(commands=['addtrigger'])
 def addtrigger(m):
-    if m.text.count(' ') and m.text.count('/') == 1:
+    if m.text.count(' ') and m.text.count('/') == 2:
         text = m.text.split(' ', 1)
         args = text[1].split('/')
         triggs.update_one({'chat':m.chat.id}, {args[0]:args[1]})
