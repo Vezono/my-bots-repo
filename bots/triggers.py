@@ -55,7 +55,7 @@ def texthandler(m):
     for trigger in triggers:
         chat_triggers.update({trigger:triggers[trigger]})
     for i in chat_triggers.keys():
-        if m.text.lower() in i:
+        if i in m.text.lower():
             bot.reply_to(m, chat_triggers[i])
 print('Triggers works!')
 runner = BotsRunner(teachers) 
