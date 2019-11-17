@@ -26,7 +26,7 @@ training = False
 teachers = [268486177, 792414733, 441399484]
 @bot.message_handler(commands=['status'])
 def status(m):
-    pasuk.reply_to(m, runner.get_status())
+    bot.reply_to(m, runner.get_status())
 @bot.message_handler()
 def txt(m):
     response = react(m)
