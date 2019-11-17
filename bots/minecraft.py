@@ -1132,5 +1132,6 @@ def createuser(id, name):
 
 runner = BotsRunner(vip) # pass empty list if you don't want to receive error messages on fail
 runner.add_bot("MineCraft", bot)
+print('Mine works!')
 runner.set_main_bot(bot)
 runner.run()
