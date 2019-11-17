@@ -9,7 +9,7 @@ from pymongo import MongoClient
 import traceback
 from manybotslib import BotsRunner
 n=0
-token = os.environ['TELEGRAM_TOKEN']
+token = os.environ['lifegame']
 bot = telebot.TeleBot(token)
 
 em_alive='🦠'
