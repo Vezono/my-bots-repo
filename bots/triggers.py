@@ -33,6 +33,7 @@ def gettriggers(m):
     tts = 'Ваши триггеры:\n\n'
     t = 0
     for trigger in chat_triggers.keys():
+        print(trigger)
         tts += '{} : {}\n\n'.format(trigger, chat_triggers[trigger])
     bot.reply_to(m, tts)
 @bot.message_handler(commands=['addtrigger'])
