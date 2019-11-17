@@ -26,7 +26,7 @@ def status(m):
     bot.reply_to(m, runner.get_status())
 @bot.message_handler(commands=['gettriggers'])
 def gettriggers(m):
-    triggers = tiggs.find_one({'chat':m.chat.id})
+    triggers = triggs.find_one({'chat':m.chat.id})
     chat_triggers = {}
     for trigger in triggers.keys():
         chat_triggers.update({trigger:triggers[trigger]})
