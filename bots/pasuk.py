@@ -29,7 +29,7 @@ for ids in x:
     lophrase.append(x[ids])
 lophrase.remove(lophrase[0])
 bot = pasuk
-alpha = False
+alpha = True
 #---------------------------------------------------------------------------
 #---------------------PASUK  HANDLERS---------------------------------------
 #---------------------------------------------------------------------------
@@ -117,7 +117,7 @@ def texthandler(m):
             if phrase:
                 for word in phrase.split(' '):
                     text = m.text.lower()
-                    text = text.replace('я', 'ты').relpace('ты', 'я')
+                    text = text.replace('я', 'ты').replace('ты', 'я')
                     if word.lower() in text.split(' ') and not sended:
                         bot.reply_to(m, phrase)
                         sended +=1
