@@ -110,8 +110,10 @@ def texthandler(m):
         return
     response = random.choice(lophrase)
     sended = 0
+    mem = lophrase
+    random.shuffle(mem)
     if alpha:
-        for phrase in lophrase:
+        for phrase in mem:
             if phrase:
                 for word in phrase.split(' '):
                     text = m.text.lower().split(' ')
