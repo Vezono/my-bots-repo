@@ -112,8 +112,9 @@ def texthandler(m):
     if alpha:
         for phrase in lophrase:
             for word in phrase.split(' '):
-                if word.lower() in m.text.lower():
+                if word.lower() in m.text.lower().split(' '):
                     bot.reply_to(m, phrase)
+                    break
                     break
     else:
         bot.reply_to(m, response)
