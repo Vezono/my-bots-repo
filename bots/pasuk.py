@@ -113,10 +113,10 @@ def texthandler(m):
         for phrase in lophrase:
             if phrase:
                 for word in phrase.split(' '):
-                if word.lower() in m.text.lower().split(' '):
-                    bot.reply_to(m, phrase)
-                    break
-                    break
+                    if word.lower() in m.text.lower().split(' '):
+                        bot.reply_to(m, phrase)
+                        break
+                        break
     else:
         bot.reply_to(m, response)
     
@@ -173,7 +173,7 @@ def google(m):
 # ---------------------------------------------------------------------------
 # ---------------------RUNNER OF BOTS----------------------------------------
 # ---------------------------------------------------------------------------
-runner = BotsRunner([creator, -1001249266392])
+runner = BotsRunner([creator])
 runner.add_bot("Pasuk", pasuk)
 runner.set_main_bot(pasuk)
 print('Pasuk works!')
