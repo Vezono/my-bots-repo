@@ -116,9 +116,9 @@ def texthandler(m):
         for phrase in mem:
             if phrase:
                 for word in phrase.split(' '):
-                    text = m.text.lower().split(' ')
+                    text = m.text.lower()
                     text = text.replace('я', 'ты').relpace('ты', 'я')
-                    if word.lower() in text and not sended:
+                    if word.lower() in text.split(' ') and not sended:
                         bot.reply_to(m, phrase)
                         sended +=1
                         break
