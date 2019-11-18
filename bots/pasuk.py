@@ -121,16 +121,13 @@ def medit(message_text, chat_id, message_id, reply_markup=None, parse_mode='Mark
 def pinloshadkin(m):
     yes = False
     if m.reply_to_message:
-        if m.reply_to_message.from_user.id == bot.get_me().id:
-            yes = True
+        if m.reply_to_message.from_user.id == 976911963:
+            return True
     for i in ['пасюк', 'loshadkin', 'лошадкин']:
         if i in m.text.lower():
-            yes = True
-            break
+            return True
         else:
-            yes = False
-    return yes
-
+            return False
 
 def google(m):
     text = m.text.split(' ', 1)[1]
