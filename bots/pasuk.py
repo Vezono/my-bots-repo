@@ -106,7 +106,7 @@ def texthandler(m):
     else:
         if m.from_user.id == pasukid:
             phrases.update_one({}, {'$set': {str(random.randint(1, 1000000000000000000)):m.text}})
-    if not pinloshadkin(m) or not random.randint(1, 100) > 99:
+    if not pinloshadkin(m):# or not random.randint(1, 100) > 99:
         return
     response = random.choice(lophrase)
     if alpha:
