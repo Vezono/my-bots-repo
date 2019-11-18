@@ -109,12 +109,14 @@ def texthandler(m):
     if not pinloshadkin(m):# or not random.randint(1, 100) > 99:
         return
     response = random.choice(lophrase)
+    sended = 0
     if alpha:
         for phrase in lophrase:
             if phrase:
                 for word in phrase.split(' '):
-                    if word.lower() in m.text.lower().split(' '):
+                    if word.lower() in m.text.lower().split(' ') and not sended:
                         bot.reply_to(m, phrase)
+                        sended +=1
                         break
                         break
     else:
