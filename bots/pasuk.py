@@ -111,7 +111,8 @@ def texthandler(m):
     response = random.choice(lophrase)
     if alpha:
         for phrase in lophrase:
-            for word in phrase.split(' '):
+            if phrase:
+                for word in phrase.split(' '):
                 if word.lower() in m.text.lower().split(' '):
                     bot.reply_to(m, phrase)
                     break
