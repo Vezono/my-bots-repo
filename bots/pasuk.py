@@ -29,7 +29,7 @@ for ids in x:
     lophrase.append(x[ids])
 lophrase.remove(lophrase[0])
 bot = pasuk
-
+alpha = False
 #---------------------------------------------------------------------------
 #---------------------PASUK  HANDLERS---------------------------------------
 #---------------------------------------------------------------------------
@@ -84,9 +84,12 @@ def talk(m):
                 pasuk.send_message(admin, trace)
         else:
             return
-@pasuk.message_handler(commands=["google"])
-def cgoogle(m):
-    google(m)
+@pasuk.message_handler(commands=["alpha"])
+def calpha(m):
+    global alpha
+    if m.from_user.id == creator:
+        alpha = not alpha
+    bot.reply_to(m, 'Альфа теперь: {}'.format(str(alpha)))
 @pasuk.message_handler(content_types=['new_chat_members'])
 def handler(m):
     if m.new_chat_members[0].id == bot_id:
@@ -95,20 +98,26 @@ def handler(m):
         pasuk.reply_to(m, 'Тут уже 1000000 твоих ботов')
     else:
         pasuk.reply_to(m, 'Добро пожаловать к нашему шалашу')
-
 @pasuk.message_handler()
 def texthandler(m):
-    if pinloshadkin(m) or random.randint(1, 100) > 99:
-        try:
-            pasuk.reply_to(m, random.choice(lophrase))
-        except:
-            pasuk.reply_to(m, random.choice(lophrase))
-    if m.forward_from is not None:
-        if m.from_user.id == pasukid or m.forward_from.id == pasukid:
+    if m.forward_from:
+        if m.forward_from.id == pasukid:
             phrases.update_one({}, {'$set': {str(random.randint(1, 1000000000000000000)):m.text}})
     else:
         if m.from_user.id == pasukid:
             phrases.update_one({}, {'$set': {str(random.randint(1, 1000000000000000000)):m.text}})
+    if not pinloshadkin(m) or not random.randint(1, 100) > 99:
+        return
+    response = random.choice(lophrase)
+    if alpha:
+        for phrase in lophrase:
+            for word in phrase.split(' '):
+                if word.lower() in m.text.lower():
+                    bot.reply_to(m, phrase)
+                    break
+    else:
+        bot.reply_to(m, response)
+    
 
 
 
