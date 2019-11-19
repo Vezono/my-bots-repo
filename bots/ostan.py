@@ -1,22 +1,24 @@
-# -*- coding: utf-8 -*-
 import os
+
 import telebot
+from telebot import types
+from manybotslib import BotsRunner
+
 import time
 import random
 import threading
-from emoji import emojize
-from telebot import types
-from pymongo import MongoClient
 import traceback
+from pymongo import MongoClient
+
 chat_id = -1001254345528
 welcome = 'AgADAgADa6sxG6ky6UnD6ibB5We5in9DhA8ABGxMw_lBUHY_u68DAAEC'
-
 win_vista = telebot.TeleBot('977119738:AAHlYUB9KKpQBloqrG9zyC8kmYhhv4UGN5A')
 win_xp = telebot.TeleBot('924601665:AAFIxZXnkz5iqGhAA0c0f1po0HqVlbmKXXg')
 win_me = telebot.TeleBot('912500162:AAF3Vna-kzLIvthn_h48WTDH_rgWqUEYArU')
 win_7 = telebot.TeleBot('708936410:AAG6AAJ5t4IRuUV4HI-_3oas1c1ctdELO6M')
 bios = telebot.TeleBot('890673978:AAHAnpeo2TjOO1q8DCFMbg4pW2hVJI9YJE4')
 chrome = telebot.TeleBot('898904621:AAGGjCqErp2O1QxXahcE00hxy2IPe8eQy3w')
+
 x=None
 wininfo='''
 Итак, начнем.
@@ -73,7 +75,7 @@ def randomact():
     global x
     t = threading.Timer(random.randint(4900, 18000), randomact)
     t.start()
-    if x==None:
+    if not x:
         acts = ['updates', 'pron', 'ads']
         x = random.choice(acts)
     else:
@@ -92,7 +94,7 @@ def randomact():
         typee()
         win_me.send_message(chat_id, 'ОТКУДА ЗА НОЧЬ 200 МЕГАБАЙТ ПОРНО?')
         typee()
-        win_xp.send_message(chat_id, 'Не плачь, Мила! Мой юзер тоже по 2GB за ночь качает. Никак не справляюсь.')
+        win_xp.send_message(chat_id, 'Не плачь, Мил! Мой юзер тоже по 2GB за ночь качает. Никак не справляюсь.')
         typee()
         win_me.send_message(chat_id, 'А что такое GB? Не слышала о таком.')
         typee()
@@ -115,3 +117,13 @@ def typee():
     bios.send_chat_action(chat_id, 'typing')
     time.sleep(4)
     return
+runner = BotsRunner([creator])
+runner.add_bot("Windows XP", win_xp)
+runner.add_bot("Windows Vista", win_vista)
+runner.add_bot("Windows Me", win_me)
+runner.add_bot("Windows 7", win_7)
+runner.add_bot("Bios", bios)
+runner.add_bot("Chrome", chrome)
+runner.set_main_bot(bios)
+print('Ostan works!')
+runner.run()
