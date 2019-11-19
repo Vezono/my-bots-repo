@@ -12,7 +12,7 @@ n=0
 token = os.environ['lifegame']
 bot = telebot.TeleBot(token)
 
-em_alive='🦠'
+em_alive='⬜️'
 em_dead='⬛️'
 
 games={}
