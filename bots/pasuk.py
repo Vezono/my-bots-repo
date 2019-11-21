@@ -10,10 +10,6 @@ import nltk
 from nltk.stem import WordNetLemmatizer
 nltk.download('popular', quiet=True) # for downloading packages
 
-# uncomment the following only the first time
-nltk.download('punkt') # first-time use only
-nltk.download('wordnet') # first-time use only
-
 from telebot import TeleBot
 from manybotslib import BotsRunner
 
@@ -76,7 +72,8 @@ def getresponse(user_response):
     flat = vals.flatten()
     flat.sort()
     req_tfidf = flat[-2]
-    if(req_tfidf==0):
+    print(sent_tokens)
+    if not req_tfidf:
         robo_response=robo_response+"Не понимаю тебя"
         return robo_response
     else:
