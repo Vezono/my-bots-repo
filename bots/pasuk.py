@@ -35,7 +35,7 @@ client=MongoClient(os.environ['database'])
 db=client.loshadkin
 phrases=db.phrases
 lophrase = []
-pxer = '2.2.5'
+pver = '2.2.5'
 x = phrases.find_one({})
 for ids in x:
     if x[ids]:
