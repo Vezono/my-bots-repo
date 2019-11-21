@@ -67,7 +67,7 @@ def LemNormalize(text):
 GREETING_INPUTS = ["Привет"]
 GREETING_RESPONSES = ["Пока"]
 
-def response(user_response):
+def getresponse(user_response):
     robo_response=''
     sent_tokens.append(user_response)
     TfidfVec = TfidfVectorizer(tokenizer=LemNormalize, stop_words='english')
@@ -178,7 +178,7 @@ def texthandler(m):
                         break
     else:
         user_response = m.text.lower()
-        bot.send_message(m.chat.id, response(user_response))
+        bot.send_message(m.chat.id, getresponse(user_response))
 
     
 
