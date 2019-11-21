@@ -5,3 +5,4 @@ lxml
 apiai
 api.ai
 nltk
+sklearn
