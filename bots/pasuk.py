@@ -178,6 +178,7 @@ def texthandler(m):
                         break
     else:
         user_response = m.text.lower()
+        tts = getresponse(user_response).capitalize().replace('\n\n', ' ')
         bot.send_message(m.chat.id, getresponse(user_response))
 
     
