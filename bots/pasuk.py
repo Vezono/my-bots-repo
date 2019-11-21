@@ -74,7 +74,6 @@ def getresponse(user_response):
     flat = vals.flatten()
     flat.sort()
     req_tfidf = flat[-2]
-    print(sent_tokens)
     if not req_tfidf:
         robo_response += "Не понимаю тебя"
         return robo_response
@@ -98,7 +97,7 @@ def count_of_phrases(m):
 def getm(m):
     pasuk.reply_to(m, str(m))
 @pasuk.message_handler(commands=['info'])
-def getm(m):
+def infof(m):
     words = []
     count_of_symbols = 0
     for i in lophrase:
