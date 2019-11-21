@@ -43,13 +43,14 @@ lophrase.remove(lophrase[0])
 bot = pasuk
 alpha = True
 raw = ''
+word_tokens = []
 for sent in lophrase:
-    if sent:
-        raw += sent + '.'
+    for word in sent:
+        word_tokens.append(word)
 raw = raw.lower()
 
 #TOkenisation
-sent_tokens = nltk.sent_tokenize(raw)# converts to list of sentences 
+sent_tokens = lophrase# converts to list of sentences 
 word_tokens = nltk.word_tokenize(raw)# converts to list of words
 
 # Preprocessing
