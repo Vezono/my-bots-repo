@@ -45,7 +45,7 @@ alpha = True
 raw = ''
 for sent in lophrase:
     if sent:
-        raw += sent + '\n\n'
+        raw += sent + '.'
 raw = raw.lower()
 
 #TOkenisation
