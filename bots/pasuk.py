@@ -69,7 +69,6 @@ GREETING_RESPONSES = ["Пока"]
 
 def getresponse(user_response):
     robo_response=''
-    sent_tokens.append(user_response)
     TfidfVec = TfidfVectorizer(tokenizer=LemNormalize, stop_words='english')
     tfidf = TfidfVec.fit_transform(sent_tokens)
     vals = cosine_similarity(tfidf[-1], tfidf)
@@ -179,7 +178,7 @@ def texthandler(m):
     else:
         user_response = m.text.lower()
         tts = getresponse(user_response).capitalize().replace('\n\n', ' ')
-        bot.send_message(m.chat.id, getresponse(user_response))
+        bot.reply_to(m, getresponse(user_response))
 
     
 
