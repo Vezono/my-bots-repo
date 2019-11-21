@@ -48,7 +48,8 @@ bot = pasuk
 alpha = True
 raw = ''
 for sent in lophrase:
-    raw += sent + '\n\n'
+    if sent:
+        raw += sent + '\n\n'
 raw = raw.lower()
 
 #TOkenisation
