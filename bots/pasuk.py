@@ -174,8 +174,8 @@ def texthandler(m):
                         break
     else:
         user_response = m.text.lower()
-        tts = getresponse(user_response).capitalize().replace('\n\n', ' ')
-        bot.reply_to(m, getresponse(user_response))
+        tts = getresponse(user_response).capitalize()
+        bot.reply_to(m, tts)
 
     
 
