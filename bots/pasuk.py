@@ -35,7 +35,7 @@ client=MongoClient(os.environ['database'])
 db=client.loshadkin
 phrases=db.phrases
 lophrase = []
-pxer = '2.2.4'
+pxer = '2.2.5'
 x = phrases.find_one({})
 for ids in x:
     if x[ids]:
@@ -108,9 +108,8 @@ def getm(m):
         for char in i:
             count_of_symbols += 1
     all_words = len(words)
-    nr_words = len(set(words))
-    tts = 'Версия: {}/n/nКол-во символов пасюка: {}\nКол-во слов пасюка(всех): {}\nКол-во слов Пасюка без повторок: {}'
-    tts = tts.format(pver, str(count_of_symbols), str(all_words), str(nr_words))
+    tts = 'Версия: {}/n/nКол-во символов пасюка: {}\nКол-во слов Пасюка: {}'
+    tts = tts.format(pver, str(count_of_symbols), str(all_words))
 @pasuk.message_handler(commands=['status'])
 def status(m):
     pasuk.reply_to(m, runner.get_status())
