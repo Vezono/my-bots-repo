@@ -35,10 +35,11 @@ client=MongoClient(os.environ['database'])
 db=client.loshadkin
 phrases=db.phrases
 lophrase = []
-
+pxer = '2.2.4'
 x = phrases.find_one({})
 for ids in x:
-    lophrase.append(x[ids])
+    if x[ids]:
+        lophrase.append(x[ids])
 lophrase.remove(lophrase[0])
 bot = pasuk
 alpha = True
@@ -51,7 +52,7 @@ raw = raw.lower()
 
 #TOkenisation
 sent_tokens = lophrase# converts to list of sentences 
-word_tokens = nltk.word_tokenize(raw)# converts to list of words
+
 
 # Preprocessing
 lemmer = WordNetLemmatizer()
@@ -75,10 +76,10 @@ def getresponse(user_response):
     req_tfidf = flat[-2]
     print(sent_tokens)
     if not req_tfidf:
-        robo_response=robo_response+"Не понимаю тебя"
+        robo_response += "Не понимаю тебя"
         return robo_response
     else:
-        robo_response = robo_response+sent_tokens[idx]
+        robo_response += sent_tokens[idx]
         return robo_response
 #---------------------------------------------------------------------------
 #---------------------PASUK  HANDLERS---------------------------------------
@@ -96,7 +97,20 @@ def count_of_phrases(m):
 @pasuk.message_handler(commands=['getm'])
 def getm(m):
     pasuk.reply_to(m, str(m))
-
+@pasuk.message_handler(commands=['info'])
+def getm(m):
+    words = []
+    count_of_symbols = 0
+    for i in lophrase:
+        for word in i.split():
+            words.append(words)
+    for i in lophrase:
+        for char in i:
+            count_of_symbols += 1
+    all_words = len(words)
+    nr_words = len(set(words))
+    tts = 'Версия: {}/n/nКол-во символов пасюка: {}\nКол-во слов пасюка(всех): {}\nКол-во слов Пасюка без повторок: {}'
+    tts = tts.format(pver, str(count_of_symbols), str(all_words), str(nr_words))
 @pasuk.message_handler(commands=['status'])
 def status(m):
     pasuk.reply_to(m, runner.get_status())
