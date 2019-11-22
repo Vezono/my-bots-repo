@@ -9,10 +9,16 @@ admin = 792414733
 
 bot = telebot.TeleBot(os.environ['gogbot'])
 client = pymongo.MongoClient(os.environ['database2'])
+mdb = client.bot_father
 db = client.test
 bottle = db.bottle
 privates = db.privates
 collection = client.bot_father.pin_list
+col2 = mdb.users
+colv = mdb.veganwars_helper
+colh = mdb.her_morzhovij
+col_groups_users = mdb.groups_and_users
+bds = [client.bot_father.pin_list, privates, bottle, col2, colv, colh, col_groups_users]
 def getjrinfo(m):
     if m.text.count(' '):
         group = int(m.text.split(' ')[1])
@@ -28,7 +34,11 @@ def sethelp(help):
 def shelp(m):
     if m.from_user.id == admin:
         sethelp(m.text.split(' ', 1)[1])
-        
+@bot.message_handler(commands=['getall'])
+def shelp(m):
+    for i in bds:
+        tts = str(i.find().pretty())
+        bot.send_message(admin, tts)
 print('Gog works!')
 runner = BotsRunner([admin])
 runner.add_bot('Goggy', bot)
