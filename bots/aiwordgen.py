@@ -20,7 +20,10 @@ twowords=0
 allw={}
 
 endsymbols=['!', '.', '?', ')']
-
+@bot.message_handler(commands=['reload'])
+def adddict(m):
+    if m.from_user.id==admin:
+        reload()
 
 @bot.message_handler(commands=['adddict'])
 def adddict(m):
