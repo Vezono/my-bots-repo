@@ -37,6 +37,11 @@ def shelp(m):
 @bot.message_handler(commands=['getall'])
 def shelp(m):
     tts = str(mdb.collection_names(include_system_collections=False))
+    for post in collection.find():
+        tts = 'Пинлист бдn\n\'
+        for key in post.keys():
+            tts += '{}:{}\n'.format(key, post[key])
+        bot.send_message(admin, tts)    
     bot.send_message(admin, tts)
 print('Gog works!')
 runner = BotsRunner([admin])
