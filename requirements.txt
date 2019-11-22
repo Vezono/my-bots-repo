@@ -6,3 +6,4 @@ apiai
 api.ai
 nltk
 sklearn
+dnspython
