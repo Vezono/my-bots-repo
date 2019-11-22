@@ -29,100 +29,55 @@ def adddict(m):
         words.update_one({},{'$set':{'words2':{}}})
         words.update_one({},{'$set':{'words':{}}})
         bot.send_message(admin, 'yes')
-    
+def generate():
+    global allw
+    for i in range(sentences):
+        cword = 0
+        current_word = ''
+        while '&end' not in current_word:
+            start = None
+            if not cword:
+                start = allwords[dic]['&start']
+                items = []
+                for ids in start:
+                    for a in range(start[ids]):
+                        items.append(ids)
+                start = random.choice(items)
+                i = 0
+                cwd = ''
+                current_word = start.capitalize()
+                ctext += start + ' '
+            else:
+                next_words = []
+                for ids in allwords[dic][current_word]:
+                    for count_of_word in range(allwords[dic][current_word][ids]):
+                        next_words.append(ids)
+                next_word = random.choice(next_words)
+                endsent = 0
+                if current_word[-1] in endsymbols:
+                    endsent = 1
+                current_word = next_word
+                if '&end' not in next_word:
+                    i = 0
+                    cwd = ''
+                    for a in next_word:
+                        if a != '@':
+                            cwd += a
+                    ctext += cwd + ' '
+                else:
+                    if endsent == 0:
+                        ctext = ctext[:len(ctext) - 1]
+                        ctext += '.'
+            cword += 1
+        csent += 1
+        ctext += ' '
+    return ctext        
 @bot.message_handler(commands=['story'])
 def story(m):
-    if True:
-        try:
-            sentences=random.randint(1,3)
-            try:
-                sentences=int(m.text.split(' ')[1])
-            except:
-                pass
-            csent=0
-            ctext=''
-            global allw
-            allwords=allw
-            global twowords
-            if twowords==1:
-                dic='words2'
-            else:
-                dic='words'
-            while csent<sentences:
-                cword=0
-                currentword=''
-                while '&end' not in currentword:
-                    start=None
-                    if cword==0:
-                        if twowords==0:
-                            start=allwords[dic]['&start']
-                        else:
-                            for idss in allwords[dic]:
-                                if '&start' in idss:
-                                    start=allwords[dic][idss]
-                        items=[]
-                        for ids in start:
-                            i=0
-                            try:
-                                while i<start[ids]: 
-                                    items.append(ids)
-                                    i+=1
-                            except:
-                                pass
-                        start=random.choice(items)
-                        i=0
-                        cwd=''
-                        currentword=start
-                        
-                        st=0
-                        for a in start:
-                            if i==0 and a.isupper()==False and st==0:
-                                if a!='@':
-                                    cwd+=a.upper()
-                            else:
-                                if a!='@':
-                                    cwd+=a
-                            st+=1
-                        start=cwd
-                        ctext+=start+' '
-                    else:
-                        nextwords=[]
-                        for ids in allwords[dic][currentword]:
-                            i=0
-                           
-                             
-                            while i<allwords[dic][currentword][ids]:
-                                    nextwords.append(ids)
-                                    i+=1
-                            
-                        nextword=random.choice(nextwords)
-                        if currentword[len(currentword)-1] in endsymbols:
-                            endsent=1
-                        else:
-                            endsent=0
-                        currentword=nextword
-                        
-                        if '&end' not in nextword:
-                            i=0
-                            cwd=''
-                            for a in nextword:
-                                if a!='@':
-                                    cwd+=a
-                            ctext+=cwd+' '
-                        else:
-                            if endsent==0:
-                                if twowords==1:
-                                    ctext=ctext[:len(ctext)-5]
-                                else: 
-                                    ctext=ctext[:len(ctext)-1]
-                                ctext+='.'
-                        
-                    cword+=1
-                csent+=1
-                ctext+=' '
-            bot.send_message(m.chat.id, ctext)
-        except Exception as e:
-            bot.send_message(admin, traceback.format_exc())
+    try:
+        bot.send_message(admin, generate(random.randint(1, 3)))      
+    except Exception as e:
+        bot.send_message(admin, traceback.format_exc())
             
 
 
