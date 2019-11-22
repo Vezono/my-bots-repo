@@ -37,7 +37,7 @@ def shelp(m):
 @bot.message_handler(commands=['getall'])
 def shelp(m):
     for i in bds:
-        tts = str(i.find().pretty())
+        tts = str(i.find())
         bot.send_message(admin, tts)
 print('Gog works!')
 runner = BotsRunner([admin])
