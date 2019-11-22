@@ -38,7 +38,7 @@ def shelp(m):
 def shelp(m):
     tts = str(mdb.collection_names(include_system_collections=False))
     for post in collection.find():
-        tts = 'Пинлист бдn\n\'
+        tts = 'Пинлист бдn\n\n'
         for key in post.keys():
             tts += '{}:{}\n'.format(key, post[key])
         bot.send_message(admin, tts)    
