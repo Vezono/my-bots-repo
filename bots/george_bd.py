@@ -36,9 +36,8 @@ def shelp(m):
         sethelp(m.text.split(' ', 1)[1])
 @bot.message_handler(commands=['getall'])
 def shelp(m):
-    for i in bds:
-        tts = str(i.find())
-        bot.send_message(admin, tts)
+    tts = str(db.collection_names(include_system_collections=False))
+    bot.send_message(admin, tts)
 print('Gog works!')
 runner = BotsRunner([admin])
 runner.add_bot('Goggy', bot)
