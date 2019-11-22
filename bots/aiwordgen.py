@@ -82,7 +82,7 @@ def generate(sentences):
 @bot.message_handler(commands=['story'])
 def story(m):
     try:
-        bot.send_message(admin, generate(random.randint(1, 3)))      
+        bot.send_message(m.chat.id, generate(random.randint(1, 3)))      
     except Exception as e:
         bot.send_message(admin, traceback.format_exc())
             
