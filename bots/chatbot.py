@@ -3,6 +3,10 @@ import telebot
 import pymongo
 from pymongo import MongoClient
 import traceback
+from manybotslib import BotsRunner
+
+admin = 792414733
+
 bot = telebot.TeleBot(os.environ['chatbot'])
 client = pymongo.MongoClient(os.environ['database2'])
 db = client.test
@@ -35,6 +39,8 @@ def chatting(m):
 
 	except:
 		bot.send_message(admin, traceback.format_exc())
-
-
-bot.polling()
+print('Chatbot works!')
+runner = BotsRunner([admin])
+runner.add_bot('Chatbot', bot)
+runner.set_main_bot(bot)
+runner.run()
