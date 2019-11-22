@@ -34,6 +34,7 @@ def adddict(m):
         bot.send_message(admin, 'yes')
 def generate(sentences):
     global allw
+    allwords = allw
     for i in range(sentences):
         cword = 0
         current_word = ''
