@@ -32,7 +32,7 @@ def adddict(m):
         words.update_one({},{'$set':{'words2':{}}})
         words.update_one({},{'$set':{'words':{}}})
         bot.send_message(admin, 'yes')
-def generate():
+def generate(sentences):
     global allw
     for i in range(sentences):
         cword = 0
