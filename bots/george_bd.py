@@ -8,43 +8,27 @@ import os
 admin = 792414733
 
 bot = telebot.TeleBot(os.environ['gogbot'])
-client = pymongo.MongoClient(os.environ['database2'])
-mdb = client.bot_father
-db = client.test
-bottle = db.bottle
-privates = db.privates
-collection = client.bot_father.pin_list
-col2 = mdb.users
-colv = mdb.veganwars_helper
-colh = mdb.her_morzhovij
-col_groups_users = mdb.groups_and_users
-bds = [client.bot_father.pin_list, privates, bottle, col2, colv, colh, col_groups_users]
-def getjrinfo(m):
-    if m.text.count(' '):
-        group = int(m.text.split(' ')[1])
-        active_players = [doc['boyar'], doc['jester'], doc['king']]
-        return str(active_players)
-def sethelp(help):
-    collection.update_one({'id': 0},
-                              {'$set': {'help_msg': help}},
-                              upsert=True)
-    bot.send_message(admin, 'completed.')
 
-@bot.message_handler(commands=['sethelp'])
+@bot.message_handler(commands=['get'])
 def shelp(m):
-    if m.from_user.id == admin:
-        sethelp(m.text.split(' ', 1)[1])
-@bot.message_handler(commands=['getall'])
-def shelp(m):
-    tts = str(mdb.collection_names(include_system_collections=False))
-    for post in collection.find():
-        tts = 'Пинлист бдn\n\n'
-        for key in post.keys():
-            tts += '{}:{}\n'.format(key, post[key])
-        bot.send_message(admin, tts)    
-    bot.send_message(admin, tts)
+    if m.text.count(' '):
+        attrs = m.text.split(' ')
+        client = pymongo.MongoClient(attrs[1])
+        db = attrs[2]
+        for coll in client[db].collection_names(include_system_collections=False):
+            for post in client[db][coll].find():
+                tts = '{} - смотри:\n\n'.format(client[db][coll])
+                for key in post.keys():
+                    tts += '{}:{}\n'.format(key, post[key])
+                bot.send_message(m.chat.id, tts)    
+                
+
+
 print('Gog works!')
 runner = BotsRunner([admin])
 runner.add_bot('Goggy', bot)
 runner.set_main_bot(bot)
 runner.run()
+
+  
+
