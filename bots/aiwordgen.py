@@ -35,6 +35,7 @@ def adddict(m):
 def generate(sentences):
     global allw
     allwords = allw
+    dic = 'words'
     for i in range(sentences):
         cword = 0
         current_word = ''
