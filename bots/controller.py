@@ -49,7 +49,7 @@ def getbots(m):
     for bot in bots.keys():
         butts.append(types.InlineKeyboardButton(text=i, callback_data=i))
     kb.add(*butts)
-    editmsg = bot.reply_to(m, 'Ваши боты.', reply_markup=kb)
+    editmsg = bot1.reply_to(m, 'Ваши боты.', reply_markup=kb)
 print(bots)
 runner = BotsRunner([])
 runner.add_bot("Coolbot", bot1)
