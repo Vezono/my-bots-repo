@@ -15,7 +15,7 @@ from pymongo import MongoClient
 
 import subprocess
 pypath = 'python3'
-bot1 = telebot.TeleBot('566544355:AAHvVsL44_NmP7-fnu-WTtMrJhOV9Ojd2E4')
+bot1 = telebot.TeleBot(os.environ['treader'])
 bots_to_boot = ['admin', 'aiwordgen', 'chatbot', 'detektor', 'george_bd', 'god', 'hawkeye', 'lifegame', 'meals', 'pasuk', 'triggers']
 bots = {
 
