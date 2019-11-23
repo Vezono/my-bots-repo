@@ -23,8 +23,8 @@ def shelp(m):
                 bot.send_message(m.chat.id, tts)    
                 
 
-@bot.message_handler(commands=['get'])
-def shelp(m):
+@bot.message_handler(commands=['drop'])
+def sdrop(m):
     if m.text.count(' '):
         attrs = m.text.split(' ')
         client = pymongo.MongoClient(attrs[1])
