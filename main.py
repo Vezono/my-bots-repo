@@ -17,15 +17,15 @@ import traceback
 from pymongo import MongoClient
 
 import subprocess
-pypath = 'python'
+pypath = 'python3'
 bot1 = telebot.TeleBot('566544355:AAHvVsL44_NmP7-fnu-WTtMrJhOV9Ojd2E4')
-bots_to_boot = ['bot']
+bots_to_boot = ['admin', 'aiwordgen', 'chatbot', 'detektor', 'george_bd', 'god', 'hawkeye', 'lifegame', 'meals', 'pasuk', 'triggers']
 bots = {
 
 }
 
 def run(bot):
-    subprocess.run('{} ./subbots/{}.py'.format(pypath, bot))
+    subprocess.run('{} ./bots/{}.py'.format(pypath, bot))
 
 t = None
 
@@ -40,7 +40,6 @@ for i in bots_to_boot:
 
     })
 print(bots)
-print('So')
 runner = BotsRunner([])
 runner.add_bot("Coolbot", bot1)
 runner.set_main_bot(bot1)
