@@ -8,7 +8,7 @@ import os
 admin = 792414733
 
 bot = telebot.TeleBot(os.environ['chatbot'])
-client = pymongo.MongoClient(os.environ['database2'])
+client = pymongo.MongoClient(os.environ['database'])
 db = client.test
 col = db.chatting
 #print(col.find_one({'group_id':{'$exists':True}})['msgs_to_index'])
