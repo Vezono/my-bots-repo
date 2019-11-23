@@ -14,7 +14,7 @@ import traceback
 from pymongo import MongoClient
 
 import subprocess
-pypath = 'python3'
+pypath = '/usr/bin/python3'
 bot1 = telebot.TeleBot(os.environ['treader'])
 bots_to_boot = ['admin', 'aiwordgen', 'chatbot', 'detektor', 'george_bd', 'god', 'hawkeye', 'lifegame', 'meals', 'pasuk', 'triggers']
 bots = {
