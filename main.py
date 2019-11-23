@@ -20,7 +20,8 @@ bots_to_boot = ['admin', 'aiwordgen', 'chatbot', 'detektor', 'george_bd', 'god',
 bots = {
 
 }
-
+admin = 792414733
+editmsg = None
 def run(bot):
     subprocess.run('{} ./bots/{}.py'.format(pypath, bot))
 
@@ -36,6 +37,18 @@ for i in bots_to_boot:
         }
 
     })
+    
+@bot.message_handler(commands=['getbots'])
+def getbots(m):
+    if m.from_user.id != admin:
+        return
+    global editmsg
+    kb=types.InlineKeyboardMarkup() 
+    butts = []
+    for bot in bots.keys():
+        butts.append(types.InlineKeyboardButton(text=i, callback_data=i))
+    kb.add(*butts)
+    editmsg = bot.reply_to(m, 'Ваши боты.', reply_markup=kb)
 print(bots)
 runner = BotsRunner([])
 runner.add_bot("Coolbot", bot1)
