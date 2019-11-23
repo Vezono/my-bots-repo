@@ -6,7 +6,7 @@ import traceback
 from manybotslib import BotsRunner
 import os
 admin = 792414733
-
+print(os.environ)
 bot = telebot.TeleBot(os.environ['chatbot'])
 client = pymongo.MongoClient(os.environ['database'])
 db = client.test
