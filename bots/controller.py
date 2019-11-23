@@ -22,9 +22,9 @@ bots = {
 }
 admin = 792414733
 editmsg = None
-print(subprocess.check_output(["ls"]))
+print(subprocess.check_output(["ls"], shell = True))
 def run(bot):
-    #subprocess.call('{} /app/bots/{}.py'.format(pypath, bot))
+    subprocess.call([pypath, '{} /app/bots/{}.py'.format(pypath, bot)], shell = True)
     pass
 t = None
 
