@@ -6,9 +6,6 @@ from manybotslib import BotsRunner
 
 import random
 
-from bots.config import data
-import bots.config
-
 import time
 import threading
 
