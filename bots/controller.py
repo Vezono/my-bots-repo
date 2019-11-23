@@ -38,7 +38,7 @@ for i in bots_to_boot:
 
     })
     
-@bot.message_handler(commands=['getbots'])
+@bot1.message_handler(commands=['getbots'])
 def getbots(m):
     if m.from_user.id != admin:
         return
