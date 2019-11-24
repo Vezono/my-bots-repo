@@ -46,7 +46,7 @@ def getbots(m):
     global editmsg
     kb=types.InlineKeyboardMarkup() 
     butts = []
-    for bot in bots.keys():
+    for i in bots.keys():
         butts.append(types.InlineKeyboardButton(text=i, callback_data=i))
     kb.add(*butts)
     editmsg = bot1.reply_to(m, 'Ваши боты.', reply_markup=kb)
