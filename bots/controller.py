@@ -24,7 +24,7 @@ admin = 792414733
 editmsg = None
 print(subprocess.check_output(["ls"], shell = True))
 def run(bot):
-    subprocess.call([pypath, '{} /app/bots/{}.py'.format(pypath, bot)], shell = True)
+    subprocess.Popen([pypath, '{} /app/bots/{}.py'.format(pypath, bot)])
     pass
 t = None
 
