@@ -96,7 +96,7 @@ def tagjoin(m):
                         kb.add(types.InlineKeyboardButton(text='Сменить команду', callback_data='teamchoice'))
                         medit(editmessage(game),game['message'].chat.id,game['message'].message_id,reply_markup=kb)
                     except:
-                        bot.send_message(m.chat.id, 'Сначала напишите /start боту @Lazertagbot в личку!')
+                        bot.send_message(m.chat.id, 'Сначала напишите /start боту @Lazertagg_bot в личку!')
                 else:
                     bot.send_message(m.chat.id, m.from_user.first_name+', вы уже в игре!')
         else:
