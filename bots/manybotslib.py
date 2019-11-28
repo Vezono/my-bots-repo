@@ -18,7 +18,7 @@ import traceback
 
 class BotsRunner:
 
-    def __init__(self, admins):
+    def __init__(self, admins = list()):
         self.__bots = dict()
         self.__bots_status = dict()
         self.__main_bot = None
