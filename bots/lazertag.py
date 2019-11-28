@@ -15,7 +15,7 @@ bot = telebot.TeleBot(token)
 client=MongoClient(os.environ['database'])
 db=client.lazertag
 users=db.users
-
+admin = 792414733
 games=[]
 
 @bot.message_handler(commands=['help'])
@@ -412,7 +412,7 @@ def endturn(game):
         
   except Exception as e:
     print('Ошибка:\n', traceback.format_exc())
-    bot.send_message(441399484, traceback.format_exc())
+    bot.send_message(admin, traceback.format_exc())
     games.remove(game)
     bot.send_message(game['id'],'Произошла ошибка! Игра была удалена.')
 
