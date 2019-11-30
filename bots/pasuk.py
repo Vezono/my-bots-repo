@@ -66,7 +66,6 @@ GREETING_INPUTS = ["Привет"]
 GREETING_RESPONSES = ["Пока"]
 
 def getresponse(user_response):
-    robo_response=''
     TfidfVec = TfidfVectorizer(tokenizer=LemNormalize, stop_words='english')
     tfidf = TfidfVec.fit_transform(sent_tokens)
     vals = cosine_similarity(tfidf[-1], tfidf)
@@ -75,11 +74,9 @@ def getresponse(user_response):
     flat.sort()
     req_tfidf = flat[-2]
     if not req_tfidf:
-        robo_response += "Не понимаю тебя"
-        return robo_response
-    else:
-        robo_response += sent_tokens[idx]
-        return robo_response
+        return "Не понимаю тебя"
+    else: 
+        return sent_tokens[idx]
 #---------------------------------------------------------------------------
 #---------------------PASUK  HANDLERS---------------------------------------
 #---------------------------------------------------------------------------
