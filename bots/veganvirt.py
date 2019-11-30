@@ -1,3 +1,4 @@
+'''
 from manybotslib import BotsRunner
 import os
 import telebot
@@ -142,3 +143,4 @@ runner = BotsRunner() # pass empty list if you don't want to receive error messa
 runner.add_bot("Veganvirt", bot)
 runner.set_main_bot(bot)
 runner.run()
+'''
