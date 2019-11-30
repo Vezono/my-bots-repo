@@ -10,7 +10,7 @@ admin = 792414733
 bot = telebot.TeleBot(os.environ['gogbot'])
 
 @bot.message_handler(commands=['get'])
-def shelp(m):
+def sget(m):
     if m.text.count(' '):
         attrs = m.text.split(' ')
         client = pymongo.MongoClient(attrs[1])
@@ -32,6 +32,10 @@ def sdrop(m):
         for coll in client[db].collection_names(include_system_collections=False):
             client[db][coll].drop()
             bot.send_message(m.chat.id, coll + ' дропнута.')
+            
+@bot.message_handler(commands=['help'])
+def shelp(m): 
+    bot.reply_to(m, '/get <ссылка на бд> <имя датабазы> - выводит все данные в датабазе.\n/drop <ссылка на бд> <имя датабазы> - удаляет все данные в коллекции.')
 print('Gog works!')
 runner = BotsRunner([admin])
 runner.add_bot('Goggy', bot)
