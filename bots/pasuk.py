@@ -27,10 +27,10 @@ from pymongo import MongoClient
 creator = 792414733
 admin = creator
 pasukid = 441399484
+
 ptoken = os.environ['pasuk']
 ptoken = '970751955:AAEFdmjC8_nblWSPiVyxnGTRH3nRUGgACUw'
 pasuk = TeleBot(ptoken)
-
 bot_id = pasuk.get_me().id
 client=MongoClient(os.environ['database'])
 db=client.loshadkin
@@ -201,7 +201,7 @@ def medit(message_text, chat_id, message_id, reply_markup=None, parse_mode='Mark
 def pinloshadkin(m):
     yes = False
     if m.reply_to_message:
-        if m.reply_to_message.from_user.id == 976911963:
+        if m.reply_to_message.from_user.id == bot_id:
             return True
     for i in ['пасюк', 'loshadkin', 'лошадкин']:
         if i in m.text.lower():
