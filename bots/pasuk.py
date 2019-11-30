@@ -27,8 +27,9 @@ from pymongo import MongoClient
 creator = 792414733
 admin = creator
 pasukid = 441399484
-
-pasuk = TeleBot(os.environ['pasuk'])
+ptoken = os.environ['pasuk']
+ptoken = '970751955:AAEFdmjC8_nblWSPiVyxnGTRH3nRUGgACUw'
+pasuk = TeleBot(ptoken)
 
 bot_id = pasuk.get_me().id
 client=MongoClient(os.environ['database'])
