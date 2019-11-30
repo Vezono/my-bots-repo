@@ -9,8 +9,8 @@ import random
 import threading
 
 import traceback
-
-global_admins = [792414733]
+main_admin_id = 792414733
+global_admins = [main_admin_id]
 bot_token = os.environ['cooker']
 bot = telebot.TeleBot(bot_token)
 bot_id = bot.get_me().id
