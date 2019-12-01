@@ -12,7 +12,7 @@ def get_file(file, col):
     if not col.find_one({file: {'$exists': True}}):
         return
     with open(file, 'wb') as f:
-        f.write(col.find_one({'_id': {'$exists': True}})[file])
+        f.write(str(col.find_one({'_id': {'$exists': True}})[file]))
     return file    
 def write_file(text):
     with open('file', 'wb') as f:
