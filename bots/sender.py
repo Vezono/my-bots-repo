@@ -26,7 +26,7 @@ from pymongo import MongoClient
 
 creator = 792414733
 admin = creator
-pasukid = 441399484
+pasukid = int(os.environ['yuliaid'])
 
 ptoken = os.environ['yulia']
 pasuk = TeleBot(ptoken)
