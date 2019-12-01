@@ -13,11 +13,11 @@ def get_file(file, col):
         return
     with open(file, 'wt') as f:
         f.write(str(col.find_one({'_id': {'$exists': True}})[file]))
-    return f  
+    return f.open()  
 def write_file(text):
     with open('file', 'wt') as f:
         f.write(text)
-    return f
+    return f.open()
 
 @bot.message_handler(commands=['get'])
 def sget(m):
