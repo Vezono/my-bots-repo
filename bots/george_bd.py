@@ -16,7 +16,7 @@ def get_file(file, col):
     return file    
 def write_file(text):
     with open('file', 'wb') as f:
-        f.write(tts)
+        f.write(text)
     return file
 
 @bot.message_handler(commands=['get'])
