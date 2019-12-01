@@ -9,6 +9,8 @@ admin = 792414733
 
 bot = telebot.TeleBot(os.environ['gogbot'])
 def get_file(file, col):
+    if not col.find_one({file: {'$exists': True}}):
+        return
     with open('file', 'wb') as f:
         f.write(col.find_one({'_id': {'$exists': True}})[file])
     return file    
@@ -43,7 +45,10 @@ def sfile(m):
         db = attrs[2]
         coll = client[db][args[3]]
         file = attrs[4]
-        bot.send_file(m.chat.id, get_file(file, coll))
+        if get_file(file, coll):
+            bot.send_file(m.chat.id, get_file(file, coll))
+        else:
+            bot.reply_to(m, 'Такого файла нет!')
 @bot.message_handler(commands=['help'])
 def shelp(m): 
     bot.reply_to(m, '/get <ссылка на клиент> <имя датабазы> - выводит все данные в датабазе.\n/drop <ссылка на клиент> <имя датабазы> - удаляет все данные в коллекции.\n/file <ссылка на клиент> <имя датабазы> <имя коллекции> <имя файла>')
