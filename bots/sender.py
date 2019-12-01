@@ -35,7 +35,7 @@ client=MongoClient(os.environ['database'])
 db=client.yulia
 phrases=db.phrases
 lophrase = []
-x = phrases.find_one({'fix':'fix'})
+x = phrases.find_one({})
 for ids in x:
     if x[ids]:
         lophrase.append(x[ids])
@@ -111,7 +111,7 @@ def texthandler(m):
             if phrase and type(phrase) != check_dict:
                 for word in phrase.split(' '):
                     text = m.text.lower()
-                    text = text.replace('я', 'ты').replace('ты', 'я')
+                    text = text.replace('я', 'ты')
                     if word.lower() in text.split(' ') and not sended:
                         bot.reply_to(m, phrase)
                         sended +=1
@@ -120,7 +120,7 @@ def texthandler(m):
     else:
         user_response = m.text.lower()
         tts = getresponse(user_response).capitalize()
-        bot.reply_to(m, tts)
+        bot.reply_to(m, tts.capitalize())
 
     
 
