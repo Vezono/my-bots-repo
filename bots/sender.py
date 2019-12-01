@@ -26,6 +26,7 @@ from pymongo import MongoClient
 
 creator = 792414733
 admin = creator
+admins = [admin]
 pasukid = int(os.environ['yuliaid'])
 
 ptoken = os.environ['yulia']
