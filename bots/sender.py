@@ -9,8 +9,6 @@ warnings.filterwarnings('ignore')
 import nltk
 from nltk.stem import WordNetLemmatizer
 nltk.download('popular', quiet=True) # for downloading packages
-nltk.download('punkt') # first-time use only
-nltk.download('wordnet') # first-time use only
 from telebot import TeleBot
 from manybotslib import BotsRunner
 
@@ -150,7 +148,7 @@ def pinloshadkin(m):
 # ---------------------RUNNER OF BOTS----------------------------------------
 # ---------------------------------------------------------------------------
 runner = BotsRunner([creator])
-runner.add_bot("Pasuk", pasuk)
+runner.add_bot("Sender", pasuk)
 runner.set_main_bot(pasuk)
-print('Pasuk works!')
+print('Sender works!')
 runner.run()
