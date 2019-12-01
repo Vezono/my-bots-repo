@@ -35,7 +35,7 @@ client=MongoClient(os.environ['database'])
 db=client.yulia
 phrases=db.phrases
 lophrase = []
-x = phrases.find_one({})
+x = phrases.find_one({'fix':'fix'})
 for ids in x:
     if x[ids]:
         lophrase.append(x[ids])
