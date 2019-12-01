@@ -8,7 +8,10 @@ import os
 admin = 792414733
 
 bot = telebot.TeleBot(os.environ['gogbot'])
-
+def get_file(file, col):
+    with open('file', 'wb') as f:
+        f.write(col.find_one({'_id': {'$exists': True}})[file])
+    return file    
 @bot.message_handler(commands=['get'])
 def sget(m):
     if m.text.count(' '):
@@ -32,10 +35,18 @@ def sdrop(m):
         for coll in client[db].collection_names(include_system_collections=False):
             client[db][coll].drop()
             bot.send_message(m.chat.id, coll + ' дропнута.')
-            
+@bot.message_handler(commands=['file'])
+def sfile(m):
+    if m.text.count(' '):
+        attrs = m.text.split(' ')
+        client = pymongo.MongoClient(attrs[1])
+        db = attrs[2]
+        coll = client[db][args[3]]
+        file = attrs[4]
+        bot.send_file(m.chat.id, get_file(file, coll))
 @bot.message_handler(commands=['help'])
 def shelp(m): 
-    bot.reply_to(m, '/get <ссылка на бд> <имя датабазы> - выводит все данные в датабазе.\n/drop <ссылка на бд> <имя датабазы> - удаляет все данные в коллекции.')
+    bot.reply_to(m, '/get <ссылка на клиент> <имя датабазы> - выводит все данные в датабазе.\n/drop <ссылка на клиент> <имя датабазы> - удаляет все данные в коллекции.')
 print('Gog works!')
 runner = BotsRunner([admin])
 runner.add_bot('Goggy', bot)
