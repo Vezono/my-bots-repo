@@ -42,7 +42,7 @@ class BotsRunner:
 
     def run(self):
         for botname in self.__bots:
-            Thread(target=self.__poll, args=[botname]).start()
+            Thread(target=self.__poll, args=[botname], name=botname).start()
 
     def __warn_about_fail(self, botname):
         text = "Бот " + botname + " отвалился!\n\n"
