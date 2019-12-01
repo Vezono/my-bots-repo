@@ -43,7 +43,7 @@ def sfile(m):
         attrs = m.text.split(' ')
         client = pymongo.MongoClient(attrs[1])
         db = attrs[2]
-        coll = client[db][args[3]]
+        coll = client[db][attrs[3]]
         file = attrs[4]
         if get_file(file, coll):
             bot.send_file(m.chat.id, get_file(file, coll))
