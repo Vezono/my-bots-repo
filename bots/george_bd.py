@@ -11,11 +11,11 @@ bot = telebot.TeleBot(os.environ['gogbot'])
 def get_file(file, col):
     if not col.find_one({file: {'$exists': True}}):
         return
-    with open(file, 'wb') as f:
+    with open(file, 'wt') as f:
         f.write(str(col.find_one({'_id': {'$exists': True}})[file]))
     return file    
 def write_file(text):
-    with open('file', 'wb') as f:
+    with open('file', 'wt') as f:
         f.write(text)
     return file
 
