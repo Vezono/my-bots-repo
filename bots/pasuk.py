@@ -29,7 +29,6 @@ admin = creator
 pasukid = 441399484
 
 ptoken = os.environ['pasuk']
-ptoken = '970751955:AAEFdmjC8_nblWSPiVyxnGTRH3nRUGgACUw'
 pasuk = TeleBot(ptoken)
 bot_id = pasuk.get_me().id
 client=MongoClient(os.environ['database'])
