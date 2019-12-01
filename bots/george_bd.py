@@ -46,7 +46,7 @@ def sfile(m):
         bot.send_file(m.chat.id, get_file(file, coll))
 @bot.message_handler(commands=['help'])
 def shelp(m): 
-    bot.reply_to(m, '/get <ссылка на клиент> <имя датабазы> - выводит все данные в датабазе.\n/drop <ссылка на клиент> <имя датабазы> - удаляет все данные в коллекции.')
+    bot.reply_to(m, '/get <ссылка на клиент> <имя датабазы> - выводит все данные в датабазе.\n/drop <ссылка на клиент> <имя датабазы> - удаляет все данные в коллекции.\n/file <ссылка на клиент> <имя датабазы> <имя коллекции> <имя файла>')
 print('Gog works!')
 runner = BotsRunner([admin])
 runner.add_bot('Goggy', bot)
