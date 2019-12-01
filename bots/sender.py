@@ -23,7 +23,7 @@ from bs4 import BeautifulSoup
 import lxml
 
 from pymongo import MongoClient
-
+check_dict = type({})
 creator = 792414733
 admin = creator
 admins = [admin]
@@ -109,7 +109,7 @@ def texthandler(m):
     random.shuffle(mem)
     if not alpha:
         for phrase in mem:
-            if phrase:
+            if phrase and type(phrase) != check_dict:
                 for word in phrase.split(' '):
                     text = m.text.lower()
                     text = text.replace('я', 'ты').replace('ты', 'я')
