@@ -13,11 +13,11 @@ def get_file(file, col):
         return
     with open(file, 'wt') as f:
         f.write(str(col.find_one({'_id': {'$exists': True}})[file]))
-    return file    
+    return f  
 def write_file(text):
     with open('file', 'wt') as f:
         f.write(text)
-    return 'file'
+    return f
 
 @bot.message_handler(commands=['get'])
 def sget(m):
@@ -51,7 +51,7 @@ def sfile(m):
         coll = client[db][attrs[3]]
         file = attrs[4]
         if get_file(file, coll):
-            bot.send_document(m.chat.id, get_file(file, coll))
+            bot.send_document(m.chat.id, data=get_file(file, coll))
         else:
             bot.reply_to(m, 'Такого файла нет!')
 @bot.message_handler(commands=['get_as_file'])
@@ -65,7 +65,7 @@ def sgetasfile(m):
                 tts = '{} - смотри:\n\n'.format(coll)
                 for key in post.keys():
                     tts += '{}:{}\n'.format(key, post[key])
-                bot.send_document(m.chat.id, write_file(tts))   
+                bot.send_document(m.chat.id, data=write_file(tts))   
 
 @bot.message_handler(commands=['help'])
 def shelp(m): 
