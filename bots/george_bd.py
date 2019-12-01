@@ -65,7 +65,7 @@ def sgetasfile(m):
                 tts = '{} - смотри:\n\n'.format(coll)
                 for key in post.keys():
                     tts += '{}:{}\n'.format(key, post[key])
-                bot.send_document(m.chat.id, file_write(tts))   
+                bot.send_document(m.chat.id, write_file(tts))   
 
 @bot.message_handler(commands=['help'])
 def shelp(m): 
