@@ -18,7 +18,7 @@ def status(m):
     bot.reply_to(m, runner.get_status())
 @bot.message_handler(commands=['getm'])
 def status(m):
-    bot.reply_to(m, str(m.reply_to_message))
+    bot.reply_to(m, str(m))
 runner = BotsRunner([792414733]) # pass empty list if you don't want to receive error messages on fail
 runner.add_bot("Antosha", bot)
 runner.set_main_bot(bot)
