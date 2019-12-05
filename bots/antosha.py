@@ -24,7 +24,7 @@ import traceback
 from pymongo import MongoClient
 bot_token = os.environ['antosha']
 bot = telebot.TeleBot(bot_token)
-
+lophrase = []
 client=MongoClient(os.environ['database'])
 db=client.antosha
 phrases=db.phrases
