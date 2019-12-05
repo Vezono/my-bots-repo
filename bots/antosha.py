@@ -10,7 +10,7 @@ import threading
 
 import traceback
 
-bot_token = os.environ['book']
+bot_token = os.environ['antosha']
 bot = telebot.TeleBot(bot_token)
 
 @bot.message_handler(commands=['status'])
