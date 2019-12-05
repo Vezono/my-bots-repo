@@ -29,7 +29,7 @@ client=MongoClient(os.environ['database'])
 db=client.antosha
 phrases=db.phrases
 x = phrases.find_one({})
-x = ['Бляха', 'Бляха']
+x = [{'Бляха':'Бляха', 'Ляха':'Бляха'}]
 for ids in x:
     if x[ids]:
         lophrase.append(x[ids])
