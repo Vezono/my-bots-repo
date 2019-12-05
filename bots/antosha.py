@@ -11,7 +11,7 @@ warnings.filterwarnings('ignore')
 
 import nltk
 from nltk.stem import WordNetLemmatizer
-nltk.download('popular', quiet=True) # for downloading packages
+#nltk.download('popular', quiet=True) # for downloading packages
 import os
 
 import time
