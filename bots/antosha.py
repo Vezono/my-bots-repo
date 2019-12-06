@@ -54,6 +54,7 @@ def addjoke(m):
     pass
 @bot.message_handler(commands=['tea'])
 def ftea(m):
+    print('Завариваем чай...')
     if m.reply_to_message:
         from_user = m.from_user.first_name
         if m.text.count(' ') == 0:
