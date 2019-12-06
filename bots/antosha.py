@@ -91,7 +91,26 @@ def texthandler(m):
 r = {'drink': 'Выпить',
      'reject': 'Отказаться',
      'throw': 'Вылить'}
-
+@bot.callback_query_handler(lambda c: True)
+def callback_handler(c):
+    print(c)
+    action = c.data.split(' ')[0]
+    touser = c.data.split(' ', 1)[1]
+    tea = c.message.text.split('"')[1]
+    if touser == c.from_user.first_name:
+        if action == 'drink':
+            tts = 'Вы выпили чай "{}", {}!'.format(tea, touser)
+        elif action == 'reject':
+            tts = 'Вы отказались от чая "{}", {}!'.format(tea, touser)
+        elif action == 'throw':
+            tts = 'Вы вылили чай "{}", {}!!'.format(tea, touser)
+        elif action == 'Да':
+            tts = 'Вы выпили чай "{}", {}!! Спасибо!!!'.format(tea, touser)
+        elif action == 'Нет':
+            tts = 'Простите, {}.'.format(touser)
+    else:
+        return
+    bot.edit_message_text(tts, c.message.chat.id, c.message.message_id)
 def rus(name):
     try:
         return r[name]
