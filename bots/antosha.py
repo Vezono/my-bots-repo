@@ -33,8 +33,7 @@ x = {'Бляха':'Бляха', 'Ляха':'Бляха'}
 for ids in x:
     if x[ids]:
         lophrase.append(x[ids])
-lophrase.remove(lophrase[0])
-bot = pasuk
+lophrase.remove(lophrase[0]
 pasukid = 214670864
 alpha = True
 raw = ''
