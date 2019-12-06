@@ -1,17 +1,6 @@
 import telebot
 from manybotslib import BotsRunner
 from telebot import types
-import io
-import string # to process standard python strings
-import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import warnings
-warnings.filterwarnings('ignore')
-
-import nltk
-from nltk.stem import WordNetLemmatizer
-#nltk.download('popular', quiet=True) # for downloading packages
 import os
 
 import time
@@ -24,52 +13,13 @@ import traceback
 from pymongo import MongoClient
 bot_token = os.environ['antosha']
 bot = telebot.TeleBot(bot_token)
-lophrase = []
 client=MongoClient(os.environ['database'])
 db=client.antosha
 phrases=db.phrases
-x = phrases.find_one({})
-x = {'Бляха':'Бляха', 'Ляха':'Бляха'}
-for ids in x:
-    if x[ids]:
-        lophrase.append(x[ids])
-lophrase.remove(lophrase[0]
-pasukid = 214670864
-alpha = True
-raw = ''
-word_tokens = []
-for sent in lophrase:
-    for word in sent:
-        word_tokens.append(word)
-raw = raw.lower()
-
-#TOkenisation
-sent_tokens = lophrase# converts to list of sentences 
 
 
-# Preprocessing
-lemmer = WordNetLemmatizer()
-def LemTokens(tokens):
-    return [lemmer.lemmatize(token) for token in tokens]
-remove_punct_dict = dict((ord(punct), None) for punct in string.punctuation)
-def LemNormalize(text):
-    return LemTokens(nltk.word_tokenize(text.lower().translate(remove_punct_dict)))    
 
-GREETING_INPUTS = ["Привет"]
-GREETING_RESPONSES = ["Пока"]
 
-def getresponse(user_response):
-    TfidfVec = TfidfVectorizer(tokenizer=LemNormalize, stop_words='english')
-    tfidf = TfidfVec.fit_transform(sent_tokens)
-    vals = cosine_similarity(tfidf[-1], tfidf)
-    idx=vals.argsort()[0][-2]
-    flat = vals.flatten()
-    flat.sort()
-    req_tfidf = flat[-2]
-    if not req_tfidf:
-        return "Что ты несешь"
-    else: 
-        return sent_tokens[idx]
 creator = 792414733
 
 timings = '''
@@ -86,29 +36,6 @@ timings = '''
 def texthandler(m):
     if 'бот' in m.text.lower() or 'антон' in m.text.lower():
         bot.reply_to(m, random.choice(['Бляха', 'I`ll be back']))
-    if m.from_user.id == pasukid:
-            phrases.update_one({}, {'$set': {str(random.randint(1, 1000000000000000000)):m.text}})
-    if not pinloshadkin(m):# or not random.randint(1, 100) > 99:
-        return
-    response = random.choice(lophrase)
-    sended = 0
-    mem = lophrase
-    random.shuffle(mem)
-    if not alpha:
-        for phrase in mem:
-            if phrase:
-                for word in phrase.split(' '):
-                    text = m.text.lower()
-                    text = text.replace('я', 'ты').replace('ты', 'я')
-                    if word.lower() in text.split(' ') and not sended:
-                        bot.reply_to(m, phrase)
-                        sended +=1
-                        break
-                        break
-    else:
-        user_response = m.text.lower()
-        tts = getresponse(user_response).capitalize()
-        bot.reply_to(m, tts)    
 @bot.message_handler(commands=['status'])
 def status(m):
     bot.reply_to(m, runner.get_status())
@@ -169,10 +96,6 @@ def rus(name):
         return r[name]
     except:
         return name
-def pinloshadkin(m):
-    if m.reply_to_message:
-        if m.reply_to_message.from_user.id == bot.get_me().id:
-            return True    
 runner = BotsRunner([792414733]) # pass empty list if you don't want to receive error messages on fail
 runner.add_bot("Antosha", bot)
 runner.set_main_bot(bot)
