@@ -103,7 +103,7 @@ def callback_handler(c):
         elif action == 'reject':
             tts = 'Вы отказались от чая "{}", {}!'.format(tea, touser)
         elif action == 'throw':
-            tts = 'Вы вылили чай "{}", {}!!'.format(tea, touser)
+            tts = 'Вы вылили в унитаз чай "{}", {}!!'.format(tea, touser)
         elif action == 'Да':
             tts = 'Вы выпили чай "{}", {}!! Спасибо!!!'.format(tea, touser)
         elif action == 'Нет':
