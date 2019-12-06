@@ -8,7 +8,7 @@ from telebot import types
 from pymongo import MongoClient
 import traceback
 from manybotslib import BotsRunner
-token = os.environ['TELEGRAM_TOKEN']
+token = os.environ['coldunstvo']
 bot = telebot.TeleBot(token)
 
 
