@@ -35,7 +35,7 @@ timings = '''
 @bot.message_handler()
 def texthandler(m):
     if 'бот' in m.text.lower() or 'антон' in m.text.lower():
-        bot.reply_to(m, random.choice(['Бляха', 'I`ll be back']))
+        bot.reply_to(m, random.choice(['Бляха', 'I`ll be back', '"Хлопки"', 'Жизненно']))
 @bot.message_handler(commands=['status'])
 def status(m):
     bot.reply_to(m, runner.get_status())
