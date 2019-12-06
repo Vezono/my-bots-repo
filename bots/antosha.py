@@ -32,10 +32,7 @@ timings = '''
 
 ДЕДЛАЙН РЕЛИЗА ФАНФИКА - 3 ЯНВАРЯ.
 '''
-@bot.message_handler()
-def texthandler(m):
-    if 'бот' in m.text.lower() or 'антон' in m.text.lower():
-        bot.reply_to(m, random.choice(['Бляха', 'I`ll be back', '"Хлопки"', 'Жизненно']))
+
 @bot.message_handler(commands=['status'])
 def status(m):
     bot.reply_to(m, runner.get_status())
@@ -87,7 +84,10 @@ def ftea(m):
         tts = '{} заварил себе чай "{}"!'.format(m.from_user.first_name, tea)
         bot.delete_message(m.chat.id, m.message_id)
         bot.send_message(m.chat.id, tts)
-
+@bot.message_handler()
+def texthandler(m):
+    if 'бот' in m.text.lower() or 'антон' in m.text.lower():
+        bot.reply_to(m, random.choice(['Бляха', 'I`ll be back', '"Хлопки"', 'Жизненно']))
 r = {'drink': 'Выпить',
      'reject': 'Отказаться',
      'throw': 'Вылить'}
