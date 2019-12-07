@@ -1,6 +1,7 @@
 import telebot
 from manybotslib import BotsRunner
 from telebot import types
+
 import os
 
 import time
@@ -9,7 +10,6 @@ import threading
 
 import traceback
 
-
 from pymongo import MongoClient
 bot_token = os.environ['antosha']
 bot = telebot.TeleBot(bot_token)
@@ -17,9 +17,21 @@ client=MongoClient(os.environ['database'])
 db=client.antosha
 phrases=db.phrases
 
+import io
+import string # to process standard python strings
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import warnings
+warnings.filterwarnings('ignore')
 
+import nltk
+from nltk.stem import WordNetLemmatizer
+nltk.download('popular', quiet=True) # for downloading packages
+nltk.download('punkt') # first-time use only
+nltk.download('wordnet') # first-time use only
 
-
+pasukid = 214670864
 creator = 792414733
 
 timings = '''
@@ -33,6 +45,44 @@ timings = '''
 ДЕДЛАЙН РЕЛИЗА ФАНФИКА - 3 ЯНВАРЯ.
 '''
 
+x = phrases.find_one({})
+for ids in x:
+    if x[ids]:
+        lophrase.append(x[ids])
+lophrase.remove(lophrase[0])
+
+sent_tokens = lophrase# converts to list of sentences 
+
+
+word_tokens = []
+for sent in lophrase:
+    for word in sent.split(' '):
+        word_tokens.append(word)
+
+# Preprocessing
+lemmer = WordNetLemmatizer()
+def LemTokens(tokens):
+    return [lemmer.lemmatize(token) for token in tokens]
+remove_punct_dict = dict((ord(punct), None) for punct in string.punctuation)
+def LemNormalize(text):
+    return LemTokens(nltk.word_tokenize(text.lower().translate(remove_punct_dict)))    
+
+GREETING_INPUTS = ["Привет"]
+GREETING_RESPONSES = ["Пока"]
+
+def getresponse(user_response):
+    TfidfVec = TfidfVectorizer(tokenizer=LemNormalize, stop_words='english')
+    tfidf = TfidfVec.fit_transform(sent_tokens)
+    vals = cosine_similarity(tfidf[-1], tfidf)
+    idx=vals.argsort()[0][-2]
+    flat = vals.flatten()
+    flat.sort()
+    req_tfidf = flat[-2]
+    if not req_tfidf:
+        return "Не понимаю тебя"
+    else: 
+        return sent_tokens[idx]
+
 @bot.message_handler(commands=['status'])
 def status(m):
     bot.reply_to(m, runner.get_status())
@@ -43,12 +93,6 @@ def status(m):
 @bot.message_handler(commands=['timings'])
 def status(m):
     bot.reply_to(m, timings)        
-@bot.message_handler(commands=['joke'])
-def joke(m):     
-    pass
-@bot.message_handler(commands=['addjoke'])
-def addjoke(m):
-    pass
 @bot.message_handler(commands=['tea'])
 def ftea(m):
     print('Завариваем чай...')
@@ -84,10 +128,39 @@ def ftea(m):
         tts = '{} заварил себе чай "{}"!'.format(m.from_user.first_name, tea)
         bot.delete_message(m.chat.id, m.message_id)
         bot.send_message(m.chat.id, tts)
+
+        
 @bot.message_handler()
 def texthandler(m):
     if 'бот' in m.text.lower() or 'антон' in m.text.lower():
         bot.reply_to(m, random.choice(['Бляха', 'I`ll be back', '"Хлопки"', 'Жизненно']))
+    if m.forward_from:
+        if m.forward_from.id == pasukid:
+            phrases.update_one({}, {'$set': {m.text.replace('.', ''):m.text}})
+    else:
+        if m.from_user.id == pasukid:
+            phrases.update_one({}, {'$set': {m.text.replace('.', ''):m.text}})
+    if not pinloshadkin(m):# or not random.randint(1, 100) > 99:
+        return
+    response = random.choice(lophrase)
+    sended = 0
+    mem = lophrase
+    random.shuffle(mem)
+    if not alpha:
+        for phrase in mem:
+            if phrase:
+                for word in phrase.split(' '):
+                    text = m.text.lower()
+                    text = text.replace('я', 'ты').replace('ты', 'я')
+                    if word.lower() in text.split(' ') and not sended:
+                        bot.reply_to(m, phrase)
+                        sended +=1
+                        break
+                        break
+    else:
+        user_response = m.text.lower()
+        tts = getresponse(user_response).capitalize()
+        bot.reply_to(m, tts)        
 r = {'drink': 'Выпить',
      'reject': 'Отказаться',
      'throw': 'Вылить'}
