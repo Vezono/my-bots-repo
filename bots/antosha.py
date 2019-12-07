@@ -44,7 +44,7 @@ timings = '''
 
 ДЕДЛАЙН РЕЛИЗА ФАНФИКА - 3 ЯНВАРЯ.
 '''
-
+lophrase = []
 x = phrases.find_one({})
 for ids in x:
     if x[ids]:
