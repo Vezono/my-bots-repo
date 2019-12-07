@@ -189,6 +189,17 @@ def rus(name):
         return r[name]
     except:
         return name
+def pinloshadkin(m):
+    if m.reply_to_message:
+        if m.reply_to_message.from_user.id == bot.get_me().id:
+            return True
+    if random.randint(1, 50) == 1:
+        return True
+    for i in ['бот', 'антон']:
+        if i in m.text.lower():
+            return True
+        else:
+            return False    
 runner = BotsRunner([792414733]) # pass empty list if you don't want to receive error messages on fail
 runner.add_bot("Antosha", bot)
 runner.set_main_bot(bot)
