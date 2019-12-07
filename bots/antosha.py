@@ -82,7 +82,6 @@ def getresponse(user_response):
         return "Не понимаю тебя"
     else: 
         return sent_tokens[idx]
-
 @bot.message_handler(commands=['status'])
 def status(m):
     bot.reply_to(m, runner.get_status())
@@ -146,6 +145,7 @@ def texthandler(m):
     sended = 0
     mem = lophrase
     random.shuffle(mem)
+    alpha = random.choice([True, False])
     if not alpha:
         for phrase in mem:
             if phrase:
