@@ -79,7 +79,7 @@ def getresponse(user_response):
     flat.sort()
     req_tfidf = flat[-2]
     if not req_tfidf:
-        return "Не понимаю тебя"
+        return "Жизненно"
     else: 
         return sent_tokens[idx]
 @bot.message_handler(commands=['status'])
@@ -131,8 +131,6 @@ def ftea(m):
         
 @bot.message_handler()
 def texthandler(m):
-    if 'бот' in m.text.lower() or 'антон' in m.text.lower():
-        bot.reply_to(m, random.choice(['Бляха', 'I`ll be back', '"Хлопки"', 'Жизненно']))
     if m.forward_from:
         if m.forward_from.id == pasukid:
             phrases.update_one({}, {'$set': {m.text.replace('.', ''):m.text}})
