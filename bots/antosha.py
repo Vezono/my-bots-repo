@@ -27,9 +27,9 @@ warnings.filterwarnings('ignore')
 
 import nltk
 from nltk.stem import WordNetLemmatizer
-nltk.download('popular', quiet=True) # for downloading packages
-nltk.download('punkt') # first-time use only
-nltk.download('wordnet') # first-time use only
+#nltk.download('popular', quiet=True) # for downloading packages
+#nltk.download('punkt') # first-time use only
+#nltk.download('wordnet') # first-time use only
 
 pasukid = 214670864
 creator = 792414733
