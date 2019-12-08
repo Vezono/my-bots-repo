@@ -880,8 +880,6 @@ def inline(call):
                 text = text[1]
                 text = text[5:]
                 r = ''
-                if text in rubypokes:
-                    r = '2'
                 medit(x['name'] + ', статы покемона ' + x['pokemons' + r][text]['name'] + ':\nКрутость: ' + str(
                     x['pokemons' + r][text]['cool']) + '\nАтака: ' + str(x['pokemons' + r][text]['atk']) + '\n' +
                       'Защита: ' + str(x['pokemons' + r][text]['def']) + '\nЛовкость: ' + str(
@@ -1025,8 +1023,6 @@ def createuser(id):
             'pokemons': {},
             'chancetocatch': 0,
             'money': 0,
-            'pokemons2': {},
-            'ruby': 0
             }
 
 
