@@ -28,7 +28,7 @@ db = client.pokewars
 users = db.users
 chats = db.chats
 pokemonsbd = db.pokemons
-pokemons_database = pokemonsdb.find({})
+pokemons_database = pokemonsbd.find({})
 pokedic = {}
 for i in pokemons_database:
     pokedic.update({list(i.keys())[0]:i[list(i.keys())[0]]})   
