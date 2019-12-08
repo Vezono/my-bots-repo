@@ -101,14 +101,14 @@ def statssss(m):
         bot.send_message(m.chat.id, 'Вы еще не зарегистрированы в боте. Пожалуйста, отправте сообщение, НЕ КОМАНДУ.')
 @bot.message_handler(commands=['mongols'])
 def mongols(m):
-    bot.reply_to(m, '/mongol - вызвать монголов на бой днем.\n/night_mongol - вызвать монголов на бой ночью.')
+    bot.reply_to(m, '/mongol - вызвать монголов на бой днем.\n/night_mongol - вызвать монголов на бой ночью.\n/silent_mongol - отправить на монгол покемонов, не интересуясь ходом битвы')
 @bot.message_handler(commands=['mongol'])
 def tatar(m):
     chat = chats.find_one({'id':m.chat.id})
     if m.from_user.id not in vip or chat['mongol']:
         bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
         return
-    chats.update_one({'id':m.chat.id}, {'mongol':1})
+    chats.update_one({'id':m.chat.id}, {'&set'{'mongol':1}})
     bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
     fighters = []
     for user in users.find({}):
@@ -154,7 +154,7 @@ def ntatar(m):
     if m.from_user.id not in vip or chat['mongol']:
         bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
         return
-    chats.update_one({'id':m.chat.id}, {'mongol':1})
+    chats.update_one({'id':m.chat.id}, {'&set'{'mongol':1}})
     bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
     fighters = []
     for user in users.find({}):
@@ -202,7 +202,7 @@ def ntatar(m):
     if m.from_user.id not in vip or chat['mongol']:
         bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
         return
-    chats.update_one({'id':m.chat.id}, {'mongol':1})
+    chats.update_one({'id':m.chat.id}, {'&set'{'mongol':1}})
     fighters = []
     for user in users.find({}):
         if random.choice([True, False]) or not len(fighters):
