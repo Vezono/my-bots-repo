@@ -322,7 +322,7 @@ def unbannn(id):
         pass
 
 
-pokemonlist = list(pokemons.keys())
+
 
 basepokes = ['dildak', 'loshod', 'penis', 'zaluper', 'zhopa', 'sidot']
 
@@ -431,7 +431,7 @@ pokemons = {'dildak': {'cool': 10,
             }
 
 print(pokedic) 
-
+pokemonlist = list(pokemons.keys())
 
 @bot.message_handler(commands=['upgrade'])
 def upgradee(m):
