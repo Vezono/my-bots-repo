@@ -108,7 +108,7 @@ def tatar(m):
     if m.from_user.id not in vip or chat['mongol']:
         bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
         return
-    chat.update_one({'id':m.chat.id}, {'mongol':1})
+    chats.update_one({'id':m.chat.id}, {'mongol':1})
     bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
     fighters = []
     for user in users.find({}):
@@ -154,7 +154,7 @@ def ntatar(m):
     if m.from_user.id not in vip or chat['mongol']:
         bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
         return
-    chat.update_one({'id':m.chat.id}, {'mongol':1})
+    chats.update_one({'id':m.chat.id}, {'mongol':1})
     bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
     fighters = []
     for user in users.find({}):
@@ -202,7 +202,7 @@ def ntatar(m):
     if m.from_user.id not in vip or chat['mongol']:
         bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
         return
-    chat.update_one({'id':m.chat.id}, {'mongol':1})
+    chats.update_one({'id':m.chat.id}, {'mongol':1})
     fighters = []
     for user in users.find({}):
         if random.choice([True, False]) or not len(fighters):
