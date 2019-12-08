@@ -102,10 +102,8 @@ def statssss(m):
                               
 @bot.message_handler(commands=['mongol'])
 def tatar(m):
-    if not tatar and m.from_user.id not in vip:
-        bot.reply_to(m, 'Вы недавно уже призывали монгол.')
-        tatar = False
-        return
+    if m.from_user.id not in vip:
+        bot.reply_to(m, 'Только князь может призвать монголов.')
     bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
     fighters = []
     for user in users.find({}):
@@ -147,9 +145,8 @@ def tatar(m):
     
 @bot.message_handler(commands=['night_mongol'])
 def ntatar(m):
-    if not tatar and m.from_user.id not in vip:
-        bot.reply_to(m, 'Вы недавно уже призывали монгол.')
-        tatar = False
+    if m.from_user.id not in vip:
+        bot.reply_to(m, 'Только князь может призвать монголов.')
         return
     bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
     fighters = []
