@@ -114,8 +114,9 @@ def tatar(m):
     bot.send_message(m.chat.id, 'Итак. Армия состоит из ' + str(army) + ' монгольских воинов.')
     tts = 'В набеге учавствуют все покемоны таких хозяев:'
     for user in fighters:
-        tts += '\n' + user['name']
-    bot.send_message(m.chat.id, tts)
+        ahref = '\n<a href="tg://user?id={}">{}</a>'.format(user['id'], user['name'])
+    bot.send_message(m.chat.id, tts, parse_mode='HTML')
+    pokes_fight = []
     for user in fighters:
         for pokemon in user['pokemons']:
             pokes_fight.append(pokemon)
