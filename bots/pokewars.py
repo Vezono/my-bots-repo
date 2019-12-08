@@ -27,6 +27,9 @@ client = MongoClient(os.environ['database'])
 db = client.pokewars
 users = db.users
 chats = db.chats
+eng = [' ', 'a', 'b', 'v', 'g', 'd', 'e', 'e', 'zh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'f', 'kh', 'ts', 'ch', 'sh', 'shch', 'j', 'u', 'j', 'e', 'yu', 'ya']
+
+rus = [' ', 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я'] 
 
 symbollist = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
               'v', 'w', 'x', 'y', 'z',
@@ -999,7 +1002,17 @@ def createpoke(pokemon, gold):
             'hunting': 0
             }
 
-
+def burnpoke(name, cool):
+    return {'name': name.capitalize(),
+            'code': transliterate(name),
+            'cool': cool,
+            'golden': 0,
+            'lvl': 1,
+            'atk': 1,
+            'def': 1,
+            'agility': 1,
+            'hunting': 0
+            }
 
 
 def createchat(id):
@@ -1017,6 +1030,21 @@ def createuser(id):
             }
 
 
+def transliterate(text):
+    text = text.lower()
+    ruposition = 0
+    tts = ''
+    for char in text:
+        for i in range(len(rus)):
+            if char == rus[i]:
+                ruposition = i
+                break
+        tts += eng[ruposition]
+    return tts 
+                
+          
+            
+        
 for user in users.find({}):
     for pokemon in user['pokemons']:
         users.update_one({'id': user['id']}, {'$set': {'pokemons.' + pokemon + '.hunting': 0}})
