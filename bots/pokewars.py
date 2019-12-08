@@ -12,8 +12,8 @@ notclick = 0
 
 token = os.environ['pokewars']
 bot = telebot.TeleBot(token)
-vip = [brit_id]
 brit_id = 792414733
+vip = [brit_id]
 games = {}
 skills = []
 
