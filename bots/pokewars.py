@@ -146,7 +146,7 @@ def tatar(m):
 
     
 @bot.message_handler(commands=['night_mongol'])
-def tatar(m):
+def ntatar(m):
     if not tatar and m.from_user.id not in vip:
         bot.reply_to(m, 'Вы недавно уже призывали монгол.')
         tatar = False
