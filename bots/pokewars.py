@@ -1,24 +1,19 @@
 import os
-import telebot
 import time
 import telebot
+from manybotslib import BotsRunner
 import random
-import info
 import threading
-from emoji import emojize
 from telebot import types
 from pymongo import MongoClient
-from emoji import emojize
 
-from requests.exceptions import ReadTimeout
-from requests.exceptions import ConnectionError
 
 notclick = 0
 
 token = os.environ['TELEGRAM_TOKEN']
 bot = telebot.TeleBot(token)
-vip = [512006137]
-brit_id=512006137
+vip = [brit_id]
+brit_id = 792414733
 games = {}
 skills = []
 
@@ -141,47 +136,26 @@ def chuntall(m):
 @bot.message_handler(commands=['testhuntall'])
 def huntallll(m):
     if m.from_user.id == brit_id:
-        x = users.find_one({'id': m.from_user.id})
-        if x != None:
-            for ids in x['pokemons']:
-                if x['pokemons'][ids]['hunting'] == 0:
-                    users.update_one({'id': m.from_user.id}, {'$set': {'pokemons.' + ids + '.hunting': 1}})
-                    t = threading.Timer(10, huntt, args=[m.from_user.id, m.from_user.id, ids])
-                    t.start()
-                    pisos.append(x['pokemons'][ids]['code'])
-            for ids2 in x['pokemons2']:
-                if x['pokemons2'][ids2]['hunting'] == 0:
-                    users.update_one({'id': m.from_user.id}, {'$set': {'pokemons2.' + ids2 + '.hunting': 1}})
-                    t = threading.Timer(10, huntt, args=[m.from_user.id, m.from_user.id, ids2])
-                    t.start()
-                    pisos.append(x['pokemons'][ids]['code'])
-            if len(pisos) > 0:        
-                bot.send_message(m.chat.id, 'Вы отправили всех готовых покемонов на охоту. Вернутся через 10 сек.')
-            else:
-                bot.send_message(m.chat.id, 'Все покемоны уже на охоте!')
+        user = users.find_one({'id': m.from_user.id})
+        if user:
+                hunters = []
+                for pokemon in user['pokemons']:
+                    if not user['pokemons'][pokemon]['hunting']:
+                        users.update_one({'id': m.from_user.id}, {'$set': {'pokemons.' + pokemon + '.hunting': 1}})
+                        hunters.append(pokemon)
+                if hunters:
+                    threading.Timer(10, huntt, args=[m.from_user.id, m.from_user.id, hunters]).start()
+                    bot.send_message(m.chat.id, 'Вы отправили всех готовых покемонов на охоту. Вернутся через 10 секунд.')
+                else:
+                    bot.send_message(m.chat.id, 'Все покемоны уже на охоте!')
 
 
 @bot.message_handler(commands=['gold'])
 def goldd(m):
-    x = users.find_one({'id': m.from_user.id})
-    if x != None:
-        bot.send_message(m.chat.id,
-                         m.from_user.first_name + ', ваше золото: ' + str(x['money']) + '\nРубины: ' + str(x['ruby']))
-
-
-@bot.message_handler(commands=['suckdick'])
-def suckdick(m):
-    if m.from_user.id not in ban:
-        x = banns(m.from_user.id, m.chat.id, m.from_user.first_name)
-        if x == 0:
-            try:
-                users.update_one({'id': m.from_user.id}, {'$inc': {'money': -1}})
-                bot.send_message(m.chat.id, 'Вы успешно отсосали хуйца и потратили 1 монету.')
-                z = random.randint(1, 100)
-                if z <= 1:
-                    bot.send_message(m.chat.id, 'Ебаный рот этого казино блять!')
-            except:
-                pass
+    user = users.find_one({'id': m.from_user.id})
+    if user:
+        tts = '{}, ваше золото: {}.'.format(m.from_user.first_name, str(user['money']))
+        bot.send_message(m.chat.id, tts)
 
 
 @bot.message_handler(commands=['gextra'])
@@ -336,7 +310,6 @@ elita = ['pikachu', 'pedro', 'bulbazaur', 'psyduck', 'moxnatka', 'charmander', '
 
 elitaweak = ['moxnatka', 'diglet', 'traxer', 'penis', 'gandonio', 'egg', 'sizor', 'ebusobak', 'ultrapoke']
 
-rubypokes = ['rubenis', 'crystaler', 'blyadomon', 'moldres', 'pupitar', 'aron', 'sfil']
 
 pokemons = {'dildak': {'cool': 10,
                        'name': 'Дилдак'},
@@ -433,41 +406,7 @@ pokemons = {'dildak': {'cool': 10,
 
             }
 
-rubypokemons = {
-    'rubenis': {'cool': 9000,
-                'name': 'Рубенис',
-                'cost': 100},
-    'crystaler': {'cool': 15000,
-                  'name': 'Кристалер',
-                  'cost': 180},
-    'blyadomon': {'cool': 20000,
-                  'name': 'Блядомон',
-                  'cost': 260},
-    'moldres': {'cool': 65000,
-                'name': 'Молдрес',
-                'cost': 820},
-    'pupitar': {'cool': 45000,
-                'name': 'Пупитар',
-                'cost': 575},
-    'aron': {'cool': 34000,
-             'name': 'Арон',
-             'cost': 440},
-    'sfil': {'cool': 1000000,
-             'name': 'Сфил',
-             'cost': 13000},
 
-}
-
-
-# @bot.message_handler(commands=['evolve'])
-# def evolve(m):
-#    x=users.find_one({'id':m.from_user.id})
-#    if x!=None:
-#     if x['money']>=500:
-#      kb=types.InlineKeyboardMarkup()
-#      for ids in x['pokemons']:
-#        kb.add(types.InlineKeyboardButton(text=pokemons[ids]['name'], callback_data=str(m.from_user.id)+' evolve'+ids))
-#      bot.send_message(m.chat.id, m.from_user.first_name+', какого покемона вы хотите попытаться эволюционировать? Цена: 500 голды. Шанс: 15%.', reply_markup=kb)
 
 
 @bot.message_handler(commands=['upgrade'])
@@ -484,9 +423,6 @@ def upgradee(m):
                     if x['pokemons'][ids]['golden'] == 1:
                         gold = ' (' + star + ')'
                     kb.add(types.InlineKeyboardButton(text=pokemons[ids]['name'] + gold,
-                                                      callback_data=str(m.from_user.id) + ' upgrade' + ids))
-                for ids in x['pokemons2']:
-                    kb.add(types.InlineKeyboardButton(text=rubypokemons[ids]['name'] + ' (♦️)',
                                                       callback_data=str(m.from_user.id) + ' upgrade' + ids))
                 bot.send_message(m.chat.id,
                                  m.from_user.first_name + ', какого покемона вы хотите попытаться улучшить? Цена: 200 голды + крутость покемона/3. Шанс: 40%.',
@@ -506,12 +442,6 @@ def upgradee(m):
                         yes = 1
                         number = ''
                         pokemon = ids
-                if yes == 0:
-                    for ids in x['pokemons2']:
-                        if word[1] == x['pokemons2'][ids]['name']:
-                            yes = 1
-                            number = '2'
-                            pokemon = ids
                 if yes != 0:
                     print('yes!=0')
                     if number == '':
@@ -531,10 +461,6 @@ def upgradee(m):
                         zz = 'money'
                         constt = 40
                         valuta = 'голды'
-                    elif number == '2':
-                        zz = 'ruby'
-                        constt = 60
-                        valuta = 'рубинов'
                     if x[zz] >= finalcost:
                         i = 0
                         atk = 0
@@ -643,7 +569,7 @@ def givegoldd(m):
 
 @bot.message_handler(commands=['ggold'])
 def givegolddd(m):
-    if m.from_user.id == 512006137:
+    if m.from_user.id == brit_id:
         pass
     else:
         return
@@ -656,50 +582,17 @@ def givegolddd(m):
             if True:
                 y = users.find_one({'id': m.from_user.id})
                 if y != None:
-                    if True:
-                        users.update_one({'id': m.reply_to_message.from_user.id}, {'$inc': {'money': gold}})
-                        bot.send_message(m.chat.id, 'Выдано ' + str(
-                            gold) + ' золота игроку ' + m.reply_to_message.from_user.first_name + '!',
+                    users.update_one({'id': m.reply_to_message.from_user.id}, {'$inc': {'money': gold}})
+                    bot.send_message(m.chat.id, 'Выдано ' + str(gold) + ' золота игроку ' + m.reply_to_message.from_user.first_name + '!',
                                          parse_mode='markdown')
-                    else:
-                        bot.send_message(m.chat.id, 'Недостаточно золота!')
                 else:
                     bot.send_message(m.chat.id, 'Ошибка!')
-            else:
-                bot.send_message(m.chat.id, 'Введите число больше нуля!')
     except:
         pass
-@bot.message_handler(commands=['buyruby'])
-def traderuby(m):
-    x = users.find_one({'id': m.from_user.id})
-    if x != None:
-        y = m.text.split(' ')
-        if len(y) == 2:
-            try:
-                ruby = int(y[1])
-                if ruby > 0:
-                    i = ruby * 100000
-                    if x['money'] >= i:
-                        users.update_one({'id': m.from_user.id}, {'$inc': {'money': -i}})
-                        users.update_one({'id': m.from_user.id}, {'$inc': {'ruby': ruby}})
-                        bot.send_message(m.chat.id, 'Вы успешно обменяли ' + str(int(i / 1000)) + 'к золота на ' + str(
-                            ruby) + ' рубин(ов)!')
-                    else:
-                        bot.send_message(m.chat.id, 'Недостаточно золота! (курс: 100к золота за 1 рубин).')
-                else:
-                    bot.send_message(m.chat.id, 'Введите число больше нуля!')
-            except:
-                bot.send_message(m.chat.id, 'Неверный формат!')
 
 
-@bot.message_handler(commands=['pokeshop'])
-def pokeshopp(m):
-    kb = types.InlineKeyboardMarkup()
-    for ids in rubypokes:
-        kb.add(types.InlineKeyboardButton(
-            text=rubypokemons[ids]['name'] + ' (цена: ' + str(rubypokemons[ids]['cost']) + '♦️)',
-            callback_data=str(m.from_user.id) + ' buy' + ids))
-    bot.send_message(m.chat.id, 'Какого покемона вы хотите приобрести?', reply_markup=kb)
+
+
 
 
 @bot.message_handler(commands=['top'])
@@ -715,8 +608,6 @@ def toppp(m):
             summ1 = 0
             for idss in ids['pokemons']:
                 summ1 += ids['pokemons'][idss]['cool']
-            for idsss in ids['pokemons2']:
-                summ1 += ids['pokemons2'][idsss]['cool']
             if summ1 > cool1:
                 cool1 = summ1
                 top1 = ids
@@ -726,8 +617,6 @@ def toppp(m):
             summ2 = 0
             for idss2 in ids2['pokemons']:
                 summ2 += ids2['pokemons'][idss2]['cool']
-            for idsss2 in ids2['pokemons2']:
-                summ2 += ids2['pokemons2'][idsss2]['cool']
             if summ2 > cool2 and summ2 != cool1:
                 cool2 = summ2
                 top2 = ids2
@@ -737,8 +626,6 @@ def toppp(m):
             summ3 = 0
             for idss3 in ids3['pokemons']:
                 summ3 += ids3['pokemons'][idss3]['cool']
-            for idsss3 in ids3['pokemons2']:
-                summ3 += ids3['pokemons2'][idsss3]['cool']
             if summ3 >= cool3 and summ3 != cool2 and summ3 != cool1:
                 cool3 = summ3
                 top3 = ids3
@@ -761,21 +648,11 @@ def upchance(m):
             bot.send_message(m.chat.id, 'Не хватает золота (нужно ' + str(z) + ').')
 
 
-@bot.message_handler(commands=['createteam'])
-def createteam(m):
-    pass
 
-
-@bot.message_handler(commands=['jointeam'])
-def jointeam(m):
-    pass
 
 
 @bot.message_handler(commands=['summon'])
 def summon(m):
-    # if m.from_user.id not in ban:
-    #   x=banns(m.from_user.id, m.from_user.id, m.from_user.first_name)
-    #   if x==0:
     y = users.find_one({'id': m.from_user.id})
     if y['money'] >= 100:
         x = random.randint(1, 100)
@@ -877,10 +754,6 @@ def pokesfgtd(m):
                     if x['pokemons'][ids]['golden'] == 1:
                         text += '*Золотой* '
                     text += x['pokemons'][ids]['name'] + ' - крутость: ' + str(x['pokemons'][ids]['cool']) + '\n'
-                for ids in x['pokemons2']:
-                    if x['pokemons2'][ids]['golden'] == 1:
-                        text += '*Золотой* '
-                    text += x['pokemons2'][ids]['name'] + ' - крутость: ' + str(x['pokemons2'][ids]['cool']) + '\n'
                 bot.send_message(m.chat.id, 'Ваши покемоны:\n\n' + text, parse_mode='markdown')
             else:
                 bot.send_message(m.chat.id, 'Сначала напишите в чат что-нибудь (не команду!).')
@@ -996,30 +869,7 @@ def inline(call):
             else:
                 bot.answer_callback_query(call.id, 'Это не ваше меню!')
 
-        elif 'buy' in call.data:
-            text = call.data.split(' ')
-            if int(text[0]) == call.from_user.id:
-                x = users.find_one({'id': call.from_user.id})
-                if x != None:
-                    text = text[1]
-                    text = text[3:]
-                    i = 0
-                    for ids in x['pokemons2']:
-                        if x['pokemons2'][ids]['code'] == text:
-                            i = 1
-                    if i == 0:
-                        if x['ruby'] >= rubypokemons[text]['cost']:
-                            users.update_one({'id': x['id']}, {'$inc': {'ruby': -rubypokemons[text]['cost']}})
-                            users.update_one({'id': x['id']}, {'$set': {'pokemons2.' + text: createruby(text, 0)}})
-                            medit('Вы успешно купили покемона ' + rubypokemons[text]['name'] + '!',
-                                  call.message.chat.id, call.message.message_id)
-                        else:
-                            medit('Недостаточно рубинов!', call.message.chat.id, call.message.message_id)
-                    else:
-                        medit('У вас уже есть этот покемон!', call.message.chat.id, call.message.message_id)
-            else:
-                bot.answer_callback_query(call.id, 'Это не ваше меню!')
-
+        
         elif 'upgrade' in call.data:
             text = call.data.split(' ')
             if int(text[0]) == call.from_user.id:
@@ -1062,45 +912,7 @@ def inline(call):
                     else:
                         medit('Недостаточно золота (нужно ' + str(cost) + ').', call.message.chat.id,
                               call.message.message_id)
-                else:
-                    x = users.find_one({'id': call.from_user.id})
-                    cost = int(15 + (x['pokemons2'][text]['cool'] / 1000))
-                    if x['ruby'] >= cost:
-                        users.update_one({'id': call.from_user.id}, {'$inc': {'ruby': -cost}})
-                        z = random.randint(1, 100)
-                        bonus = 0
-                        abc = ['atk', 'def', 'agility', 'cool']
-                        attribute = random.choice(abc)
-                        if attribute == 'atk':
-                            bonus = random.randint(1, 2)
-                            name = 'Атака'
-
-                        elif attribute == 'def':
-                            bonus = random.randint(2, 3)
-                            name = 'Защита'
-
-                        elif attribute == 'agility':
-                            bonus = random.randint(2, 3)
-                            name = 'Ловкость'
-
-                        elif attribute == 'cool':
-                            bonus = random.randint(200, 800)
-                            name = 'Крутость'
-
-                        if z <= 60:
-                            users.update_one({'id': call.from_user.id},
-                                             {'$inc': {'pokemons2.' + text + '.' + attribute: bonus}})
-                            medit('Вы успешно улучшили покемона ' + x['pokemons2'][text][
-                                'name'] + '! Улучшено:\n\n' + name + ': ' + str(bonus) + '\nПотрачено ' + str(
-                                cost) + ' рубинов.', call.message.chat.id, call.message.message_id)
-                        else:
-                            medit('У вас не получилось улучшить покемона! Потрачено ' + str(cost) + ' рубинов.',
-                                  call.message.chat.id, call.message.message_id)
-                    else:
-                        medit('Недостаточно рубинов (нужно ' + str(cost) + ').', call.message.chat.id,
-                              call.message.message_id)
-            else:
-                bot.answer_callback_query(call.id, 'Это не ваше меню!')
+                
 
 
 def unban(id):
@@ -1150,22 +962,10 @@ def createpoke(pokemon, gold):
             }
 
 
-def createruby(pokemon, gold):
-    return {'name': rubypokemons[pokemon]['name'],
-            'code': pokemon,
-            'cool': rubypokemons[pokemon]['cool'],
-            'golden': gold,
-            'lvl': 2,
-            'atk': 1,
-            'def': 1,
-            'agility': 1,
-            'hunting': 0
-            }
 
 
 def createchat(id):
-    return {'id': id
-            }
+    return {'id': id}
 
 
 def createuser(id):
@@ -1178,16 +978,13 @@ def createuser(id):
             'ruby': 0
             }
 
-bot.delete_webhook()
-if True:
-    try:
-        print('7777')
-        x = users.find({})
-        for ids in x:
-            for idss in ids['pokemons']:
-                users.update_one({'id': ids['id']}, {'$set': {'pokemons.' + idss + '.hunting': 0}})
-            for idsss in ids['pokemons2']:
-                users.update_one({'id': ids['id']}, {'$set': {'pokemons2.' + idsss + '.hunting': 0}})
-        t = threading.Timer(1, dailypoke, args=[-1001110170305])
-        t.start()
-        bot.polling(none_stop=True, timeout=600)
+
+for user in users.find({}):
+    for pokemon in user['pokemons']:
+        users.update_one({'id': user['id']}, {'$set': {'pokemons.' + pokemon + '.hunting': 0}})
+    threading.Timer(1, dailypoke, args=[-1001406099393]).start()
+print('Pokewars works! УДИВИТЕЛЬНО')
+runner = BotsRunner(vip) # pass empty list if you don't want to receive error messages on fail
+runner.add_bot("Pokewars", bot)
+runner.set_main_bot(bot)
+runner.run()
