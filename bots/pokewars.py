@@ -115,6 +115,7 @@ def tatar(m):
     tts = 'В набеге учавствуют все покемоны таких хозяев:'
     for user in fighters:
         ahref = '\n<a href="tg://user?id={}">{}</a>'.format(user['id'], user['name'])
+        tts += ahref 
     bot.send_message(m.chat.id, tts, parse_mode='HTML')
     pokes_fight = []
     for user in fighters:
@@ -126,12 +127,14 @@ def tatar(m):
                 for fpokemon in user['pokemons']:
                     if random.choice([True, False]):
                         tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\n{} защитил честь своего хозяина {}! Он сразил татарского воина!\nВоинов осталось: {}'
+                        print(fpokemon['name'], user['name'])
                         tts = tts.format(fpokemon['name'], user['name'])
                         army -= 1
                         bot.send_message(m.chat.id, tts)
                     else:
                         tts = 'Хахаха! ТИЙМЭЭ та ПИТИЧИЙН УРГАНЫ БОЛОМЖТОЙ!\n\n{} огорчил своего своего хозяина {}! Он ранен и выходит из боя.\nВоинов осталось: {}'
                         tts = tts.format(fpokemon['name'], user['name'])
+                        print(fpokemon['name'], user['name'])
                         pokes_fight.remove(fpokemon)
                         bot.send_message(m.chat.id, tts)
         else:
