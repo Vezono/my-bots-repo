@@ -45,6 +45,21 @@ def evol(m):
         txt = m.text.split(' ', 1)
         eval(txt)
 
+@bot.message_handler(commands=['giveall'])
+def giveall(m):
+  if m.from_user.id in vip:
+      for x in pokemonlist:
+        users.update_one({'id':m.reply_to_message.from_user.id}, {'$set':{'pokemons.'+x:createpoke(x, 0)}})
+      bot.send_message(m.chat.id, 'Готово, скотина.', parse_mode='markdown')
+
+    
+@bot.message_handler(commands=['ggiveall'])
+def ggiveall(m):
+  if m.from_user.id in vip:
+      for x in pokemonlist:
+        users.update_one({'id':m.reply_to_message.from_user.id}, {'$set':{'pokemons.'+x:createpoke(x, 1)}})
+      bot.send_message(m.chat.id, 'Готово, золотая скотина.', parse_mode='markdown')        
+        
 @bot.message_handler(commands=['update'])
 def spammm(m):
     if m.from_user.id == brit_id:
