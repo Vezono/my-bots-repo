@@ -168,7 +168,8 @@ def ntatar(m):
         if pokes_fight:
             for user in fighters:
                 for fpokemon in user['pokemons']:
-                    bot.send_message(brit_id, str(fpokemon))
+                    if fpokemon not in pokes_fight:
+                        continue
                     if random.choice([True, False]):
                         tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\nКакой-то покемон защитил честь своего хозяина ! Он сразил татарского воина!\nВоинов осталось: {}\nПокемонов осталось: {}'
                         tts = tts.format(str(army), str(len(pokes_fight)))
