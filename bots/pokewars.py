@@ -124,7 +124,7 @@ def tatar(m):
     while army != 0:
         if pokes_fight:
             for user in fighters:
-                bot.send_message(brit_id, str(user))
+                bot.send_message(brit_id, str(fpokemon))
                 for fpokemon in user['pokemons']:
                     if random.choice([True, False]):
                         tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\n{} защитил честь своего хозяина {}! Он сразил татарского воина!\nВоинов осталось: {}'
