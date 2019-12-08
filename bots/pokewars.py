@@ -18,7 +18,7 @@ games = {}
 skills = []
 
 timerss = {}
-
+tatar = True
 ban = []
 timers = []
 pokeban = []
