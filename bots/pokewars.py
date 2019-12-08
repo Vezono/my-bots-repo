@@ -916,7 +916,7 @@ def inline(call):
             if int(text[0]) == call.from_user.id:
                 text = text[1]
                 text = text[7:]
-                if text not in rubypokes:
+                if True:
                     x = users.find_one({'id': call.from_user.id})
                     cost = int(200 + (x['pokemons'][text]['cool'] / 3))
                     if x['money'] >= cost:
