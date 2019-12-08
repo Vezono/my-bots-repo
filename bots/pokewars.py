@@ -132,6 +132,7 @@ def tatar(m):
                     else:
                         tts = 'Хахаха! ТИЙМЭЭ та ПИТИЧИЙН УРГАНЫ БОЛОМЖТОЙ!\n\n{} огорчил своего своего хозяина {}! Он ранен и выходит из боя.\nВоинов осталось: {}'
                         tts = tts.format(fpokemon['name'], user['name'])
+                        pokes_fight.remove(fpokemon)
                         bot.send_message(m.chat.id, tts)
         else:
             bot.send_message(m.chat.id, 'Вы проиграли. Ни один покемон не может продолжать битву.')
