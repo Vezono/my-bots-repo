@@ -104,6 +104,7 @@ def statssss(m):
 def tatar(m):
     if not tatar and m.from_user.id not in vip:
         bot.reply_to(m, 'Вы недавно уже призывали монгол.')
+        global tatar
         tatar = False
         return
     bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
@@ -149,6 +150,7 @@ def tatar(m):
 def ntatar(m):
     if not tatar and m.from_user.id not in vip:
         bot.reply_to(m, 'Вы недавно уже призывали монгол.')
+        global tatar
         tatar = False
         return
     bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
