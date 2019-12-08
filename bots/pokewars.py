@@ -99,9 +99,9 @@ def statssss(m):
                          reply_markup=kb)
     else:
         bot.send_message(m.chat.id, 'Вы еще не зарегистрированы в боте. Пожалуйста, отправте сообщение, НЕ КОМАНДУ.')
-@bot.message_handler(commands=['mongolы'])
+@bot.message_handler(commands=['mongols'])
 def mongols(m):
-    bot.reply_to(m, '/mongol - вызвать монголов на бой днем.\n/hight_mongol - вызвать монголов на бой ночью.')
+    bot.reply_to(m, '/mongol - вызвать монголов на бой днем.\n/night_mongol - вызвать монголов на бой ночью.')
 @bot.message_handler(commands=['mongol'])
 def tatar(m):
     chat = chats.find_one({'id':m.chat.id})['mongol']
@@ -192,7 +192,42 @@ def ntatar(m):
             return
     for user in fighters:
         users.update_one({'id', user['id']}, {'&inc':{'gold':1}})
-    bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')       
+    bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')  
+    
+    
+    
+@bot.message_handler(commands=['silent_mongol'])
+def ntatar(m):
+    chat = chats.find_one({'id':m.chat.id})['mongol']
+    if m.from_user.id not in vip or chat:
+        bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
+        return
+    chat.update_one({'id':m.chat.id}, {'mongol':1})
+    fighters = []
+    for user in users.find({}):
+        if random.choice([True, False]) or not len(fighters):
+            fighters.append(user)
+    army = random.randint(50, 100)        
+    pokes_fight = []
+    for user in fighters:
+        for pokemon in user['pokemons']:
+            pokes_fight.append(pokemon)        
+    while army != 0:
+        if pokes_fight:
+            for user in fighters:
+                for fpokemon in user['pokemons']:
+                    if fpokemon not in pokes_fight:
+                        continue
+                    if random.choice([True, False]):
+                        army -= 1
+                    else:
+                        pokes_fight.remove(fpokemon)
+        else:
+            bot.send_message(m.chat.id, 'Вы проиграли. Ни один покемон не может продолжать битву.')
+            return
+    for user in fighters:
+        users.update_one({'id', user['id']}, {'&inc':{'gold':1}})
+    bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')    
 def huntt(id, chatid, hunters):
     user = users.find_one({'id': id})
     if user:
