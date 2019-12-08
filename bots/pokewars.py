@@ -441,7 +441,7 @@ def upgradee(m):
         if x != None:
             if x['money'] >= 200:
                 kb = types.InlineKeyboardMarkup()
-                star = emojize(':star:', use_aliases=True)
+                star = '⭐️'
                 for ids in x['pokemons']:
                     gold = ''
                     if x['pokemons'][ids]['golden'] == 1:
