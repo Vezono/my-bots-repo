@@ -123,15 +123,15 @@ def tatar(m):
     while army != 0:
         if pokes_fight:
             for user in fighters:
-                for pokemon in user['pokemons']:
+                for fpokemon in user['pokemons']:
                     if random.choice([True, False]):
                         tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\n{} защитил честь своего хозяина {}! Он сразил татарского воина!\nВоинов осталось: {}'
-                        tts = tts.format(pokemon['name'], user['name'])
+                        tts = tts.format(fpokemon['name'], user['name'])
                         army -= 1
                         bot.send_message(m.chat.id, tts)
                     else:
                         tts = 'Хахаха! ТИЙМЭЭ та ПИТИЧИЙН УРГАНЫ БОЛОМЖТОЙ!\n\n{} огорчил своего своего хозяина {}! Он ранен и выходит из боя.\nВоинов осталось: {}'
-                        tts = tts.format(pokemon['name'], user['name'])
+                        tts = tts.format(fpokemon['name'], user['name'])
                         bot.send_message(m.chat.id, tts)
         else:
             bot.send_message(m.chat.id, 'Вы проиграли. Ни один покемон не может продолжать битву.')
