@@ -153,7 +153,7 @@ def ntatar(m):
     for user in users.find({}):
         if random.choice([True, False]) or not len(fighters):
             fighters.append(user)
-    army = random.randint(100, 200)        
+    army = random.randint(50, 100)        
     bot.send_message(m.chat.id, 'Итак. Сейчас ночь, поэтому не будет видно какой покемон погиб.\nАрмия состоит из ' + str(army) + ' монгольских воинов.')
     tts = 'В набеге учавствуют все покемоны таких хозяев:'
     for user in fighters:
