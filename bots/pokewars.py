@@ -322,12 +322,7 @@ def unbannn(id):
         pass
 
 
-pokemonlist = ['dildak', 'loshod', 'penis', 'zaluper', 'pikachu', 'pedro', 'bulbazaur', 'mayt', 'psyduck', 'zhopa',
-               'moxnatka', 'charmander',
-               'diglet', 'golem', 'sidot', 'traxer', 'pizdak', 'tyxlomon', 'morzh', 'penisdetrov', 'gandonio',
-               'spermostrel', 'yebator', 'egg',
-               'graveler', 'tirog', 'eldro4illo', 'vyper', 'sizor', 'myavs', 'bulatpidor', 'ebusobak', 'slagma', 'pupa',
-               'lupa']
+pokemonlist = list(pokemons.keys())
 
 basepokes = ['dildak', 'loshod', 'penis', 'zaluper', 'zhopa', 'sidot']
 
@@ -435,7 +430,7 @@ pokemons = {'dildak': {'cool': 10,
 
             }
 
-print(pokedic == pokemons) 
+print(pokedic) 
 
 
 @bot.message_handler(commands=['upgrade'])
