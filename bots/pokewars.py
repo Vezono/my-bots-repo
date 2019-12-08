@@ -1171,6 +1171,8 @@ def transliterate(text):
 for user in users.find({}):
     for pokemon in user['pokemons']:
         users.update_one({'id': user['id']}, {'$set': {'pokemons.' + pokemon + '.hunting': 0}})
+for chat in chats.find({}):
+    chats.update_one({'id': chat['id']}, {'$set': {'mongol': 0}})       
 threading.Timer(1, dailypoke, args=[-1001406099393]).start()
 print('Pokewars works! УДИВИТЕЛЬНО')
 runner = BotsRunner(vip) # pass empty list if you don't want to receive error messages on fail
