@@ -10,7 +10,7 @@ from pymongo import MongoClient
 
 notclick = 0
 
-token = os.environ['TELEGRAM_TOKEN']
+token = os.environ['pokewars']
 bot = telebot.TeleBot(token)
 vip = [brit_id]
 brit_id = 792414733
