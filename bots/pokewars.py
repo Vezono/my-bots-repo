@@ -55,7 +55,7 @@ def evol(m):
         for poke in pokemons:
             poks.append({poke:pokemons[poke]})
         for pok in poks:
-            pokemonsdb.insert_one(pok)
+            pokemonsbd.insert_one(pok)
         bot.reply_to(m, 'Готово.')    
 @bot.message_handler(commands=['giveall'])
 def giveall(m):
