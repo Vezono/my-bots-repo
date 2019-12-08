@@ -104,8 +104,8 @@ def mongols(m):
     bot.reply_to(m, '/mongol - вызвать монголов на бой днем.\n/night_mongol - вызвать монголов на бой ночью.')
 @bot.message_handler(commands=['mongol'])
 def tatar(m):
-    chat = chats.find_one({'id':m.chat.id})['mongol']
-    if m.from_user.id not in vip or chat:
+    chat = chats.find_one({'id':m.chat.id})
+    if m.from_user.id not in vip or chat['mongol']:
         bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
         return
     chat.update_one({'id':m.chat.id}, {'mongol':1})
@@ -150,8 +150,8 @@ def tatar(m):
     
 @bot.message_handler(commands=['night_mongol'])
 def ntatar(m):
-    chat = chats.find_one({'id':m.chat.id})['mongol']
-    if m.from_user.id not in vip or chat:
+    chat = chats.find_one({'id':m.chat.id})
+    if m.from_user.id not in vip or chat['mongol']:
         bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
         return
     chat.update_one({'id':m.chat.id}, {'mongol':1})
@@ -198,8 +198,8 @@ def ntatar(m):
     
 @bot.message_handler(commands=['silent_mongol'])
 def ntatar(m):
-    chat = chats.find_one({'id':m.chat.id})['mongol']
-    if m.from_user.id not in vip or chat:
+    chat = chats.find_one({'id':m.chat.id})
+    if m.from_user.id not in vip or chat['mongol']:
         bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
         return
     chat.update_one({'id':m.chat.id}, {'mongol':1})
