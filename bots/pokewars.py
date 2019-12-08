@@ -104,6 +104,7 @@ def statssss(m):
 def tatar(m):
     if not tatar and m.from_user.id not in vip:
         bot.reply_to(m, 'Вы недавно уже призывали монгол.')
+        tatar = False
         return
     bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
     fighters = []
@@ -120,7 +121,7 @@ def tatar(m):
     pokes_fight = []
     for user in fighters:
         for pokemon in user['pokemons']:
-            pokes_fight.append(pokemon)
+            pokes_fight.append(pokemon)        
     while army != 0:
         if pokes_fight:
             for user in fighters:
@@ -142,7 +143,51 @@ def tatar(m):
     for user in fighters:
         users.update_one({'id', user['id']}, {'&inc':{'gold':1}})
     bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')   
+
     
+@bot.message_handler(commands=['night_mongol'])
+def tatar(m):
+    if not tatar and m.from_user.id not in vip:
+        bot.reply_to(m, 'Вы недавно уже призывали монгол.')
+        tatar = False
+        return
+    bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
+    fighters = []
+    for user in users.find({}):
+        if random.choice([True, False]) or not len(fighters):
+            fighters.append(user)
+    army = random.randint(100, 200)        
+    bot.send_message(m.chat.id, 'Итак. Сейчас ночь, поэтому не будет видно какой покемон погиб.\nАрмия состоит из ' + str(army) + ' монгольских воинов.')
+    tts = 'В набеге учавствуют все покемоны таких хозяев:'
+    for user in fighters:
+        ahref = '\n<a href="tg://user?id={}">{}</a>'.format(user['id'], user['name'])
+        tts += ahref 
+    bot.send_message(m.chat.id, tts, parse_mode='HTML')
+    pokes_fight = []
+    for user in fighters:
+        for pokemon in user['pokemons']:
+            pokes_fight.append(pokemon)        
+    while army != 0:
+        if pokes_fight:
+            for user in fighters:
+                for fpokemon in user['pokemons']:
+                    bot.send_message(brit_id, str(fpokemon))
+                    if random.choice([True, False]):
+                        tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\nКакой-то покемон защитил честь своего хозяина {}! Он сразил татарского воина!\nВоинов осталось: {}'
+                        tts = tts.format(user['name'])
+                        army -= 1
+                        bot.send_message(m.chat.id, tts)
+                    else:
+                        tts = 'Хахаха! ТИЙМЭЭ та ПИТИЧИЙН УРГАНЫ БОЛОМЖТОЙ!\n\nКакой-то покемон огорчил своего своего хозяина {}! Он ранен и выходит из боя.\nВоинов осталось: {}'
+                        tts = tts.format(ser['name'])
+                        pokes_fight.remove(fpokemon)
+                        bot.send_message(m.chat.id, tts)
+        else:
+            bot.send_message(m.chat.id, 'Вы проиграли. Ни один покемон не может продолжать битву.')
+            return
+    for user in fighters:
+        users.update_one({'id', user['id']}, {'&inc':{'gold':1}})
+    bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')       
 def huntt(id, chatid, hunters):
     user = users.find_one({'id': id})
     if user:
