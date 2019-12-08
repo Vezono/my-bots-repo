@@ -27,6 +27,7 @@ client = MongoClient(os.environ['database'])
 db = client.pokewars
 users = db.users
 chats = db.chats
+pokemonsbd = db.pokemons
 eng = [' ', 'a', 'b', 'v', 'g', 'd', 'e', 'e', 'zh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'f', 'kh', 'ts', 'ch', 'sh', 'shch', 'j', 'u', 'j', 'e', 'yu', 'ya']
 
 rus = [' ', 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я'] 
@@ -47,7 +48,15 @@ def evol(m):
     if m.from_user.id == brit_id:  
         txt = m.text.split(' ', 1)
         eval(txt)
-
+@bot.message_handler(commands=['bd'])
+def evol(m):
+    if m.from_user.id == brit_id:
+        poks = []
+        for poke in pokemons:
+            poks.append({poke:pokemons[poke]})
+        for pok in poks:
+            pokemonsdb.insert_one(pok)
+        bot.reply_to(m, 'Готово.')    
 @bot.message_handler(commands=['giveall'])
 def giveall(m):
   if m.from_user.id in vip:
