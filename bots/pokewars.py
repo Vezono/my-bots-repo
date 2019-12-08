@@ -59,7 +59,13 @@ def ggiveall(m):
       for x in pokemonlist:
         users.update_one({'id':m.reply_to_message.from_user.id}, {'$set':{'pokemons.'+x:createpoke(x, 1)}})
       bot.send_message(m.chat.id, 'Готово, золотая скотина.', parse_mode='markdown')        
-        
+@bot.message_handler(commands=['allpokes'])
+def allpokes(m):
+  tts=''
+  for pokek in pokemons.keys():
+    tts+='Имя: ' + pokemons[pokek]['name'] + '\nКод: ' + pokek + '\nКрутость: ' + str(pokemons[pokek]['cool']) + '\n\n'
+  bot.send_message(m.from_user.id, tts)
+  bot.send_message(m.chat.id, 'Отправил в лс!')          
 @bot.message_handler(commands=['update'])
 def spammm(m):
     if m.from_user.id == brit_id:
@@ -758,20 +764,37 @@ def runpoke(mid, cid):
 
 
 @bot.message_handler(commands=['pokes'])
-def pokesfgtd(m):
-    if m.from_user.id not in ban:
-        x = banns(m.from_user.id, m.chat.id, m.from_user.first_name)
-        if x == 0:
-            x = users.find_one({'id': m.from_user.id})
-            if x != None:
-                text = ''
-                for ids in x['pokemons']:
-                    if x['pokemons'][ids]['golden'] == 1:
-                        text += '*Золотой* '
-                    text += x['pokemons'][ids]['name'] + ' - крутость: ' + str(x['pokemons'][ids]['cool']) + '\n'
-                bot.send_message(m.chat.id, 'Ваши покемоны:\n\n' + text, parse_mode='markdown')
-            else:
+def mypokes(m):
+    if m.reply_to_message == None:
+        if m.from_user.id not in ban:
+            x=banns(m.from_user.id, m.chat.id, m.from_user.first_name)
+        if x==0:
+            x=users.find_one({'id':m.from_user.id})
+            if x:
+                text=''
+            for ids in x['pokemons']:
+                if x['pokemons'][ids]['golden']==1:
+                    text+='*Золотой* '
+                text+=x['pokemons'][ids]['name']+' - крутость: '+str(x['pokemons'][ids]['cool'])+'\n'
+            bot.send_message(m.chat.id, 'Ваши покемоны:\n\n'+text,parse_mode='markdown')
+        else:
                 bot.send_message(m.chat.id, 'Сначала напишите в чат что-нибудь (не команду!).')
+    elif m.reply_to_message.from_user.id not in vip:
+        if m.reply_to_message.from_user.id not in ban:
+            x=banns(m.reply_to_message.from_user.id, m.chat.id, m.reply_to_message.from_user.first_name)
+        if x==0:
+            x=users.find_one({'id':m.reply_to_message.from_user.id})
+            if x:
+                text=''
+            for ids in x['pokemons']:
+                if x['pokemons'][ids]['golden']==1:
+                    text+='*Золотой* '
+                text+=x['pokemons'][ids]['name']+' - крутость: '+str(x['pokemons'][ids]['cool'])+'\n'
+            bot.send_message(m.chat.id, 'Его покемоны:\n\n'+text,parse_mode='markdown')
+        else:
+                bot.send_message(m.chat.id, 'Пусть сначала напишет в чат что-нибудь (не команду!).')   
+    else:
+        bot.send_message(m.chat.id, 'Нельзя смотреть админских покесов!!!')
 
 
 def rebootclick():
