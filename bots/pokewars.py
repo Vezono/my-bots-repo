@@ -100,7 +100,45 @@ def statssss(m):
     else:
         bot.send_message(m.chat.id, 'Вы еще не зарегистрированы в боте. Пожалуйста, отправте сообщение, НЕ КОМАНДУ.')
                               
-
+@bot.message_handler(commands=['mongol'])
+def tatar(m):
+    if not tatar and m.from_user.id not in vip:
+        bot.reply_to(m, 'Вы недавно уже призывали монгол.')
+        return
+    bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
+    fighters = []
+    for user in users.find({}):
+        if random.choice([True, False]) or not len(fighters):
+            fighters.append(user)
+    army = random.randint(100, 200)        
+    bot.send_message(m.chat.id, 'Итак. Армия состоит из ' + str(army) + ' монгольских воинов.')
+    tts = 'В набеге учавствуют все покемоны таких хозяев:'
+    for user in fighters:
+        tts += '\n' + user['name']
+    bot.send_message(m.chat.id, tts)
+    for user in fighters:
+        for pokemon in user['pokemons']:
+            pokes_fight.append(pokemon)
+    while army != 0:
+        if pokes_fight:
+            for user in fighters:
+                for pokemon in user['pokemons']:
+                    if random.choice([True, False]):
+                        tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\n{} защитил честь своего хозяина {}! Он сразил татарского воина!\nВоинов осталось: {}'
+                        tts = tts.format(pokemon['name'], user['name'])
+                        army -= 1
+                        bot.send_message(m.chat.id, tts)
+                    else:
+                        tts = 'Хахаха! ТИЙМЭЭ та ПИТИЧИЙН УРГАНЫ БОЛОМЖТОЙ!\n\n{} огорчил своего своего хозяина {}! Он ранен и выходит из боя.\nВоинов осталось: {}'
+                        tts = tts.format(pokemon['name'], user['name'])
+                        bot.send_message(m.chat.id, tts)
+        else:
+            bot.send_message(m.chat.id, 'Вы проиграли. Ни один покемон не может продолжать битву.')
+            return
+    for user in fighters:
+        users.update_one({'id', user['id']}, {'&inc':{'gold':1}})
+    bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')   
+    
 def huntt(id, chatid, hunters):
     user = users.find_one({'id': id})
     if user:
