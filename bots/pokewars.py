@@ -140,11 +140,13 @@ def tatar(m):
                     bot.send_message(brit_id, str(fpokemon))
                     if random.choice([True, False]):
                         tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\n{} защитил честь своего хозяина {}! Он сразил татарского воина!\nВоинов осталось: {}'
+                        print(user)
                         tts = tts.format(user['pokemons'][fpokemon]['name'], user['name'])
                         army -= 1
                         bot.send_message(m.chat.id, tts)
                     else:
                         tts = 'Хахаха! ТИЙМЭЭ та ПИТИЧИЙН УРГАНЫ БОЛОМЖТОЙ!\n\n{} огорчил своего своего хозяина {}! Он ранен и выходит из боя.\nВоинов осталось: {}'
+                        print(user)
                         tts = tts.format(user['pokemons'][fpokemon]['name'], user['name'])
                         pokes_fight.remove(fpokemon)
                         bot.send_message(m.chat.id, tts)
