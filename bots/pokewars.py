@@ -139,15 +139,15 @@ def tatar(m):
                 for fpokemon in user['pokemons']:
                     bot.send_message(brit_id, str(fpokemon))
                     if random.choice([True, False]):
-                        tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\n{} защитил честь своего хозяина {}! Он сразил татарского воина!\nВоинов осталось: {}'
+                        tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\n + user['pokemons'][fpokemon]['name'] +  защитил честь своего хозяина  + user['name'] + ! Он сразил татарского воина!\nВоинов осталось: {}\nПокемонов осталось: {}'
                         print(user)
-                        tts = tts.format(user['pokemons'][fpokemon]['name'], user['name'])
+                        tts = tts.format(str(army), str(len(pokes_fight)))
                         army -= 1
                         bot.send_message(m.chat.id, tts)
                     else:
-                        tts = 'Хахаха! ТИЙМЭЭ та ПИТИЧИЙН УРГАНЫ БОЛОМЖТОЙ!\n\n{} огорчил своего своего хозяина {}! Он ранен и выходит из боя.\nВоинов осталось: {}'
+                        tts = 'Хахаха! ТИЙМЭЭ та ПИТИЧИЙН УРГАНЫ БОЛОМЖТОЙ!\n\n' + user['pokemons'][fpokemon]['name'] + ' огорчил своего своего хозяина ' + user['name'] + '! Он ранен и выходит из боя.\nВоинов осталось: {}\nПокемонов осталось: {}'
                         print(user)
-                        tts = tts.format(user['pokemons'][fpokemon]['name'], user['name'])
+                        tts = tts.format(str(army), str(len(pokes_fight)))
                         pokes_fight.remove(fpokemon)
                         bot.send_message(m.chat.id, tts)
         else:
