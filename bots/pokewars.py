@@ -109,22 +109,30 @@ def tatar(m):
         bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
         return
     chats.update_one({'id':m.chat.id}, {'&set':{'mongol':1}})
+
     bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
+
     fighters = []
     for user in users.find({}):
         if random.choice([True, False]) or not len(fighters):
             fighters.append(user)
+
     army = random.randint(100, 200)        
     bot.send_message(m.chat.id, 'Итак. Армия состоит из ' + str(army) + ' монгольских воинов.')
     tts = 'В набеге учавствуют все покемоны таких хозяев:'
-    for user in fighters:
+    
+    names = fighters
+    for user in names:
         ahref = '\n<a href="tg://user?id={}">{}</a>'.format(user['id'], user['name'])
         tts += ahref 
     bot.send_message(m.chat.id, tts, parse_mode='HTML')
+    
     pokes_fight = []
-    for user in fighters:
+    pokes_handlers = fighters
+    for user in pokes_handlers:
         for pokemon in user['pokemons']:
-            pokes_fight.append(pokemon)        
+            pokes_fight.append(pokemon)
+            
     while army != 0:
         if pokes_fight:
             for user in fighters:
@@ -143,7 +151,8 @@ def tatar(m):
         else:
             bot.send_message(m.chat.id, 'Вы проиграли. Ни один покемон не может продолжать битву.')
             return
-    for user in fighters:
+    users_to_gold = fighters    
+    for user in users_to_gold:
         users.update_one({'id', user['id']}, {'&inc':{'gold':1}})
     bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')   
 
