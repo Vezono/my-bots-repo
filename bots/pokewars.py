@@ -108,7 +108,7 @@ def tatar(m):
     if m.from_user.id not in vip or chat['mongol']:
         bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
         return
-    chats.update_one({'id':m.chat.id}, {'&set':{'mongol':1}})
+    chats.update_one({'id':m.chat.id}, {'$set':{'mongol':1}})
 
     bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
 
@@ -153,7 +153,7 @@ def tatar(m):
             return
     users_to_gold = fighters    
     for user in users_to_gold:
-        users.update_one({'id', user['id']}, {'&inc':{'gold':1}})
+        users.update_one({'id', user['id']}, {'$inc':{'gold':1}})
     bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')   
 
     
@@ -163,7 +163,7 @@ def ntatar(m):
     if m.from_user.id not in vip or chat['mongol']:
         bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
         return
-    chats.update_one({'id':m.chat.id}, {'&set':{'mongol':1}})
+    chats.update_one({'id':m.chat.id}, {'$set':{'mongol':1}})
     bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
     fighters = []
     for user in users.find({}):
@@ -200,7 +200,7 @@ def ntatar(m):
             bot.send_message(m.chat.id, 'Вы проиграли. Ни один покемон не может продолжать битву.')
             return
     for user in fighters:
-        users.update_one({'id', user['id']}, {'&inc':{'gold':1}})
+        users.update_one({'id', user['id']}, {'$inc':{'gold':1}})
     bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')  
     
     
@@ -211,7 +211,7 @@ def ntatar(m):
     if m.from_user.id not in vip or chat['mongol']:
         bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
         return
-    chats.update_one({'id':m.chat.id}, {'&set':{'mongol':1}})
+    chats.update_one({'id':m.chat.id}, {'$set':{'mongol':1}})
     fighters = []
     for user in users.find({}):
         if random.choice([True, False]) or not len(fighters):
@@ -235,7 +235,7 @@ def ntatar(m):
             bot.send_message(m.chat.id, 'Вы проиграли. Ни один покемон не может продолжать битву.')
             return
     for user in fighters:
-        users.update_one({'id', user['id']}, {'&inc':{'gold':1}})
+        users.update_one({'id', user['id']}, {'$inc':{'gold':1}})
     bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')    
 def huntt(id, chatid, hunters):
     user = users.find_one({'id': id})
