@@ -101,7 +101,7 @@ def statssss(m):
         bot.send_message(m.chat.id, 'Вы еще не зарегистрированы в боте. Пожалуйста, отправте сообщение, НЕ КОМАНДУ.')
 @bot.message_handler(commands=['mongols'])
 def mongols(m):
-    bot.reply_to(m, '/mongol - вызвать монголов на бой днем.\n/night_mongol - вызвать монголов на бой ночью.\n/silent_mongol - отправить на монгол покемонов, не интересуясь ходом битвы')
+    bot.reply_to(m, '/mongol - вызвать монголов на бой.')
 @bot.message_handler(commands=['mongol'])
 def tatar(m):
     chat = chats.find_one({'id':m.chat.id})
@@ -137,16 +137,13 @@ def tatar(m):
         if pokes_fight:
             for user in fighters:
                 for fpokemon in user['pokemons']:
-                    bot.send_message(brit_id, str(fpokemon))
                     if random.choice([True, False]):
                         tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\n' + user['pokemons'][fpokemon]['name'] +  'защитил честь своего хозяина'  + user['name'] + '! Он сразил татарского воина!\nВоинов осталось: {}\nПокемонов осталось: {}'
-                        print(user)
                         tts = tts.format(str(army), str(len(pokes_fight)))
                         army -= 1
                         bot.send_message(m.chat.id, tts)
                     else:
                         tts = 'Хахаха! ТИЙМЭЭ та ПИТИЧИЙН УРГАНЫ БОЛОМЖТОЙ!\n\n' + user['pokemons'][fpokemon]['name'] + ' огорчил своего своего хозяина ' + user['name'] + '! Он ранен и выходит из боя.\nВоинов осталось: {}\nПокемонов осталось: {}'
-                        print(user)
                         tts = tts.format(str(army), str(len(pokes_fight)))
                         pokes_fight.remove(fpokemon)
                         bot.send_message(m.chat.id, tts)
@@ -157,88 +154,7 @@ def tatar(m):
     for user in users_to_gold:
         users.update_one({'id', user['id']}, {'$inc':{'gold':1}})
     bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')   
-
     
-@bot.message_handler(commands=['night_mongol'])
-def ntatar(m):
-    chat = chats.find_one({'id':m.chat.id})
-    if m.from_user.id not in vip or chat['mongol']:
-        bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
-        return
-    chats.update_one({'id':m.chat.id}, {'$set':{'mongol':1}})
-    bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
-    fighters = []
-    for user in users.find({}):
-        if random.choice([True, False]) or not len(fighters):
-            fighters.append(user)
-    army = random.randint(50, 100)        
-    bot.send_message(m.chat.id, 'Итак. Сейчас ночь, поэтому не будет видно какой покемон погиб.\nАрмия состоит из ' + str(army) + ' монгольских воинов.')
-    tts = 'В набеге учавствуют все покемоны таких хозяев:'
-    for user in fighters:
-        ahref = '\n<a href="tg://user?id={}">{}</a>'.format(user['id'], user['name'])
-        tts += ahref 
-    bot.send_message(m.chat.id, tts, parse_mode='HTML')
-    pokes_fight = []
-    for user in fighters:
-        for pokemon in user['pokemons']:
-            pokes_fight.append(pokemon)        
-    while army != 0:
-        if pokes_fight:
-            for user in fighters:
-                for fpokemon in user['pokemons']:
-                    if fpokemon not in pokes_fight:
-                        continue
-                    if random.choice([True, False]):
-                        tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\nКакой-то покемон защитил честь своего хозяина ! Он сразил татарского воина!\nВоинов осталось: {}\nПокемонов осталось: {}'
-                        tts = tts.format(str(army), str(len(pokes_fight)))
-                        army -= 1
-                        bot.send_message(m.chat.id, tts)
-                    else:
-                        tts = 'Хахаха! ТИЙМЭЭ та ПИТИЧИЙН УРГАНЫ БОЛОМЖТОЙ!\n\nКакой-то покемон огорчил своего своего хозяина ! Он ранен и выходит из боя.\nВоинов осталось: {}\nПокемонов осталось: {}'
-                        pokes_fight.remove(fpokemon)
-                        tts = tts.format(str(army), str(len(pokes_fight)))
-                        bot.send_message(m.chat.id, tts)
-        else:
-            bot.send_message(m.chat.id, 'Вы проиграли. Ни один покемон не может продолжать битву.')
-            return
-    for user in fighters:
-        users.update_one({'id', user['id']}, {'$inc':{'gold':1}})
-    bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')  
-    
-    
-    
-@bot.message_handler(commands=['silent_mongol'])
-def ntatar(m):
-    chat = chats.find_one({'id':m.chat.id})
-    if m.from_user.id not in vip or chat['mongol']:
-        bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
-        return
-    chats.update_one({'id':m.chat.id}, {'$set':{'mongol':1}})
-    fighters = []
-    for user in users.find({}):
-        if random.choice([True, False]) or not len(fighters):
-            fighters.append(user)
-    army = random.randint(50, 100)        
-    pokes_fight = []
-    for user in fighters:
-        for pokemon in user['pokemons']:
-            pokes_fight.append(pokemon)        
-    while army != 0:
-        if pokes_fight:
-            for user in fighters:
-                for fpokemon in user['pokemons']:
-                    if fpokemon not in pokes_fight:
-                        continue
-                    if random.choice([True, False]):
-                        army -= 1
-                    else:
-                        pokes_fight.remove(fpokemon)
-        else:
-            bot.send_message(m.chat.id, 'Вы проиграли. Ни один покемон не может продолжать битву.')
-            return
-    for user in fighters:
-        users.update_one({'id', user['id']}, {'$inc':{'gold':1}})
-    bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')    
 def huntt(id, chatid, hunters):
     user = users.find_one({'id': id})
     if user:
