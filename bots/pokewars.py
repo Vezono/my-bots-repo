@@ -137,8 +137,10 @@ def tatar(m):
         if pokes_fight:
             for user in fighters:
                 for fpokemon in user['pokemons']:
+                    if fpokemon not in pokes_fight:
+                        continue
                     if random.choice([True, False]):
-                        tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\n' + user['pokemons'][fpokemon]['name'] +  'защитил честь своего хозяина'  + user['name'] + '! Он сразил татарского воина!\nВоинов осталось: {}\nПокемонов осталось: {}'
+                        tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\n' + user['pokemons'][fpokemon]['name'] +  ' защитил честь своего хозяина'   + user['name'] + '! Он сразил татарского воина!\nВоинов осталось: {}\nПокемонов осталось: {}'
                         tts = tts.format(str(army), str(len(pokes_fight)))
                         army -= 1
                         bot.send_message(m.chat.id, tts)
