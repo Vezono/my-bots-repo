@@ -1015,7 +1015,8 @@ def transliterate(text):
 def reboot():
     for user in users.find({}):
         for pokemon in user['pokemons']:
-            huntt(user['id'], [pokemon])
+            if pokemon['hunting']:
+                huntt(user['id'], [pokemon])
     for chat in chats.find({}):
         chats.update_one({'id': chat['id']}, {'$set': {'mongol': 0}})       
     threading.Timer(1, dailypoke, args=[-1001406099393]).start()
