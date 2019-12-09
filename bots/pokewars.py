@@ -140,21 +140,21 @@ def tatar(m):
                     if fpokemon not in pokes_fight:
                         continue
                     if random.choice([True, False]):
-                        tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\n' + user['pokemons'][fpokemon]['name'] +  ' защитил честь своего хозяина'   + user['name'] + '! Он сразил татарского воина!\nВоинов осталось: {}\nПокемонов осталось: {}'
-                        tts = tts.format(str(army), str(len(pokes_fight)))
+                        tts = 'ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\n' + user['pokemons'][fpokemon]['name'] +  ' защитил честь своего хозяина '   + user['name'] + '! Он сразил татарского воина!\nВоинов осталось: {}\nПокемонов осталось: {}'
                         army -= 1
+                        tts = tts.format(str(army), str(len(pokes_fight)))
                         bot.send_message(m.chat.id, tts)
                     else:
                         tts = 'Хахаха! ТИЙМЭЭ та ПИТИЧИЙН УРГАНЫ БОЛОМЖТОЙ!\n\n' + user['pokemons'][fpokemon]['name'] + ' огорчил своего своего хозяина ' + user['name'] + '! Он ранен и выходит из боя.\nВоинов осталось: {}\nПокемонов осталось: {}'
-                        tts = tts.format(str(army), str(len(pokes_fight)))
                         pokes_fight.remove(fpokemon)
+                        tts = tts.format(str(army), str(len(pokes_fight)))
                         bot.send_message(m.chat.id, tts)
         else:
             bot.send_message(m.chat.id, 'Вы проиграли. Ни один покемон не может продолжать битву.')
             return
     users_to_gold = fighters    
     for user in users_to_gold:
-        users.update_one({'id', user['id']}, {'$inc':{'gold':1}})
+        users.update_one({'id', user['id']}, {'$inc':{'gold':50000}})
     bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')   
     
 def huntt(id, chatid, hunters):
