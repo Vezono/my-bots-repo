@@ -30,8 +30,8 @@ chats = db.chats
 pokemonsbd = db.pokemons
 pokemons_database = pokemonsbd.find({})
 pokedic = {}
-for i in pokemons_database:
-    pokedic.update({list(i.keys())[0]:i[list(i.keys())[0]]})   
+for pokemon in pokemons_database:
+    pokedic.update(pokemon)   
 eng = [' ', 'a', 'b', 'v', 'g', 'd', 'e', 'e', 'zh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'f', 'kh', 'ts', 'ch', 'sh', 'shch', 'j', 'u', 'j', 'e', 'yu', 'ya']
 
 rus = [' ', 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я'] 
@@ -486,7 +486,7 @@ pokemons = {'dildak': {'cool': 10,
 
             }
 
-print(pokedic) 
+print(str(pokedic == pokemons) + 'БАМБАЛЕЙЛА') 
 pokemonlist = list(pokemons.keys())
 
 @bot.message_handler(commands=['upgrade'])
