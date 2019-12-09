@@ -27,11 +27,19 @@ client = MongoClient(os.environ['database'])
 db = client.pokewars
 users = db.users
 chats = db.chats
-pokemonsbd = db.pokemons
-pokemons_database = pokemonsbd.find({})
-pokedic = {}
-for pokemon in pokemons_database:
-    pokedic.update(pokemon)   
+ 
+    
+basepokes = ['dildak', 'loshod', 'penis', 'zaluper', 'zhopa', 'sidot']
+
+elita = ['pikachu', 'pedro', 'bulbazaur', 'psyduck', 'moxnatka', 'charmander', 'diglet', 'golem', 'sidot', 'traxer',
+         'tyxlomon', 'morzh',
+         'penisdetrov', 'gandonio', 'spermostrel', 'yebator', 'egg', 'graveler', 'tirog', 'eldro4illo', 'vyper',
+         'sizor', 'myavs', 'bulatpidor', 'ebusobak',
+         'slagma', 'pupa', 'lupa']
+
+elitaweak = ['moxnatka', 'diglet', 'traxer', 'penis', 'gandonio', 'egg', 'sizor', 'ebusobak', 'ultrapoke']
+
+pokemonlist = list(pokemons.keys())    
 eng = [' ', 'a', 'b', 'v', 'g', 'd', 'e', 'e', 'zh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'f', 'kh', 'ts', 'ch', 'sh', 'shch', 'j', 'u', 'j', 'e', 'yu', 'ya']
 
 rus = [' ', 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я'] 
@@ -53,7 +61,10 @@ def evol(m):
         txt = m.text.split(' ', 1)
         eval(txt[1])
         bot.reply_to(m, 'done')
-        
+@bot.message_handler(commands=['reboot'])
+def creboot(m):
+    if m.from_user.id == brit_id:  
+        reboot()        
         
 @bot.message_handler(commands=['giveall'])
 def giveall(m):
@@ -62,6 +73,16 @@ def giveall(m):
         users.update_one({'id':m.reply_to_message.from_user.id}, {'$set':{'pokemons.'+x:createpoke(x, 0)}})
       bot.send_message(m.chat.id, 'Готово, скотина.', parse_mode='markdown')
 
+@bot.message_handler(commands=['burnpokemon'])
+def burnpok(m):
+    if m.from_user.id not in vip:
+        return
+    text = m.text.split()
+    cool = int(text[2])
+    name = text[1]
+    commit = burnpoke(name, cool)
+    db.pokemons.insert_one(commit)
+    bot.send_message(m.chat.id, 'Покемон создан!')
     
 @bot.message_handler(commands=['ggiveall'])
 def ggiveall(m):
@@ -159,7 +180,7 @@ def tatar(m):
         users.update_one({'id', user['id']}, {'$inc':{'gold':50000}})
     bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')   
     
-def huntt(id, chatid, hunters):
+def huntt(id, hunters):
     user = users.find_one({'id': id})
     if user:
         for pokemon in hunters:
@@ -198,7 +219,7 @@ def huntt(id, chatid, hunters):
                     pupa = 'Пупа и Лупа ходили за голдой. Но Пасюк перепутал их крутость, и Лупа принес голду за Пупу, а Пупа ЗА ЛУПУ!!! Получено 25к голды.'
             tts = 'Покемон {} вернулся с охоты\nПринесённое золото: {}\nУмножено ли золото на 2 (только для золотых): {}\n{}'
             tts = tts.format(pokemon['name'], str(earned), level, pupa)
-            bot.send_message(chatid, tts)
+            bot.send_message(id, tts)
             users.update_one({'id': id}, {'$inc': {'money': earned}})
 
             
@@ -215,7 +236,7 @@ def chuntall(m):
                         users.update_one({'id': m.from_user.id}, {'$set': {'pokemons.' + pokemon + '.hunting': 1}})
                         hunters.append(pokemon)
                 if hunters:
-                    threading.Timer(1800, huntt, args=[m.from_user.id, m.from_user.id, hunters]).start()
+                    threading.Timer(1800, huntt, args=[m.from_user.id, hunters]).start()
                     bot.send_message(m.chat.id, 'Вы отправили всех готовых покемонов на охоту. Вернутся через 30 минут.')
                 else:
                     bot.send_message(m.chat.id, 'Все покемоны уже на охоте!')
@@ -231,7 +252,7 @@ def huntallll(m):
                         users.update_one({'id': m.from_user.id}, {'$set': {'pokemons.' + pokemon + '.hunting': 1}})
                         hunters.append(pokemon)
                 if hunters:
-                    threading.Timer(10, huntt, args=[m.from_user.id, m.from_user.id, hunters]).start()
+                    threading.Timer(10, huntt, args=[m.from_user.id, hunters]).start()
                     bot.send_message(m.chat.id, 'Вы отправили всех готовых покемонов на охоту. Вернутся через 10 секунд.')
                 else:
                     bot.send_message(m.chat.id, 'Все покемоны уже на охоте!')
@@ -382,114 +403,7 @@ def unbannn(id):
 
 
 
-basepokes = ['dildak', 'loshod', 'penis', 'zaluper', 'zhopa', 'sidot']
 
-elita = ['pikachu', 'pedro', 'bulbazaur', 'psyduck', 'moxnatka', 'charmander', 'diglet', 'golem', 'sidot', 'traxer',
-         'tyxlomon', 'morzh',
-         'penisdetrov', 'gandonio', 'spermostrel', 'yebator', 'egg', 'graveler', 'tirog', 'eldro4illo', 'vyper',
-         'sizor', 'myavs', 'bulatpidor', 'ebusobak',
-         'slagma', 'pupa', 'lupa']
-
-elitaweak = ['moxnatka', 'diglet', 'traxer', 'penis', 'gandonio', 'egg', 'sizor', 'ebusobak', 'ultrapoke']
-
-
-pokemons = {'dildak': {'cool': 10,
-                       'name': 'Дилдак'},
-            'loshod': {'cool': 25,
-                       'name': 'Лошод'},
-            'penis': {'cool': 37,
-                      'name': 'Пенис'},
-            'zaluper': {'cool': 13,
-                        'name': 'Залупер'},
-            'pikachu': {'cool': 100,
-                        'name': 'Пикачу'},
-            'ruinmon': {'cool': -1,
-                        'name': 'Руинмон'},
-            'pedro': {'cool': 68,
-                      'name': 'Педро'},
-            'bulbazaur': {'cool': 112,
-                          'name': 'Бульбазавр'},
-            'mayt': {'cool': 41,
-                     'name': 'Мяут'},
-            'psyduck': {'cool': 131,
-                        'name': 'Псайдак'},
-            'zhopa': {'cool': 16,
-                      'name': 'Жопа'},
-            'catchermon': {'cool': 200,
-                           'name': 'Кэтчермон'},
-            'moxnatka': {'cool': 75,
-                         'name': 'Мохнатка'},
-            'charmander': {'cool': 82,
-                           'name': 'Чармандер'},
-            'diglet': {'cool': 49,
-                       'name': 'Диглет'},
-            'golem': {'cool': 125,
-                      'name': 'Голем'},
-            'sidot': {'cool': 56,
-                      'name': 'Сидот'},
-            'traxer': {'cool': 110,
-                       'name': 'Трахер'},
-            'pizdak': {'cool': 19,
-                       'name': 'Вонючий Пиздак'},
-            'tyxlomon': {'cool': 250,
-                         'name': 'Тухломон'},
-            'morzh': {'cool': 176,
-                      'name': 'Морж'},
-            'penisdetrov': {'cool': 425,
-                            'name': 'Пенис Детров'},
-            'gandonio': {'cool': 99,
-                         'name': 'Гандонио'},
-            'spermostrel': {'cool': 213,
-                            'name': 'Спермострел'},
-            'quelern': {'cool': 100,
-                        'name': 'Кьюлёрн'},
-            'eidolon': {'cool': 100,
-                        'name': 'Эйдолон'},
-            'pomidor': {'cool': 100,
-                        'name': 'Помидор Убийца'},
-            'bombarnac': {'cool': 100,
-                          'name': 'Бомбарнак'},
-            'zawarudo': {'cool': 100,
-                         'name': 'ZAAAA WARUDOOOOO'},
-            'sharingan': {'cool': 100,
-                          'name': 'Шаринган'},
-            'shadowmew': {'cool': 100,
-                          'name': 'Shadow Mewtwo'},
-            'yebator': {'cool': 127,
-                        'name': 'Уебатор'},
-            'egg': {'cool': 66,
-                    'name': 'Яичко'},
-            'graveler': {'cool': 340,
-                         'name': 'Гравелер'},
-            'tirog': {'cool': 182,
-                      'name': 'Тирог'},
-            'eldro4illo': {'cool': 703,
-                           'name': 'Эль Дрочилло'},
-            'vyper': {'cool': 155,
-                      'name': 'Вуппер'},
-            'sizor': {'cool': 79,
-                      'name': 'Сизор'},
-            'myavs': {'cool': 587,
-                      'name': 'Мявс'},
-            'bulatpidor': {'cool': 291,
-                           'name': 'Булат пидор'},
-            'ebusobak': {'cool': 75,
-                         'name': 'Ебусобакен'},
-            'slagma': {'cool': 311,
-                       'name': 'Слагма'},
-            'pupa': {'cool': 1500,
-                     'name': 'Пупа'},
-            'lupa': {'cool': 1500,
-                     'name': 'Лупа'},
-            'ultrapoke': {'cool': 1000,
-                          'name': 'Ультрапокес'},
-            'pasyuk': {'cool': 100,
-                       'name': 'Пасюк'}
-
-            }
-
-print(str(pokedic == pokemons) + 'БАМБАЛЕЙЛА') 
-pokemonlist = list(pokemons.keys())
 
 @bot.message_handler(commands=['upgrade'])
 def upgradee(m):
@@ -1097,14 +1011,20 @@ def transliterate(text):
     return tts 
                 
           
-            
-        
-for user in users.find({}):
-    for pokemon in user['pokemons']:
-        users.update_one({'id': user['id']}, {'$set': {'pokemons.' + pokemon + '.hunting': 0}})
-for chat in chats.find({}):
-    chats.update_one({'id': chat['id']}, {'$set': {'mongol': 0}})       
-threading.Timer(1, dailypoke, args=[-1001406099393]).start()
+   
+def reboot():
+    for user in users.find({}):
+        for pokemon in user['pokemons']:
+            huntt(user['id'], [pokemon])
+    for chat in chats.find({}):
+        chats.update_one({'id': chat['id']}, {'$set': {'mongol': 0}})       
+    threading.Timer(1, dailypoke, args=[-1001406099393]).start()
+    global pokemons
+    pokemons = {}
+    for pokemon in db.pokemons.find({}):
+        pokedic.update(pokemon)
+    bot.send_message(-1001406099393, 'Бот был перезагружен! Все покемоны вернулись с охоты (с голдой кста), и можно снова вызвать монголов.')    
+reboot()
 print('Pokewars works! УДИВИТЕЛЬНО')
 runner = BotsRunner(vip) # pass empty list if you don't want to receive error messages on fail
 runner.add_bot("Pokewars", bot)
