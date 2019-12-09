@@ -51,8 +51,10 @@ def medit(message_text, chat_id, message_id, reply_markup=None, parse_mode='Mark
 def evol(m):
     if m.from_user.id == brit_id:  
         txt = m.text.split(' ', 1)
-        eval(txt)
-   
+        eval(txt[1])
+        bot.reply_to(m, 'done')
+        
+        
 @bot.message_handler(commands=['giveall'])
 def giveall(m):
   if m.from_user.id in vip:
