@@ -87,7 +87,7 @@ def ftea(m):
             kb = None
         else:
             tts = '{} приготовил чай "{}" для вас, {}!'.format(from_user, tea, ahref)
-        bot.delete_message(m.chat.id, m.message_id)
+        #bot.delete_message(m.chat.id, m.message_id)
         bot.send_message(m.chat.id, tts, reply_markup=kb, parse_mode='HTML')
     else:
         if m.text.count(' ') == 0:
