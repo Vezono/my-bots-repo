@@ -95,7 +95,7 @@ def ftea(m):
         else:
             tea = m.text.split(' ', 1)[1]
         tts = '{} заварил себе чай "{}"!'.format(m.from_user.first_name, tea)
-        bot.delete_message(m.chat.id, m.message_id)
+        #bot.delete_message(m.chat.id, m.message_id)
         bot.send_message(m.chat.id, tts)
 
     
