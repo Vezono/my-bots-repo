@@ -39,6 +39,27 @@ def announce(m):
                                                                                   not_announced)        
     bot.send_message(m.chat.id, tts)       
     
+
+@bot.message_handler(commands=['update'])
+def cupdate(m):
+    if m.from_user.id != creator:
+        return
+    if not m.text.count(' '):
+        bot.reply_to(m, 'Недостаточно аргументов.')
+    tts = '📣Обновление:\n\n' + m.text.split(' ', 1)[1]
+    not_announced = ''
+    count = 0
+    all_chat = len(сhats.find({}))
+    for chat in chats.find({}):
+        try:
+            bot.send_message(chat['id'], tts)
+            count += 1
+        except:
+            not_announced += '\n{}'.format(chat['id'])
+    tts = 'Сообщение отправлено в {}/{} чатов.\nСообщение не получили:\n{}'.format(str(count),
+                                                                                   str(all_chats),
+                                                                                   not_announced)        
+    bot.send_message(m.chat.id, tts) 
     
 @bot.message_handler(commands=['start'])
 def start(m):            
@@ -48,6 +69,7 @@ def start(m):
     else:
         if not chats.find_one({'id':id})
             chats.insert_one(createchat(m.chat.title, m.chat.id, m))
+    bot.send_message(m.chat.id, 'Привет, анон. Добро пожаловать. Снова.')        
         
 
         
