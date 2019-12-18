@@ -63,10 +63,10 @@ def cupdate(m):
 @bot.message_handler(commands=['start'])
 def start(m):            
     if m.chat.type == 'private':
-        if not users.find_one({'id':id}):
+        if not users.find_one({'id':m.from_user.id}):
             users.insert_one(createuser(m.from_user.first_name, m.from_user.id))
     else:
-        if not chats.find_one({'id':id}):
+        if not chats.find_one({'id':m.chat.id}):
             chats.insert_one(createchat(m.chat.title, m.chat.id, m))
     bot.send_message(m.chat.id, 'Привет. Добро пожаловать. Снова.')        
         
