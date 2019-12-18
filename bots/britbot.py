@@ -49,8 +49,9 @@ def cupdate(m):
     tts = '📣Обновление:\n\n' + m.text.split(' ', 1)[1]
     not_announced = ''
     count = 0
-    all_chat = len(сhats.find({}))
+    all_chat = 0
     for chat in chats.find({}):
+        all_chat += 1
         try:
             bot.send_message(chat['id'], tts)
             count += 1
