@@ -51,7 +51,7 @@ def cupdate(m):
     count = 0
     all_chats = 0
     for chat in chats.find({}):
-        all_chat += 1
+        all_chats += 1
         try:
             bot.send_message(chat['id'], tts)
             count += 1
