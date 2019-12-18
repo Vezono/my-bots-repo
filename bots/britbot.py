@@ -11,7 +11,7 @@ from manybotslib import BotsRunner
 client = MongoClient(os.environ['database'])
 db = client.gbball
 users = db.users
-chat = db.chats
+chats = db.chats
 
 token = os.environ['britbot']
 bot = telebot.TeleBot(token)
