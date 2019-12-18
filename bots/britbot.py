@@ -61,6 +61,43 @@ def cupdate(m):
                                                                                    str(all_chats),
                                                                                    not_announced)        
     bot.send_message(m.chat.id, tts) 
+
+@bot.message_handler(commands=['tea'])
+def ftea(m):
+    print('Завариваем чай...')
+    if m.reply_to_message:
+        from_user = m.from_user.first_name
+        if m.text.count(' ') == 0:
+            tea = 'обычный'
+        else:
+            tea = m.text.split(' ', 1)[1]
+        touser = m.reply_to_message.from_user.first_name
+        ahref = '<a href="tg://user?id={}">{}</a>'.format(m.reply_to_message.from_user.id, touser)
+        kb = types.InlineKeyboardMarkup()
+        btns = []
+        btns2 = []
+        for i in ['drink', 'reject']:
+            btns.append(types.InlineKeyboardButton(rus(i), callback_data='{} {}'.format(i, touser)))
+        for i in ['throw']:
+            btns2.append(types.InlineKeyboardButton(rus(i), callback_data='{} {}'.format(i, touser)))
+        kb.add(*btns)
+        kb.add(*btns2)
+        if touser == bot.get_me().first_name:
+            tts = 'Не хочу я блять чай твой ебаный в пизду иди, ' + from_user + '!!'
+            kb = None
+        else:
+            tts = '{} приготовил чай "{}" для вас, {}!'.format(from_user, tea, ahref)
+        bot.delete_message(m.chat.id, m.message_id)
+        bot.send_message(m.chat.id, tts, reply_markup=kb, parse_mode='HTML')
+    else:
+        if m.text.count(' ') == 0:
+            tea = 'обычный'
+        else:
+            tea = m.text.split(' ', 1)[1]
+        tts = '{} заварил себе чай "{}"!'.format(m.from_user.first_name, tea)
+        bot.delete_message(m.chat.id, m.message_id)
+        bot.send_message(m.chat.id, tts)
+
     
 @bot.message_handler(commands=['start'])
 def start(m):            
@@ -72,7 +109,25 @@ def start(m):
             chats.insert_one(createchat(m.chat.title, m.chat.id, m))
     bot.send_message(m.chat.id, 'Привет. Добро пожаловать. Снова.')        
         
-
+@bot.callback_query_handler(lambda c: True)
+def callback_handler(c):
+    action = c.data.split(' ')[0]
+    touser = c.data.split(' ', 1)[1]
+    tea = c.message.text.split('"')[1]
+    if touser == c.from_user.first_name:
+        if action == 'drink':
+            tts = 'Вы выпили чай "{}", {}!'.format(tea, touser)
+        elif action == 'reject':
+            tts = 'Вы отказались от чая "{}", {}!'.format(tea, touser)
+        elif action == 'throw':
+            tts = 'Вы вылили в унитаз чай "{}", {}!!'.format(tea, touser)
+        elif action == 'Да':
+            tts = 'Вы выпили чай "{}", {}!! Спасибо!!!'.format(tea, touser)
+        elif action == 'Нет':
+            tts = 'Простите, {}.'.format(touser)
+    else:
+        return
+    bot.edit_message_text(tts, c.message.chat.id, c.message.message_id)
         
 def createuser(name, id):
     return {'id':id,
