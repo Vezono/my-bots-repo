@@ -139,6 +139,15 @@ def createchat(name, id, m):
             'name':name,
             'invitor':getlink(m.from_user.first_name, m.from_user.id)
     }
+r = {'drink': 'Выпить',
+     'reject': 'Отказаться',
+     'throw': 'Вылить'}
+def rus(name):
+    try:
+        return r[name]
+    except:
+        return name
+
 def getlink(name, id):
     return '<a href="tg://user?id={}">{}</a>'.format(id, name)
 
