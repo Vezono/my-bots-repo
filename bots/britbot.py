@@ -26,8 +26,9 @@ def announce(m):
     tts = '📣Сообщение разработчика:\n\n' + m.text.split(' ', 1)[1]
     not_announced = ''
     count = 0
-    all_users = len(users.find({}))
+    all_users = 0
     for user in users.find({}):
+        all_users += 1
         try:
             bot.send_message(user['id'], tts)
             count += 1
