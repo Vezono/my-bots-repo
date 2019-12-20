@@ -190,7 +190,7 @@ def announce(m):
             bot.send_message(user['id'], tts)
             count += 1
         except:
-            not_announced += '\n{}'.format(user['id'])
+            not_announced += '\n{}'.format(getlink(user['name'], user['id']))
     tts = 'Сообщение отправлено {}/{} юзерам.\nСообщение не получили:\n{}'.format(str(count),
                                                                                   str(all_users),
                                                                                   not_announced)        
@@ -267,6 +267,8 @@ def start(m):
     else:
         if not chats.find_one({'id':m.chat.id}):
             chats.insert_one(createchat(m.chat.title, m.chat.id, m))
+        if not users.find_one({'id':m.from_user.id}):
+            users.insert_one(createuser(m.from_user.first_name, m.from_user.id))    
     bot.send_message(m.chat.id, 'Привет. Добро пожаловать. Снова.')        
         
 @bot.callback_query_handler(lambda c: True)
