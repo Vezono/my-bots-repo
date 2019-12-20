@@ -196,6 +196,28 @@ def announce(m):
                                                                                   not_announced)        
     bot.send_message(m.chat.id, tts, parse_mode='HTML')       
     
+@bot.message_handler(commands=['getblocked'])
+def announce(m):
+    if m.from_user.id != creator:
+        return
+    tts = 'Это системное сообщение. Вы не должны видеть его.'
+    not_announced = ''
+    announced = ''
+    count = 0
+    all_users = 0
+    for user in users.find({}):
+        all_users += 1
+        try:
+            bot.delete_message(user['id'], bot.send_message(user['id'], tts))
+            count += 1
+            announced += '\n{}'.format(getlink(user['name'], user['id']))
+        except:
+            not_announced += '\n{}'.format(getlink(user['name'], user['id']))
+    tts = 'Доступно {}/{} юзеров, из них:\n{}\n\nНе доступны:\n{}'.format(str(count),
+                                                                          str(all_users),
+                                                                          announced,
+                                                                          not_announced)
+    bot.send_message(m.chat.id, tts, parse_mode='HTML') 
 
 @bot.message_handler(commands=['update'])
 def cupdate(m):
