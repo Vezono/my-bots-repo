@@ -200,7 +200,6 @@ def announce(m):
 def announce(m):
     if m.from_user.id != creator:
         return
-    tts = 'Это системное сообщение. Вы не должны видеть его.'
     not_announced = ''
     announced = ''
     count = 0
@@ -208,14 +207,11 @@ def announce(m):
     for user in users.find({}):
         all_users += 1
         try:
-            msg = bot.send_message(user['id'], tts)
-            print(msg)
-            bot.delete_message(user['id'], msg)
+            bot.get_chat_member(user['id'], user['id'])
             count += 1
             announced += '\n{}'.format(getlink(user['name'], user['id']))
         except:
             not_announced += '\n{}'.format(getlink(user['name'], user['id']))
-            print(traceback.format_exc())
     tts = 'Доступно {}/{} юзеров, из них:\n{}\n\nНе доступны:\n{}'.format(str(count),
                                                                           str(all_users),
                                                                           announced,
