@@ -194,7 +194,7 @@ def announce(m):
     tts = 'Сообщение отправлено {}/{} юзерам.\nСообщение не получили:\n{}'.format(str(count),
                                                                                   str(all_users),
                                                                                   not_announced)        
-    bot.send_message(m.chat.id, tts)       
+    bot.send_message(m.chat.id, tts, parse_mode='HTML')       
     
 
 @bot.message_handler(commands=['update'])
@@ -217,7 +217,7 @@ def cupdate(m):
     tts = 'Сообщение отправлено в {}/{} чатов.\nСообщение не получили:\n{}'.format(str(count),
                                                                                    str(all_chats),
                                                                                    not_announced)        
-    bot.send_message(m.chat.id, tts) 
+    bot.send_message(m.chat.id, tts, parse_mode='HTML') 
 
 @bot.message_handler(commands=['tea'])
 def ftea(m):
