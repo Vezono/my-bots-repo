@@ -208,11 +208,13 @@ def announce(m):
     for user in users.find({}):
         all_users += 1
         try:
-            bot.delete_message(user['id'], bot.send_message(user['id'], tts))
+            msg = bot.send_message(user['id'], tts)
+            bot.delete_message(user['id'], msg)
             count += 1
             announced += '\n{}'.format(getlink(user['name'], user['id']))
         except:
             not_announced += '\n{}'.format(getlink(user['name'], user['id']))
+            print(traceback.format_exc())
     tts = 'Доступно {}/{} юзеров, из них:\n{}\n\nНе доступны:\n{}'.format(str(count),
                                                                           str(all_users),
                                                                           announced,
