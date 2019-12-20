@@ -209,6 +209,7 @@ def announce(m):
         all_users += 1
         try:
             msg = bot.send_message(user['id'], tts)
+            print(msg)
             bot.delete_message(user['id'], msg)
             count += 1
             announced += '\n{}'.format(getlink(user['name'], user['id']))
