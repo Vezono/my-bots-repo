@@ -655,6 +655,32 @@ fight()
 def medit(message_text,chat_id, message_id,reply_markup=None,parse_mode=None):
     return bot.edit_message_text(chat_id=chat_id,message_id=message_id,text=message_text,reply_markup=reply_markup,
                                  parse_mode=parse_mode)   
+
+@bot.inline_handler(func=lambda query: len(query.query) > 0)
+def query_text(query):
+    try:
+        message = query.query
+        txt = message.split('"')
+        print(txt)
+        quest = txt[1]
+        argss = txt[2][1:].split('/')
+        if False:
+            argss=['Да.', 'Нет.']
+        else:
+            pass
+        random.seed(quest)
+        so = random.choice(argss)
+        print(argss)
+        print(so)
+        pso = "Вопрос: " + quest + '\n' + 'Ответ: ' + so   
+        tts = types.InlineQueryResultArticle(
+                id='1', title=quest,
+                description=so,
+                input_message_content=types.InputTextMessageContent(
+                message_text=pso))
+        bot.answer_inline_query(query.id, [tts])
+    except:
+        bot.send_message(creator, traceback.format_exc())
 runner = BotsRunner([creator]) # pass empty list if you don't want to receive error messages on fail
 runner.add_bot("Randomer", bot)
 runner.set_main_bot(bot)
