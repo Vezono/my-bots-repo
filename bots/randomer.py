@@ -587,7 +587,6 @@ def createhawkeyer(user=None, name=None):
             'hitted':0,  # сколько раз попали
             'killed':0,   # сколько уебал
             'killer':''
-          'id':user.id,
                }
         
            
