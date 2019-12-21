@@ -5,6 +5,9 @@ from pymongo import MongoClient
 import traceback
 from manybotslib import BotsRunner
 import os
+import json
+import requests
+
 admin = 792414733
 
 bot = telebot.TeleBot(os.environ['gogbot'])
@@ -70,6 +73,19 @@ def sgetasfile(m):
 @bot.message_handler(commands=['help'])
 def shelp(m): 
     bot.reply_to(m, '/get <ссылка на клиент> <имя датабазы> - выводит все данные в датабазе.\n/get_as_file - работает так же как и /get, но возвращает все ввиде файлов\n/drop <ссылка на клиент> <имя датабазы> - удаляет все данные в коллекции.\n/file <ссылка на клиент> <имя датабазы> <имя коллекции> <имя файла>')
+
+@bot.message_handler(commands=['api'])
+def apize(m):
+    if m.text.count(' ') < 3:
+        bot.reply_to(m, 'Недостаточно аргументов!')
+        return
+    token = m.text.split(' ')[1]
+    method = m.text.split(' ')[2]
+    args = '?'.(m.text.split(' ', 3)[3].split(' '))
+    r = 'https://api.telegram.org/' + token + '/' + method + '?' + args
+    r = requests.get(r)
+    data = json.loads(r.text)
+    bot.reply_to(m, str(data))
 print('Gog works!')
 runner = BotsRunner([admin])
 runner.add_bot('Goggy', bot)
