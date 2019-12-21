@@ -3,15 +3,15 @@ import telebot
 import time
 import random
 import threading
-from emoji import emojize
 from telebot import types
 from pymongo import MongoClient
 import traceback
 from manybotslib import BotsRunner
-token = os.environ['coldunstvo']
+
+token = os.environ['randomer']
 bot = telebot.TeleBot(token)
-
-
+creator = 792414733
+admins = [creator]
 games={}
 
 def effect(target='all', amount=0):
@@ -413,9 +413,276 @@ def createplayer(user):
     }
            }
 
+randlist=['Возбужденный Самец', 'Веган', 'Большой Банан', 'Гей Воробей', 'Большая Залупа Коня', 'Малая Залупа Коня', 'Осёл', 'Трахер', 
+         'Сыч ебаный', 'Пидорас', 'Дрочила', 'Дрочемыш', 'Анальный Зонд', 'Волосатая Феминистка', 'Гей', 'Еблет', 'Исма', 'Еблак', 'Минетный монстр',
+         'Анальный зверь']
+@bot.callback_query_handler(func=lambda call:True)
+def inline(call):
+    if call.data=='join':        
+      try:
+        if call.from_user.id not in info.lobby.game[call.message.chat.id]['players']:
+              z=0
+              for ids in info.lobby.game:
+                  if call.from_user.id in info.lobby.game[ids]['players']:
+                    z+=1    
+              if z==0:
+               if len(info.lobby.game[call.message.chat.id]['players'])<len(randlist):
+                  info.lobby.game[call.message.chat.id]['players'].update(createuser(call.from_user.id, call.message.chat.id))
+                  bot.send_message(call.message.chat.id, 'Аноним вошел!')
+                  info.lobby.alreadyplay.append(call.from_user.id)
+               else:
+                   try:
+                       bot.send_message(call.from_user.id, 'Достигнуто максимальное число пидоров!')
+                   except:
+                       pass
+                    
+               #if len(info.lobby.game[call.message.chat.id]['players'])>len(randlist):
+               # bot.send_message(call.message.chat.id, 'Набор окончен!')
+               # begin(call.message.chat.id)
+      except:
+        pass
+                                  
+def del2(id):
+    try:
+      del info.lobby.game[id]
+      bot.send_message(id, '25 минут прошло! Вирт остановлен!')
+    except:
+      pass
+def delplayer(id, id2):
+    try:
+        del info.lobby.game[id]['players'][id2]
+    except:
+        pass
+            
+def deleter(id):
+  try:
+    del info.lobby.game[id]
+  except:
+    pass
+    
+@bot.message_handler(commands=['stop'])
+def s(m):
+  for ids in info.lobby.game:
+    if m.from_user.id in info.lobby.game[ids]['players']:
+        bot.send_message(ids, 'Аноним вышел!')
+        t=threading.Timer(0.1, delplayer, args=[ids, m.from_user.id])
+        t.start()
+@bot.message_handler(commands=['lobby'])
+def m(m):
+    if m.chat.id not in info.lobby.game:
+        info.lobby.game.update(createroom(m.chat.id))
+        t=threading.Timer(1500, del2, args=[m.chat.id])
+        t.start()
+        info.lobby.game[m.chat.id]['timer']=t
+        bot.send_message(441399484, 'Вирт начался где-то!')
+        Keyboard=types.InlineKeyboardMarkup()          
+        Keyboard.add(types.InlineKeyboardButton(text='Писька', callback_data='join'))
+        info.lobby.game[m.chat.id]['startm']=bot.send_message(m.chat.id, 'Начинаем! жмите на кнопку, чтобы присоединиться', reply_markup=Keyboard)
+    else:
+      try:
+        bot.reply_to(info.lobby.game[m.chat.id]['startm'], 'Вирт уже идёт!')
+      except:
+        pass
+def namechoice(id):
+    x=random.choice(randlist)
+    while x in info.lobby.game[id]['nicks']:
+        x=random.choice(randlist)
+    info.lobby.game[id]['nicks'].append(x)
+    return x
+        
+         
+@bot.message_handler(content_types=['text'])
+def h(m):
+    for ids in info.lobby.game:
+        if m.from_user.id in info.lobby.game[ids]['players']:
+          if m.chat.id>0:
+            try:
+              bot.send_message(ids, '_'+info.lobby.game[ids]['players'][m.from_user.id]['name']+'_:\n'+m.text, parse_mode='markdown')
+              info.lobby.game[ids]['timer'].cancel()
+              t=threading.Timer(1500, del2, args=[ids])
+              t.start()
+              info.lobby.game[ids]['timer'].stop()
+              info.lobby.game[ids]['timer']=t
+            except:
+                pass
+            try:
+                for idd in info.lobby.game[ids]['players']:
+                    if m.from_user.id!=idd:
+                      bot.send_message(idd, '_'+info.lobby.game[ids]['players'][m.from_user.id]['name']+'_:\n'+m.text, parse_mode='markdown')
+            except:
+                pass
+    
+def createroom(id):
+  return{id:{
+      'nicks':[],
+      'startm':None,
+      'timer':None,
+    'players':{
+    }
+     }
+      }   
+        
+def createuser(id, chatid):
+    return{id:{
+           'name':namechoice(chatid)
+          }
+          }
 
-runner = BotsRunner([792414733]) # pass empty list if you don't want to receive error messages on fail
-runner.add_bot("Coldunstvo", bot)
+names=['Gentoo', 'Arch']
+
+@bot.message_handler(commands=['start'])
+def start(m):
+    no=0
+    for ids in fighters:
+        if ids['id']==m.from_user.id:
+            no=1
+    if no==0:
+        fighters.append(createhawkeyer(user=m.from_user))
+        bot.send_message(m.chat.id, 'Вы успешно зашли в игру! Теперь ждите, пока ваш боец прострелит кому-нибудь яйцо.\nСоветую кинуть бота в мут!')
+ 
+@bot.message_handler(commands=['add'])
+def add(m):
+    if m.from_user.id in admins:
+        name=m.text.split(' ')[1]
+        fighters.append(createhawkeyer(name=name))
+        bot.send_message(m.chat.id, 'Добавлен игрок "'+name+'"!')
+
+    
+@bot.message_handler(commands=['settimer'])
+def settimer(m):
+    if m.from_user.id in admins:
+        try:
+            global btimer
+            btimer=int(m.text.split(' ')[1])
+        except:
+            pass
+        
+@bot.message_handler(commands=['stats'])
+def stats(m):
+    me=None
+    for ids in fighters:
+        if ids['id']==m.from_user.id:
+            me=ids
+    if me!=None:
+        text=''
+        text+='ХП: '+str(me['hp'])+'\n'
+        text+='В вас попали: '+str(me['hitted'])+' раз(а)\n'
+        text+='Вы убили: '+str(me['killed'])+' дурачков\n'
+        bot.send_message(m.chat.id, text)
+
+
+def createhawkeyer(user=None, name=None):
+    if user!=None:
+        name=user.first_name
+        idd=user.id
+    else:
+        name=name
+        idd='npc'
+    return {
+            'hp':1000,
+            'damage':10,
+            'killchance':5,
+            'name':name,
+            'id':idd,
+            'hitted':0,  # сколько раз попали
+            'killed':0,   # сколько уебал
+            'killer':''
+          'id':user.id,
+               }
+        
+           
+   
+    
+def fight():
+    for ids in fighters:
+        alive=[]
+        for idss in fighters:
+            if idss['hp']>0 and idss['id']!=ids['id']:
+                alive.append(idss)
+        if len(alive)>0:
+            text=''
+            tts = ''
+            target=random.choice(alive)
+            dmg=ids['damage']+ids['damage']*(random.randint(-20, 20)/100)
+            target['hp']-=dmg
+            target['hitted']+=1
+            text+='Вы попали в '+target['name']+'! Нанесено '+str(dmg)+' урона.\n'
+            tts+='В вас попал {}! Нанесено {} урона'.format(ids['name'], str(dmg))
+            if target['hp']<=0:
+                ids['killed']+=1
+                target['killer']=ids['name']
+                text+='Вы убили цель!\n'
+            else:
+                if random.randint(1, 1000)<=ids['killchance']:
+                    target['hp']=0
+                    ids['killed']+=1
+                    target['killer']=ids['name']
+                    text+='Вы прострелили яйцо цели! Та погибает.\n'
+                    tts+='Вам прострелили яйцо. Вы погибаете.'
+            try:
+                bot.send_message(ids['id'], text)
+                bot.send_message(target['id'], tts)
+            except:
+                pass
+    dellist=[]
+    for ids in fighters:
+        if ids['hp']<=0:
+            dellist.append(ids)
+    for ids in dellist:
+        try:
+            bot.send_message(ids['id'], 'Вы сдохли. Вас убил '+ids['killer'])
+        except:
+            pass
+        me=ids
+        text='Итоговые статы:\n\n'
+        text+='ХП: '+str(me['hp'])+'\n'
+        text+='В вас попали: '+str(me['hitted'])+' раз(а)\n'
+        text+='Вы убили: '+str(me['killed'])+' дурачков\n'
+        try:
+            bot.send_message(ids['id'], text)
+        except:
+            pass
+        fighters.remove(ids)
+    if len(fighters)<=2:
+        name=random.choice(names)
+        fighters.append(createhawkeyer(name=name))
+    global btimer
+    t=threading.Timer(btimer, fight)
+    t.start()
+    
+fight() 
+
+def medit(message_text,chat_id, message_id,reply_markup=None,parse_mode=None):
+    return bot.edit_message_text(chat_id=chat_id,message_id=message_id,text=message_text,reply_markup=reply_markup,
+                                 parse_mode=parse_mode)   
+
+@bot.inline_handler(func=lambda query: len(query.query) > 0)
+def query_text(query):
+    try:
+        message = query.query
+        txt = message.split('"')
+        print(txt)
+        quest = txt[1]
+        argss = txt[2][1:].split('/')
+        if False:
+            argss=['Да.', 'Нет.']
+        else:
+            pass
+        random.seed(quest)
+        so = random.choice(argss)
+        print(argss)
+        print(so)
+        pso = "Вопрос: " + quest + '\n' + 'Ответ: ' + so   
+        tts = types.InlineQueryResultArticle(
+                id='1', title=quest,
+                description=so,
+                input_message_content=types.InputTextMessageContent(
+                message_text=pso))
+        bot.answer_inline_query(query.id, [tts])
+    except:
+        bot.send_message(creator, traceback.format_exc())
+runner = BotsRunner([creator]) # pass empty list if you don't want to receive error messages on fail
+runner.add_bot("Randomer", bot)
 runner.set_main_bot(bot)
-print('Coldustvo works!')
+print('Randomer works!')
 runner.run()

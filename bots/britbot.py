@@ -301,36 +301,18 @@ def eat(m):
         try:
             cookself(m, meal)
         except:
-            bot.send_message(m.chat.id, traceback.format_exc())
+            bot.send_message(creator, traceback.format_exc())
     else:
         try:
             cookto(m, meal)
         except:
-            bot.send_message(m.chat.id, traceback.format_exc())
-@bot.message_handler(commands=['status'])
-def status(m):
-    bot.reply_to(m, runner.get_status())
-@bot.message_handler(commands=['append'])
-def appendix(m):
-    try:
-        meal = m.text.lower().split(' ', 1)[1]
-        eatable.append(meal)
-        bot.send_message(m.chat.id, 'Я научился готовить '+ meal + '!')
-        bot.send_message(main_admin_id, str(eatable))
-    except:
-        bot.send_message(m.chat.id, 'Вы забыли указать, что именно готовить!')
-@bot.message_handler(commands=['remove'])
-def appendix(m):
-    if m.from_user.id != main_admin_id:
-        return
-    meal = m.text.lower().split(' ', 1)[1]
-    eatable.remove(meal)
-    bot.send_message(m.chat.id, 'Я разучился готовить '+ meal + '!')
-    print(eatable)
+            bot.send_message(creator, traceback.format_exc())
+
+
           
 def cookto(m, meal):
     tts = m.from_user.first_name + ' приготовил(а) пользователю ' + m.reply_to_message.from_user.first_name + ' ' + meal + '!'
-    if meal in eatable:
+    if True:
         kb=types.InlineKeyboardMarkup(3) 
         artrits = meal
         buttons1=[types.InlineKeyboardButton(text='Съесть', callback_data='eat '+artrits), 
@@ -339,14 +321,11 @@ def cookto(m, meal):
         kb.add(*buttons1)
         oldm = m
         m = bot.reply_to(m, tts, reply_markup=kb)
-    else:
-        bot.send_message(m.chat.id, 'Он(а) не может съесть ' + meal + ', потому что я неумею это готовить. Чтобы научить меня - /append еда.')
+    
+    
 def cookself(m, meal):
-    if meal in eatable:
-        bot.send_message(m.chat.id, m.from_user.first_name + ' сьел(а) ' + meal + '!')
-    else:
-        bot.send_message(m.chat.id, 'Вы не можете съесть ' + meal + ', потому что я неумею это готовить. Чтобы научить меня - /append еда.')
-        
+    bot.send_message(m.chat.id, m.from_user.first_name + ' сьел(а) ' + meal + '!')
+         
    
 @bot.callback_query_handler(lambda c: True)
 def callback_handler(c):
