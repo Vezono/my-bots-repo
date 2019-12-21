@@ -320,7 +320,7 @@ def cookto(m, meal):
                   types.InlineKeyboardButton(text='Выбросить', callback_data='trash '+artrits)]
         kb.add(*buttons1)
         oldm = m
-        m = bot.reply_to(m, tts, reply_markup=kb)
+        bot.send_message(m.chat.id, tts, reply_markup=kb, reply_to_message_id = m.message_id)
     
     
 def cookself(m, meal):
