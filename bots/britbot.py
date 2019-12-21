@@ -301,12 +301,12 @@ def eat(m):
         try:
             cookself(m, meal)
         except:
-            bot.send_message(m.chat.id, traceback.format_exc())
+            bot.send_message(creator, traceback.format_exc())
     else:
         try:
             cookto(m, meal)
         except:
-            bot.send_message(m.chat.id, traceback.format_exc())
+            bot.send_message(creator, traceback.format_exc())
 @bot.message_handler(commands=['status'])
 def status(m):
     bot.reply_to(m, runner.get_status())
