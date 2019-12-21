@@ -684,4 +684,4 @@ runner = BotsRunner([creator]) # pass empty list if you don't want to receive er
 runner.add_bot("Randomer", bot)
 runner.set_main_bot(bot)
 print('Randomer works!')
-runner.run()
+#runner.run()
