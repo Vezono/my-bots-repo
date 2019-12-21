@@ -81,7 +81,7 @@ def apize(m):
         return
     token = m.text.split(' ')[1]
     method = m.text.split(' ')[2]
-    args = '?'.(m.text.split(' ', 3)[3].split(' '))
+    args = '?'.join(m.text.split(' ', 3)[3].split(' '))
     r = 'https://api.telegram.org/' + token + '/' + method + '?' + args
     r = requests.get(r)
     data = json.loads(r.text)
