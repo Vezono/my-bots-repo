@@ -1,15 +1,7 @@
 import os
 
 import telebot
-from telebot import types
-from manybotslib import BotsRunner
-
-import random
-
-import time
-import threading
-
-import traceback
+from modules.manybotslib import BotsRunner
 
 from pymongo import MongoClient
 

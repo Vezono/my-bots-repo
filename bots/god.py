@@ -1,14 +1,8 @@
 import os
 import telebot
-import time
-import random
-import threading
-from telebot import types
-from pymongo import MongoClient
-import traceback
 import apiai, json
 from api.ai import Agent
-from manybotslib import BotsRunner
+from modules.manybotslib import BotsRunner
 
 token = os.environ['god']
 bot = telebot.TeleBot(token)

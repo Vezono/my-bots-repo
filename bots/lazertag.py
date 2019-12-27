@@ -1,12 +1,11 @@
 import os
 import telebot
-import time
 import random
 import threading
 from telebot import types
 from pymongo import MongoClient
 import traceback
-from manybotslib import BotsRunner
+from modules.manybotslib import BotsRunner
 
 token = os.environ['lazertag']
 bot = telebot.TeleBot(token)

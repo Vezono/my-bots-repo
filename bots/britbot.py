@@ -1,178 +1,64 @@
-import os
 import telebot
-import time
-import random
 import threading
 from telebot import types
 from pymongo import MongoClient
 import traceback
-from manybotslib import BotsRunner
 
-client = MongoClient(os.environ['database'])
+from modules.eatable import Cooker
+from modules.manybotslib import BotsRunner
+from config import *
+
+from modules.life import LifeGame
+from modules.funcs import BotUtil
+
+client = MongoClient(environ['database'])
 db = client.gbball
 users = db.users
 chats = db.chats
 
-token = os.environ['britbot']
-bot = telebot.TeleBot(token)
-creator = 792414733
+bot = BotUtil(environ['britbot'])
+cooker = Cooker(bot)
 
-n = 0
-em_alive='⬜️'
-em_dead='⬛️'
-games={}
+
+@bot.message_handler(commands=['mute'])
+def handle_mute(m):
+    if not m.reply_to_message:
+        bot.send_message(m.chat.id, "Отвечайте реплаем на сообщение того, кого вы хотите ограничить.")
+        return
+    user = m.reply_to_message.from_user
+    until_date = 0
+    reason = ""
+    if m.text.count(' ') == 1:
+        until_date = int(m.text.split()[1])
+    if m.text.count(' ') > 1:
+        until_date = int(m.text.split(' ', 2)[1])
+        reason = m.text.split(' ', 2)[2]
+    bot.mute(m.chat, user, m.from_user, until_date, reason)
+
+
+@bot.message_handler(commands=['ban'])
+def handle_mute(m):
+    if not m.reply_to_message:
+        bot.send_message(m.chat.id, "Отвечайте реплаем на сообщение того, кого вы хотите заблокировать.")
+        return
+    user = m.reply_to_message.from_user
+    until_date = 0
+    reason = ""
+    if m.text.count(' ') == 1:
+        until_date = int(m.text.split()[1])
+    if m.text.count(' ') > 1:
+        until_date = int(m.text.split(' ', 2)[1])
+        reason = m.text.split(' ', 2)[2]
+    bot.ban(m.chat, user, m.from_user, until_date, reason)
 
 @bot.message_handler(commands=['life'])
 def life(m):
-    game=creategame(m.chat.id)
-    for ids in game:
-        c=ids
-    x=m.text.split(' ')
-    i=1
-    while i<len(x):
-        try:
-            game[c]['world'][x[i]]='alive'
-            i+=1
-        except:
-            pass
-    
-    games.update(game)
-    startgame(game[c])
+    print("Starting life...")
+    cells = None
+    if m.text.count(" "):
+        cells = m.text.split(" ", 1)[1]
+    # LifeGame(m.chat.id, bot, cells)
 
-    
-@bot.message_handler(commands=['clear'])
-def clearr(m):
-    dl=[]
-    try:
-        for ids in games:
-            if games[ids]['id']==m.chat.id:
-                dl.append(ids)
-        for ids in dl:
-            games[ids]['del']=1
-            del games[ids]
-        bot.send_message(m.chat.id, 'Удалил все игры в чате')
-    except:
-        bot.send_message(creator, traceback.format_exc())
-
-def startgame(game, no=0):
-    text=''
-    x=0
-    y=0
-    global em_alive
-    global em_dead
-    while y<int(game['size'][0]):
-        x=0
-        while x<int(game['size'][1]):
-            cpoint=str(x)+str(y)
-            if game['world'][cpoint]=='alive':
-                text+=em_alive
-            else:
-                text+=em_dead
-            x+=1
-        y+=1
-        text+='\n'
-    if game['msg']==None:
-        game['msg']=bot.send_message(game['id'], text)
-    else:
-        try:
-            medit(text, game['msg'].chat.id, game['msg'].message_id)
-        except:
-            pass
-    if no==0:
-        mapedit(game)
-    else:
-        del games[game['code']]
-    
-    
-def mapedit(game):
-    alive=[]
-    dead=[]
-    for ids in game['world']:
-        x=int(ids[0])
-        y=int(ids[1])
-        nearalive=0
-        i1=-1
-        i2=-1
-        while i1<=1:
-            i2=-1
-            while i2<=1:
-                point=str(x+i1)+str(y+i2)
-                try:
-                    if game['world'][point]=='alive' and point!=ids:
-                        nearalive+=1
-                except:
-                    #bot.send_message(creator, traceback.format_exc())
-                    pass
-                i2+=1
-            i1+=1
-        if game['world'][ids]=='alive':
-            if nearalive>=2 and nearalive<=3:
-                alive.append(ids)
-            else:
-                dead.append(ids)
-                
-        elif game['world'][ids]=='dead':
-            if nearalive==3:
-                alive.append(ids)
-            else:
-                dead.append(ids)
-    for ids in dead:
-        game['world'][ids]='dead'
-    for ids in alive:
-        game['world'][ids]='alive'
-    d=0
-    if game['last']==game['world']:
-        game['count']+=1
-        if game['count']>=3:
-            del games[game['code']]  
-            bot.send_message(creator, 'deleted')
-            d=1
-    else:
-        game['count']=0
-    game['last']=game['world'].copy()
-    if game['del']==1:
-        d=1
-    if len(alive)!=0 and d!=1:
-        t=threading.Timer(game['speed'], startgame, args=[game])
-        t.start()
-       
-    elif d!=1:
-        t=threading.Timer(game['speed'], startgame, args=[game, 1])
-        t.start()
-    
-
-    
-def creategame(chatid, size='99', speed=1.2):   # x = size[0];  y = size[1];   speed в секундах.
-    global n
-    n+=1
-    world={}
-    x=0
-    y=0
-    while x<int(size[0]):
-        y=0
-        world.update({str(x)+str(y):'dead'})
-        while y<int(size[1]):
-            world.update({str(x)+str(y):'dead'})
-            y+=1
-        x+=1
-    return {n:{
-        'id':chatid,
-        'world':world,
-        'size':size,
-        'speed':speed,
-        'msg':None,
-        'code':n,
-        'last':{},
-        'count':0,
-        'xod':0,
-        'del':0
-    }
-           }
-
-    
-def medit(message_text,chat_id, message_id,reply_markup=None,parse_mode=None):
-    return bot.edit_message_text(chat_id=chat_id,message_id=message_id,text=message_text,reply_markup=reply_markup,
-                                 parse_mode=parse_mode)    
 
 @bot.message_handler(commands=['announce'])
 def announce(m):
@@ -190,12 +76,13 @@ def announce(m):
             bot.send_message(user['id'], tts)
             count += 1
         except:
-            not_announced += '\n{}'.format(getlink(user['name'], user['id']))
+            not_announced += '\n{}'.format(bot.get_link(user['name'], user['id']))
     tts = 'Сообщение отправлено {}/{} юзерам.\nСообщение не получили:\n{}'.format(str(count),
                                                                                   str(all_users),
-                                                                                  not_announced)        
-    bot.send_message(m.chat.id, tts, parse_mode='HTML')       
-    
+                                                                                  not_announced)
+    bot.send_message(m.chat.id, tts, parse_mode='HTML')
+
+
 @bot.message_handler(commands=['getblocked'])
 def announce(m):
     if m.from_user.id != creator:
@@ -209,14 +96,15 @@ def announce(m):
         try:
             bot.get_chat_member(user['id'], user['id'])
             count += 1
-            announced += '\n{}'.format(getlink(user['name'], user['id']))
+            announced += '\n{}'.format(bot.get_link(user['name'], user['id']))
         except:
-            not_announced += '\n{}'.format(getlink(user['name'], user['id']))
+            not_announced += '\n{}'.format(bot.get_link(user['name'], user['id']))
     tts = 'Доступно {}/{} юзеров, из них:\n{}\n\nНе доступны:\n{}'.format(str(count),
                                                                           str(all_users),
                                                                           announced,
                                                                           not_announced)
-    bot.send_message(m.chat.id, tts, parse_mode='HTML') 
+    bot.send_message(m.chat.id, tts, parse_mode='HTML')
+
 
 @bot.message_handler(commands=['update'])
 def cupdate(m):
@@ -237,13 +125,14 @@ def cupdate(m):
             not_announced += '\n{}'.format(chat['id'])
     tts = 'Сообщение отправлено в {}/{} чатов.\nСообщение не получили:\n{}'.format(str(count),
                                                                                    str(all_chats),
-                                                                                   not_announced)        
-    bot.send_message(m.chat.id, tts, parse_mode='HTML') 
+                                                                                   not_announced)
+    bot.send_message(m.chat.id, tts, parse_mode='HTML')
+
 
 @bot.message_handler(commands=['tea'])
 def ftea(m):
     print('Завариваем чай...')
-    
+
     if not m.reply_to_message:
         if not m.text.count(' '):
             tea = 'обычный'
@@ -253,80 +142,41 @@ def ftea(m):
         bot.send_message(m.chat.id, tts)
         bot.delete_message(m.chat.id, m.message_id)
         return
-    
-    from_user = m.from_user.first_name
+
+    from_user = m.from_user
+    to_user = m.reply_to_message.from_user
     if m.text.count(' ') == 0:
         tea = 'обычный'
     else:
-        tea = m.text.split(' ', 1)[1]
-    touser = m.reply_to_message.from_user.first_name
-    ahref = '<a href="tg://user?id={}">{}</a>'.format(m.reply_to_message.from_user.id, touser)
-    kb = types.InlineKeyboardMarkup()
-    btns = []
-    btns2 = []
-    for i in ['drink', 'reject']:
-        btns.append(types.InlineKeyboardButton(rus(i), callback_data='{} {}'.format(i, touser)))
-    for i in ['throw']:
-        btns2.append(types.InlineKeyboardButton(rus(i), callback_data='{} {}'.format(i, touser)))
-    kb.add(*btns)
-    kb.add(*btns2)
-    if touser == bot.get_me().first_name:
-        tts = 'Не хочу я блять чай твой ебаный в пизду иди, ' + from_user + '!!'
-        kb = None
-    else:
-        tts = '{} приготовил чай "{}" для вас, {}!'.format(from_user, tea, ahref)
-    bot.send_message(m.chat.id, tts, reply_markup=kb, parse_mode='HTML')
-    bot.delete_message(m.chat.id, m.message_id)
+        tea = m.text.split(' ', 1)[1].replace("<", "&lt;")
+    cooker.tea(tea, from_user, to_user, m.chat, m.reply_to_message.message_id)
 
 
-    
 @bot.message_handler(commands=['start'])
-def start(m):            
+def start(m):
     if m.chat.type == 'private':
-        if not users.find_one({'id':m.from_user.id}):
+        if not users.find_one({'id': m.from_user.id}):
             users.insert_one(createuser(m.from_user.first_name, m.from_user.id))
     else:
-        if not chats.find_one({'id':m.chat.id}):
+        if not chats.find_one({'id': m.chat.id}):
             chats.insert_one(createchat(m.chat.title, m.chat.id, m))
-        if not users.find_one({'id':m.from_user.id}):
-            users.insert_one(createuser(m.from_user.first_name, m.from_user.id))    
-    bot.send_message(m.chat.id, 'Привет. Добро пожаловать. Снова.')        
+        if not users.find_one({'id': m.from_user.id}):
+            users.insert_one(createuser(m.from_user.first_name, m.from_user.id))
+    bot.send_message(m.chat.id, 'Привет. Добро пожаловать. Снова.')
+
+
 @bot.message_handler(commands=['cook'])
 def eat(m):
-    try:
-        meal = m.text.lower().split(' ', 1)[1]
-    except:
+    if not m.text.count(' '):
         bot.send_message(m.chat.id, 'Вы забыли указать, что именно вы хотите приготовить!')
-    if m.reply_to_message is None:
-        try:
-            cookself(m, meal)
-        except:
-            bot.send_message(creator, traceback.format_exc())
+        return
+    meal = m.text.lower().split(' ', 1)[1]
+    if m.reply_to_message:
+        cooker.cook(m.reply_to_message.message_id, m.from_user, m.reply_to_message.from_user, m.chat, meal)
     else:
-        try:
-            cookto(m, meal)
-        except:
-            bot.send_message(creator, traceback.format_exc())
+        bot.send_message(m.chat.id, m.from_user.first_name + ' сьел(а) ' + meal + '!')
 
 
-          
-def cookto(m, meal):
-    tts = m.from_user.first_name + ' приготовил(а) пользователю ' + m.reply_to_message.from_user.first_name + ' ' + meal + '!'
-    if True:
-        kb=types.InlineKeyboardMarkup(3) 
-        artrits = meal
-        buttons1=[types.InlineKeyboardButton(text='Съесть', callback_data='eat '+artrits), 
-                  types.InlineKeyboardButton(text='Оставить', callback_data='stay '+artrits), 
-                  types.InlineKeyboardButton(text='Выбросить', callback_data='trash '+artrits)]
-        kb.add(*buttons1)
-        oldm = m
-        bot.send_message(m.chat.id, tts, reply_markup=kb, reply_to_message_id = m.message_id)
-    
-    
-def cookself(m, meal):
-    bot.send_message(m.chat.id, m.from_user.first_name + ' сьел(а) ' + meal + '!')
-         
-   
 @bot.callback_query_handler(lambda c: True)
 def callback_handler(c):
     call = c
@@ -340,58 +190,57 @@ def callback_handler(c):
         if userid == call.from_user.id:
             if attribut == 'eat':
                 tts = call.from_user.first_name + ' с апетитом сьел(а) блюдо "' + meal + '" от пользователя ' + user_name + '!'
-                medit(call.message.chat.id, mid, tts, reply_markup=None)
             elif attribut == 'stay':
                 tts = call.from_user.first_name + ' решил(а) не есть блюдо "' + meal + '" от пользователя ' + user_name + '!'
-                medit(call.message.chat.id, mid,  tts, reply_markup=None)
             elif attribut == 'trash':
                 tts = call.from_user.first_name + ' выбросил(а) блюдо "' + meal + '" от пользователя ' + user_name + '!'
-                medit(call.message.chat.id, mid,  tts, reply_markup=None)     
+            bot.edit_message(tts, call.message.chat.id, mid, reply_markup=None)
         else:
             bot.answer_callback_query(call.id, 'Это не ваше меню!')
         return
+
     action = c.data.split(' ')[0]
-    touser = c.data.split(' ', 1)[1]
+    to_user = c.message.reply_to_message.from_user.first_name
     tea = c.message.text.split('"')[1]
-    if touser == c.from_user.first_name:
+    if to_user == c.from_user.first_name:
         if action == 'drink':
-            tts = 'Вы выпили чай "{}", {}!'.format(tea, touser)
+            tts = 'Вы выпили чай "{}", {}!'.format(tea, to_user)
         elif action == 'reject':
-            tts = 'Вы отказались от чая "{}", {}!'.format(tea, touser)
+            tts = 'Вы отказались от чая "{}", {}!'.format(tea, to_user)
         elif action == 'throw':
-            tts = 'Вы вылили в унитаз чай "{}", {}!!'.format(tea, touser)
+            tts = 'Вы вылили в унитаз чай "{}", {}!!'.format(tea, to_user)
         elif action == 'Да':
-            tts = 'Вы выпили чай "{}", {}!! Спасибо!!!'.format(tea, touser)
+            tts = 'Вы выпили чай "{}", {}!! Спасибо!!!'.format(tea, to_user)
         elif action == 'Нет':
-            tts = 'Простите, {}.'.format(touser)
+            tts = 'Простите, {}.'.format(to_user)
     else:
+        bot.answer_callback_query(call.id, 'Это не ваше меню!')
         return
     bot.edit_message_text(tts, c.message.chat.id, c.message.message_id)
-    
-        
+
+
 def createuser(name, id):
-    return {'id':id,
-            'name':name,
-            'coins':0
-    }
+    return {'id': id,
+            'name': name,
+            'coins': 0
+            }
+
+
 def createchat(name, id, m):
-    return {'id':id,
-            'name':name,
-            'invitor':getlink(m.from_user.first_name, m.from_user.id)
-    }
-r = {'drink': 'Выпить',
-     'reject': 'Отказаться',
-     'throw': 'Вылить'}
+    return {'id': id,
+            'name': name,
+            'invitor': bot.get_link(m.from_user.first_name, m.from_user.id)
+            }
+
+
 def rus(name):
     try:
         return r[name]
     except:
         return name
 
-def getlink(name, id):
-    return '<a href="tg://user?id={}">{}</a>'.format(id, name)
 
-runner = BotsRunner([creator]) # pass empty list if you don't want to receive error messages on fail
+runner = BotsRunner([creator])  # pass empty list if you don't want to receive error messages on fail
 runner.add_bot("Brit", bot)
 runner.set_main_bot(bot)
 print('Brit works!')

@@ -2,14 +2,12 @@ import os
 
 import telebot
 from telebot import types
-from manybotslib import BotsRunner
-import time
+from modules.manybotslib import BotsRunner
 import random
 import threading
 
 
 from pymongo import MongoClient
-import traceback
 
 mine_token = os.environ['mine_token']
 mine_bot = telebot.TeleBot(mine_token)

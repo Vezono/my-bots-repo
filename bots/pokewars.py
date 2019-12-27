@@ -1,7 +1,6 @@
 import os
-import time
 import telebot
-from manybotslib import BotsRunner
+from modules.manybotslib import BotsRunner
 import random
 import threading
 from telebot import types

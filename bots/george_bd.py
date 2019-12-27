@@ -1,16 +1,13 @@
-import random
-import telebot
+from modules.funcs import BotUtil as telebot
 import pymongo
-from pymongo import MongoClient
-import traceback
-from manybotslib import BotsRunner
-import os
+from modules.manybotslib import BotsRunner
 import json
 import requests
+import config
 
 admin = 792414733
 
-bot = telebot.TeleBot(os.environ['gogbot'])
+bot = telebot(config.environ['gogbot'])
 def get_file(file, col):
     if not col.find_one({file: {'$exists': True}}):
         return
@@ -82,10 +79,12 @@ def apize(m):
     token = m.text.split(' ')[1]
     method = m.text.split(' ')[2]
     args = '?'.join(m.text.split(' ', 3)[3].split(' '))
-    r = 'https://api.telegram.org/' + token + '/' + method + '?' + args
+    r = 'https://api.telegram.org/bot' + token + '/' + method + '?' + args
+    print(r)
     r = requests.get(r)
     data = json.loads(r.text)
     bot.reply_to(m, str(data))
+
 print('Gog works!')
 runner = BotsRunner([admin])
 runner.add_bot('Goggy', bot)

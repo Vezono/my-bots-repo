@@ -1,6 +1,4 @@
-import io
 import string # to process standard python strings
-import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import warnings
@@ -11,16 +9,13 @@ from nltk.stem import WordNetLemmatizer
 nltk.download('popular', quiet=True) # for downloading packages
 
 from telebot import TeleBot
-from manybotslib import BotsRunner
+from modules.manybotslib import BotsRunner
 
 import os
 #d
-import time
 import random
-import threading
 import requests
 from bs4 import BeautifulSoup
-import lxml
 
 from pymongo import MongoClient
 

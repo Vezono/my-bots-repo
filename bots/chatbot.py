@@ -1,9 +1,8 @@
 import random
 import telebot
 import pymongo
-from pymongo import MongoClient
 import traceback
-from manybotslib import BotsRunner
+from modules.manybotslib import BotsRunner
 import os
 admin = 792414733
 print(os.environ)
