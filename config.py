@@ -1,6 +1,6 @@
 import os
 
-# environ = os.environ
+environ = os.environ
 
 
 creator = 792414733
