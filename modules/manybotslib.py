@@ -37,7 +37,7 @@ class BotsRunner:
         self.__bots[name] = bot
         self.__bots_status[name] = False
 
-    def set_main_bot(self, bot, status_command):
+    def set_main_bot(self, bot, status_command='status'):
         self.__main_bot = bot
 
         @BotsRunner.__message_handler(self.__main_bot, commands=[status_command])
