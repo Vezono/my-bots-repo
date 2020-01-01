@@ -80,7 +80,7 @@ class BotsRunner:
             except Exception:
                 self.__bots_status[botname] = False
                 self.__warn_about_fail(botname)
-                if local_retries > 0:
+                if local_retries:
                     local_retries -= 1
                     self.__tell_about_restart(botname, local_retries)
                     continue
