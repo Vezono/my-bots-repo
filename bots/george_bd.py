@@ -84,12 +84,5 @@ def apize(m):
     r = requests.get(r)
     data = json.loads(r.text)
     bot.reply_to(m, str(data))
-
-print('Gog works!')
-runner = BotsRunner([admin])
-runner.add_bot('Goggy', bot)
-runner.set_main_bot(bot)
-runner.run()
-
   
 
