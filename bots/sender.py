@@ -36,7 +36,7 @@ def get_key(x):
             return get_key(x[key])
         return x[key]
         
-
+del x['_id']
 for key in x:
     if x[key]:
         text = get_key(x)
@@ -45,7 +45,7 @@ bot = pasuk
 alpha = True
 raw = ''
 word_tokens = []
-del lophrase['_id']
+
 for sent in lophrase:
     try:
         for word in sent:
