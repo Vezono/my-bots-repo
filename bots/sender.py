@@ -115,14 +115,17 @@ def texthandler(m):
     if not alpha:
         for phrase in mem:
             if phrase and type(phrase) != check_dict:
-                for word in phrase.split(' '):
-                    text = m.text.lower()
-                    text = text.replace('я', 'ты')
-                    if word.lower() in text.split(' ') and not sended:
-                        bot.reply_to(m, phrase)
-                        sended +=1
-                        break
-                        break
+                try:
+                    for word in phrase.split(' '):
+                        text = m.text.lower()
+                        text = text.replace('я', 'ты')
+                        if word.lower() in text.split(' ') and not sended:
+                            bot.reply_to(m, phrase)
+                            sended +=1
+                            break
+                            break
+                except:
+                    pass
     else:
         user_response = m.text.lower()
         tts = getresponse(user_response).capitalize()
