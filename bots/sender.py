@@ -41,12 +41,11 @@ for key in x:
     if x[key]:
         text = get_key(x)
         lophrase.append(text)
-lophrase.remove(lophrase[0])
 bot = pasuk
 alpha = True
 raw = ''
 word_tokens = []
-lophrase.remove(lophrase[0])
+del lophrase['_id']
 for sent in lophrase:
     try:
         for word in sent:
