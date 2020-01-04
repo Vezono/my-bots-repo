@@ -136,12 +136,3 @@ def pinloshadkin(m):
         else:
             return False
 
-
-# ---------------------------------------------------------------------------
-# ---------------------RUNNER OF BOTS----------------------------------------
-# ---------------------------------------------------------------------------
-runner = BotsRunner([creator])
-runner.add_bot("Sender", pasuk)
-runner.set_main_bot(pasuk)
-print('Sender works!')
-runner.run()
