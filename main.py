@@ -21,7 +21,7 @@ bots = {
     'Bot Ruler': bot
 }
 
-runner = BotsRunner(admins=(config.creator), retries=3, show_traceback=True)
+runner = BotsRunner(admins=[config.creator], retries=3, show_traceback=True)
 runner.add_bots(bots)
 runner.set_main_bot(bot, 'status')
 
