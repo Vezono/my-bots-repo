@@ -29,9 +29,18 @@ db=client.yulia
 phrases=db.phrases
 lophrase = []
 x = phrases.find_one({})
-for ids in x:
-    if x[ids]:
-        lophrase.append(x[ids])
+
+def get_key(x):
+    for key in x:
+        if type(x[key]) == type({}):
+            return get_key(x[key])
+        return x[key]
+        
+
+for key in x:
+    if x[key]:
+        text = get_key(x)
+        lophrase.append(text)
 lophrase.remove(lophrase[0])
 bot = pasuk
 alpha = True
