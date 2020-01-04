@@ -233,11 +233,3 @@ def google(m):
     pasuk.send_message(m.chat.id, text.encode('UTF-8'), parse_mode='HTML')
 
 
-# ---------------------------------------------------------------------------
-# ---------------------RUNNER OF BOTS----------------------------------------
-# ---------------------------------------------------------------------------
-runner = BotsRunner([creator])
-runner.add_bot("Pasuk", pasuk)
-runner.set_main_bot(pasuk)
-print('Pasuk works!')
-runner.run()
