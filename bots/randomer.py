@@ -678,8 +678,3 @@ def query_text(query):
         bot.answer_inline_query(query.id, [tts])
     except:
         bot.send_message(creator, traceback.format_exc())
-runner = BotsRunner([creator]) # pass empty list if you don't want to receive error messages on fail
-runner.add_bot("Randomer", bot)
-runner.set_main_bot(bot)
-print('Randomer works!')
-#runner.run()
