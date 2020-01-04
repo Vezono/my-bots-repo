@@ -111,11 +111,15 @@ def texthandler(m):
     sended = 0
     mem = lophrase
     random.shuffle(mem)
+    random.shuffle(mem)
+    random.shuffle(mem)
     if not alpha:
         for phrase in mem:
             if phrase and type(phrase) != check_dict:
                 try:
-                    for word in phrase.split(' '):
+                    pwords = phrase.split(' ')
+                    random.shuffle(pwords)
+                    for word in pwords:
                         text = m.text.lower()
                         text = text.replace('я', 'ты')
                         if word.lower() in text.split(' ') and not sended:
@@ -125,6 +129,11 @@ def texthandler(m):
                             break
                 except:
                     pass
+            else:
+                if phrase != check_dict:
+                    while not phrase:
+                        phrase = random.choice(mem)
+                    bot.reply_to(m, phrase)
     else:
         user_response = m.text.lower()
         tts = getresponse(user_response).capitalize()
