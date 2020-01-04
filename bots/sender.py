@@ -48,8 +48,11 @@ raw = ''
 word_tokens = []
 lophrase.remove(lophrase[0])
 for sent in lophrase:
-    for word in sent:
-        word_tokens.append(word)
+    try:
+        for word in sent:
+            word_tokens.append(word)
+    except:
+        pass
 raw = raw.lower()
 
 #TOkenisation
