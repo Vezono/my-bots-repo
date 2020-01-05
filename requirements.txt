@@ -2,8 +2,6 @@ pyTelegramBotAPI
 pymongo
 bs4
 lxml
-apiai
-api.ai
 nltk
 sklearn
 dnspython

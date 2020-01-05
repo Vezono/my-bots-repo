@@ -1,16 +1,16 @@
+import config
+from modules.funcs import BotUtil
+
+bot = BotUtil('1006055451:AAGta5Mx9nIH6CTal0pirJp-n3wvsq2QKRk', config.creator)
+bot.report('Инициализация...')
+
 from bots import britbot
 from bots import sender
 from bots import randomer
 from bots import george_bd
 from bots import pasuk
 
-import config
-
 from modules.manybotslib import BotsRunner
-
-from modules.funcs import BotUtil
-
-bot = BotUtil('1006055451:AAGta5Mx9nIH6CTal0pirJp-n3wvsq2QKRk')
 
 bots = {
     'Брит': britbot.bot,
@@ -24,5 +24,5 @@ bots = {
 runner = BotsRunner(admins=[config.creator], retries=3, show_traceback=True)
 runner.add_bots(bots)
 runner.set_main_bot(bot, 'status')
-
+bot.report('Готово! Боты запущены и готовы к работе.')
 runner.run()

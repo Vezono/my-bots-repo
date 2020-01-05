@@ -3,11 +3,11 @@ import time
 
 class BotUtil(TeleBot):
 
-    def __init__(self, token):
+    def __init__(self, token, creator):
         super().__init__(token)
         self.bot = TeleBot(token)
         self.__group_admins = ['administrator', 'creator']
-
+        self.__creator = creator
     def edit_message(self, message_text, chat_id, message_id, reply_markup=None, parse_mode=None):
         return self.bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=message_text,
                                           reply_markup=reply_markup, parse_mode=parse_mode)
@@ -87,3 +87,5 @@ class BotUtil(TeleBot):
         self.bot.kick_chat_member(chat.id, user.id, until_date=until_date)
         self.bot.send_message(chat.id, tts, parse_mode="HTML")
 
+    def report(self, text):
+        return self.bot.send_message(self.__creator, text)
