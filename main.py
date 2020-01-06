@@ -3,6 +3,7 @@ from modules.funcs import BotUtil
 
 bot = BotUtil('1006055451:AAGta5Mx9nIH6CTal0pirJp-n3wvsq2QKRk', config.creator)
 bot.report('Инициализация...')
+bot.report(config.environ)
 
 from bots import britbot
 from bots import sender
