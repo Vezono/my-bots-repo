@@ -3,7 +3,7 @@ import time
 
 class BotUtil(TeleBot):
 
-    def __init__(self, token, creator):
+    def __init__(self, token, creator=None):
         super().__init__(token)
         self.bot = TeleBot(token)
         self.__group_admins = ['administrator', 'creator']
@@ -88,4 +88,5 @@ class BotUtil(TeleBot):
         self.bot.send_message(chat.id, tts, parse_mode="HTML")
 
     def report(self, text):
-        return self.bot.send_message(self.__creator, text)
+        if self.__creator:
+            return self.bot.send_message(self.__creator, text)
