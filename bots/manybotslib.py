@@ -18,7 +18,9 @@ import traceback
 
 class BotsRunner:
 
-    def __init__(self, admins = list()):
+    def __init__(self, admins=None):
+        if admins is None:
+            admins = list()
         self.__bots = dict()
         self.__bots_status = dict()
         self.__main_bot = None
@@ -36,6 +38,11 @@ class BotsRunner:
     def add_bot(self, name, bot):
         self.__bots.update({name: bot})
         self.__bots_status.update({name: False})
+
+    def halt_bot(self, name):
+        del self.__bots_status['name']
+        del self.__bots['name']
+        self.run()
 
     def set_main_bot(self, bot):
         self.__main_bot = bot
@@ -58,4 +65,3 @@ class BotsRunner:
         except Exception:
             self.__bots_status.update({botname: False})
             self.__warn_about_fail(botname)
-            

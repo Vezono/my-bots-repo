@@ -1,4 +1,4 @@
-import os
+import config
 import telebot
 import random
 import threading
@@ -6,9 +6,9 @@ from telebot import types
 import traceback
 from modules.manybotslib import BotsRunner
 
-token = os.environ['randomer']
+token = config.environ['randomer']
 bot = telebot.TeleBot(token)
-creator = 792414733
+creator = config.creator
 admins = [creator]
 games={}
 

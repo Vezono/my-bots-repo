@@ -10,7 +10,7 @@ from nltk.stem import WordNetLemmatizer
 from telebot import TeleBot
 from modules.manybotslib import BotsRunner
 
-import os
+import config as os
 #d
 import random
 

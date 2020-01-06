@@ -11,7 +11,7 @@ nltk.download('popular', quiet=True) # for downloading packages
 from telebot import TeleBot
 from modules.manybotslib import BotsRunner
 
-import os
+import config as os
 #d
 import random
 import requests
@@ -37,7 +37,7 @@ for ids in x:
         lophrase.append(x[ids])
 lophrase.remove(lophrase[0])
 bot = pasuk
-alpha = True
+alpha = False
 raw = ''
 word_tokens = []
 for sent in lophrase:

@@ -51,6 +51,7 @@ def handle_mute(m):
         reason = m.text.split(' ', 2)[2]
     bot.ban(m.chat, user, m.from_user, until_date, reason)
 
+
 @bot.message_handler(commands=['life'])
 def life(m):
     print("Starting life...")
