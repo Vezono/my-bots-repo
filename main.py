@@ -13,6 +13,7 @@ from bots import sender
 from bots import randomer
 from bots import george_bd
 from bots import pasuk
+from bots import triggers
 
 from modules.manybotslib import BotsRunner
 
@@ -22,6 +23,7 @@ bots = {
     'Mr.Random': randomer.bot,
     'DB_Checker': george_bd.bot,
     'Пасюк': pasuk.bot,
+    'Триггеры': triggers.bot,
     'Bot_Ruler': bot
 }
 
