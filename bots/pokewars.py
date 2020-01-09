@@ -49,7 +49,7 @@ symbollist = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', '
               'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я',
               '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 
-
+pokemonlist = list(pokemons.keys())
 def medit(message_text, chat_id, message_id, reply_markup=None, parse_mode='Markdown'):
     return bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=message_text, reply_markup=reply_markup,
                                  parse_mode=parse_mode)
@@ -1020,6 +1020,7 @@ def reboot():
         chats.update_one({'id': chat['id']}, {'$set': {'mongol': 0}})       
     threading.Timer(1, dailypoke, args=[-1001406099393]).start()
     global pokemons
+    global pokemonlist
     pokemons = {}
     for pokemon in db.pokemons.find({}):
         pokemons.update(pokemon)
