@@ -13,9 +13,7 @@ bot = telebot.TeleBot(token)
 client=MongoClient(os.environ['database'])
 db=client.triggerbot
 triggs=db.triggs
-@bot.message_handler(commands=['status'])
-def status(m):
-    bot.reply_to(m, runner.get_status())
+
 @bot.message_handler(commands=['gettriggers'])
 def gettriggers(m):
     triggers = triggs.find_one({'chat':m.chat.id})
@@ -28,6 +26,7 @@ def gettriggers(m):
         print(trigger)
         tts += '{} : {}\n\n'.format(trigger, chat_triggers[trigger])
     bot.reply_to(m, tts)
+    
 @bot.message_handler(commands=['addtrigger'])
 def addtrigger(m):
     if m.text.count(' ') and m.text.count('/') == 2:
@@ -35,6 +34,7 @@ def addtrigger(m):
         args = text[1].split('/')
         triggs.update_one({'chat':m.chat.id}, {'$set':{args[0]:args[1]}})
         bot.reply_to(m, 'Триггер успешно добавлен!')
+        
 @bot.message_handler()
 def texthandler(m):
     if not triggs.find_one({'chat':m.chat.id}):
@@ -48,8 +48,3 @@ def texthandler(m):
     for i in chat_triggers.keys():
         if i in m.text.lower():
             bot.reply_to(m, chat_triggers[i])
-print('Triggers works!')
-runner = BotsRunner(teachers) 
-runner.add_bot("God", bot)
-runner.set_main_bot(bot)
-runner.run()
