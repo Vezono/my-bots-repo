@@ -1014,7 +1014,7 @@ def transliterate(text):
 def reboot():
     for user in users.find({}):
         for pokemon in user['pokemons']:
-            if pokemon['hunting']:
+            if user['pokemons'][pokemon]['hunting']:
                 huntt(user['id'], [pokemon])
     for chat in chats.find({}):
         chats.update_one({'id': chat['id']}, {'$set': {'mongol': 0}})       
