@@ -14,6 +14,7 @@ from bots import randomer
 from bots import george_bd
 from bots import pasuk
 from bots import triggers
+from bots import pokewars
 
 from modules.manybotslib import BotsRunner
 
@@ -24,6 +25,7 @@ bots = {
     'DB_Checker': george_bd.bot,
     'Пасюк': pasuk.bot,
     'Триггеры': triggers.bot,
+    'Поква': pokewars.bot,
     'Bot_Ruler': bot
 }
 
