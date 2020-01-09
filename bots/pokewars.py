@@ -1026,8 +1026,3 @@ def reboot():
     pokemonlist = list(pokemons.keys())  
     bot.send_message(-1001406099393, 'Бот был перезагружен! Все покемоны вернулись с охоты (с голдой кста), и можно снова вызвать монголов.')    
 reboot()
-print('Pokewars works! УДИВИТЕЛЬНО')
-runner = BotsRunner(vip) # pass empty list if you don't want to receive error messages on fail
-runner.add_bot("Pokewars", bot)
-runner.set_main_bot(bot)
-runner.run()
