@@ -5,7 +5,7 @@ import config
 from modules.funcs import BotUtil
 from telebot import types
 
-bot = BotUtil('1006055451:AAGta5Mx9nIH6CTal0pirJp-n3wvsq2QKRk', config.creator)
+bot = BotUtil(config.environ['mainbot'], config.creator)
 bot.report('Инициализация...')
 
 from bots import britbot
