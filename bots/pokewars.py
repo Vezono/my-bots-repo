@@ -711,7 +711,7 @@ def dailypoke(id):
     i = 0
     for ids in pokemons:
         i += 1
-    pokechance = 95 / (i * 0.06)
+    pokechance = 95 / (i+1 * 0.06)
     come = []
     for ids in pokemonlist:
         chance = pokechance / (pokemons[ids]['cool'] * 0.01)
@@ -1022,7 +1022,7 @@ def reboot():
     global pokemons
     pokemons = {}
     for pokemon in db.pokemons.find({}):
-        pokedic.update(pokemon)
+        pokemons.update(pokemon)
     pokemonlist = list(pokemons.keys())  
     bot.send_message(-1001406099393, 'Бот был перезагружен! Все покемоны вернулись с охоты (с голдой кста), и можно снова вызвать монголов.')    
 reboot()
