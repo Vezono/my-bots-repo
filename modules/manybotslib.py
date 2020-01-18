@@ -67,7 +67,7 @@ class BotsRunner:
         for adm in self.__admins:
             self.__main_bot.send_message(
                 adm,
-                "♻️ Рестарт бота " + botname +
+                "♻️ Рестарт бота " + str(botname) +
                 ". Осталось " + local_retries + " падений до необходимости рестарта приложения"
             )
 

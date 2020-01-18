@@ -1,13 +1,10 @@
-import telebot
-import threading
-from telebot import types
+import random
+from timeit import default_timer as timer
+
 from pymongo import MongoClient
-import traceback
 
-from modules.eatable import Cooker
 from config import *
-
-from modules.life import LifeGame
+from modules.eatable import Cooker
 from modules.funcs import BotUtil
 
 client = MongoClient(environ['database'])
@@ -33,6 +30,23 @@ def handle_mute(m):
         until_date = int(m.text.split(' ', 2)[1])
         reason = m.text.split(' ', 2)[2]
     bot.mute(m.chat, user, m.from_user, until_date, reason)
+
+
+@bot.message_handler(commands=['race'])
+def testtime(m):
+    start_time = timer()
+    if not m.text.count(' ') > 0:
+        count = 1000000
+    else:
+        count = int(m.text.split()[1])
+    i = 0
+    sum = 0
+    while i < count:
+        i += 1
+        sum += random.randint(1, 100)
+    sredn = sum / count
+    time = int(timer() - start_time)
+    bot.reply_to(m, 'Делаю {} операций за {} секунд.'.format(count, time).replace('000', 'к'))
 
 
 @bot.message_handler(commands=['ban'])
