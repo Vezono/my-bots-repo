@@ -1,6 +1,3 @@
-from timeit import default_timer as timer
-start_time = timer()
-
 import config
 from modules.funcs import BotUtil
 from telebot import types
@@ -8,13 +5,16 @@ from telebot import types
 bot = BotUtil(config.environ['mainbot'], config.creator)
 bot.report('Инициализация...')
 
+from timeit import default_timer as timer
+
+start_time = timer()
+
 from bots import britbot
 from bots import sender
 from bots import randomer
 from bots import george_bd
 from bots import pasuk
 from bots import triggers
-from bots import pokewars
 
 from modules.manybotslib import BotsRunner
 
@@ -25,7 +25,6 @@ bots = {
     'DB_Checker': george_bd.bot,
     'Пасюк': pasuk.bot,
     'Триггеры': triggers.bot,
-    'Поква': pokewars.bot,
     'Bot_Ruler': bot
 }
 
@@ -40,14 +39,13 @@ def ret_os(m):
 def setup_bots(m):
     if not m.from_user.id == config.creator:
         return
-    buttons = []
     kb = types.InlineKeyboardMarkup()
     for botrun in list(bots.keys()):
         kb.add(types.InlineKeyboardButton(text=botrun, callback_data=botrun))
     bot.send_message(m.chat.id, 'Ваши боты:', reply_markup=kb)
 
 
-@bot.callback_query_handler(func=lambda call:True)
+@bot.callback_query_handler(func=lambda call: True)
 def inline(c):
     botname = c.data.split(' ')[0]
     if not c.data.count(' '):
@@ -61,9 +59,10 @@ def inline(c):
     if task == 'status':
         bot.report(runner.get_status()[botname])
 
+
 runner = BotsRunner(admins=[config.creator], retries=3, show_traceback=True)
 runner.add_bots(bots)
 runner.set_main_bot(bot, 'status')
-bot.report('Готово! Боты запущены и готовы к работе.\nВремени использовано: '+str(int(timer() - start_time)) + ' секунд.')
+bot.report(
+    'Готово! Боты запущены и готовы к работе.\nВремени использовано: ' + str(int(timer() - start_time)) + ' секунд.')
 runner.run()
-

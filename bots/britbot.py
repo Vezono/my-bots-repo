@@ -5,7 +5,6 @@ from pymongo import MongoClient
 import traceback
 
 from modules.eatable import Cooker
-from modules.manybotslib import BotsRunner
 from config import *
 
 from modules.life import LifeGame

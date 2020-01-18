@@ -1,4 +1,4 @@
-import os
+import config
 
 import telebot
 from modules.manybotslib import BotsRunner
@@ -7,10 +7,10 @@ from pymongo import MongoClient
 
 teachers = [792414733]
 
-token = os.environ['god']
+token = config.environ['god']
 bot = telebot.TeleBot(token)
 
-client=MongoClient(os.environ['database'])
+client = MongoClient(config.environ['database'])
 db=client.triggerbot
 triggs=db.triggs
 

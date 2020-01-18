@@ -1,4 +1,4 @@
-import os
+import config as os
 import telebot
 from modules.manybotslib import BotsRunner
 import random

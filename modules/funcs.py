@@ -89,4 +89,5 @@ class BotUtil(TeleBot):
 
     def report(self, text):
         if self.__creator:
+            print(text)
             return self.bot.send_message(self.__creator, text)
