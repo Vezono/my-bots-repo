@@ -1,6 +1,7 @@
+from telebot import types
+
 import config
 from modules.funcs import BotUtil
-from telebot import types
 
 bot = BotUtil(config.environ['mainbot'], config.creator)
 bot.report('Инициализация...')
@@ -63,6 +64,5 @@ def inline(c):
 runner = BotsRunner(admins=[config.creator], retries=3, show_traceback=True)
 runner.add_bots(bots)
 runner.set_main_bot(bot, 'status')
-bot.report(
-    'Готово! Боты запущены и готовы к работе.\nВремени использовано: ' + str(int(timer() - start_time)) + ' секунд.')
+bot.report('Готово! Боты запущены и готовы к работе.\nВремени использовано: {} секунд.'.format(timer() - start_time))
 runner.run()

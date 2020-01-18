@@ -1,18 +1,20 @@
-import string # to process standard python strings
+import string  # to process standard python strings
+import warnings
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import warnings
+
 warnings.filterwarnings('ignore')
 
 import nltk
 from nltk.stem import WordNetLemmatizer
-nltk.download('popular', quiet=True) # for downloading packages
+
+nltk.download('popular', quiet=True)  # for downloading packages
 
 from telebot import TeleBot
-from modules.manybotslib import BotsRunner
 
 import config as os
-#d
+# d
 import random
 import requests
 from bs4 import BeautifulSoup
@@ -26,9 +28,9 @@ pasukid = 441399484
 ptoken = os.environ['pasuk']
 pasuk = TeleBot(ptoken)
 bot_id = pasuk.get_me().id
-client=MongoClient(os.environ['database'])
-db=client.loshadkin
-phrases=db.phrases
+client = MongoClient(os.environ['database'])
+db = client.loshadkin
+phrases = db.phrases
 lophrase = []
 pver = '2.2.5'
 x = phrases.find_one({})
@@ -45,36 +47,45 @@ for sent in lophrase:
         word_tokens.append(word)
 raw = raw.lower()
 
-#TOkenisation
-sent_tokens = lophrase# converts to list of sentences 
-
+# TOkenisation
+sent_tokens = lophrase  # converts to list of sentences
 
 # Preprocessing
 lemmer = WordNetLemmatizer()
+
+
 def LemTokens(tokens):
     return [lemmer.lemmatize(token) for token in tokens]
+
+
 remove_punct_dict = dict((ord(punct), None) for punct in string.punctuation)
+
+
 def LemNormalize(text):
-    return LemTokens(nltk.word_tokenize(text.lower().translate(remove_punct_dict)))    
+    return LemTokens(nltk.word_tokenize(text.lower().translate(remove_punct_dict)))
+
 
 GREETING_INPUTS = ["Привет"]
 GREETING_RESPONSES = ["Пока"]
+
 
 def getresponse(user_response):
     TfidfVec = TfidfVectorizer(tokenizer=LemNormalize, stop_words='english')
     tfidf = TfidfVec.fit_transform(sent_tokens)
     vals = cosine_similarity(tfidf[-1], tfidf)
-    idx=vals.argsort()[0][-2]
+    idx = vals.argsort()[0][-2]
     flat = vals.flatten()
     flat.sort()
     req_tfidf = flat[-2]
     if not req_tfidf:
         return "Не понимаю тебя"
-    else: 
+    else:
         return sent_tokens[idx]
-#---------------------------------------------------------------------------
-#---------------------PASUK  HANDLERS---------------------------------------
-#---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# ---------------------PASUK  HANDLERS---------------------------------------
+# ---------------------------------------------------------------------------
 
 @pasuk.message_handler(commands=['count_of_phrases'])
 def count_of_phrases(m):
@@ -85,9 +96,13 @@ def count_of_phrases(m):
         lophrase.append(x[ids])
     lophrase.remove(lophrase[0])
     pasuk.reply_to(m, str(len(lophrase)))
+
+
 @pasuk.message_handler(commands=['getm'])
 def getm(m):
     pasuk.reply_to(m, str(m))
+
+
 @pasuk.message_handler(commands=['info'])
 def infof(m):
     words = []
@@ -101,24 +116,30 @@ def infof(m):
     all_words = len(words)
     tts = 'Версия: {}/n/nКол-во символов пасюка: {}\nКол-во слов Пасюка: {}'
     tts = tts.format(pver, str(count_of_symbols), str(all_words))
+
+
 @pasuk.message_handler(commands=['status'])
 def status(m):
     pasuk.reply_to(m, runner.get_status())
+
+
 @pasuk.message_handler(commands=["talk"])
 def talk(m):
     if m.reply_to_message:
         pasuk.delete_message(m.chat.id, m.message_id)
-        text = m.text.split(' ', 1)[1]  
+        text = m.text.split(' ', 1)[1]
         if text == 'laguh':
-            pasuk.send_sticker(m.chat.id, 'CAADAgADAwAD-ZeEHnikVOwYHk14Ag', reply_to_message_id = m.reply_to_message.message_id)
+            pasuk.send_sticker(m.chat.id, 'CAADAgADAwAD-ZeEHnikVOwYHk14Ag',
+                               reply_to_message_id=m.reply_to_message.message_id)
             trace = m.from_user.first_name + ' ' + text
             pasuk.send_message(admin, trace)
         elif text == 'cat':
-            pasuk.send_sticker(m.chat.id, 'CAADAgADCwAD-ZeEHn8PdFdXHqZJAg', reply_to_message_id = m.reply_to_message.message_id)  
+            pasuk.send_sticker(m.chat.id, 'CAADAgADCwAD-ZeEHn8PdFdXHqZJAg',
+                               reply_to_message_id=m.reply_to_message.message_id)
             trace = m.from_user.first_name + ' ' + text
             pasuk.send_message(admin, trace)
         else:
-            pasuk.send_message(m.chat.id, text, reply_to_message_id = m.reply_to_message.message_id)
+            pasuk.send_message(m.chat.id, text, reply_to_message_id=m.reply_to_message.message_id)
             trace = m.from_user.first_name + ' ' + text
             pasuk.send_message(admin, trace)
     else:
@@ -138,12 +159,16 @@ def talk(m):
                 pasuk.send_message(admin, trace)
         else:
             return
+
+
 @pasuk.message_handler(commands=["alpha"])
 def calpha(m):
     global alpha
     if m.from_user.id == creator:
         alpha = not alpha
     bot.reply_to(m, 'Альфа теперь: {}'.format(str(alpha)))
+
+
 @pasuk.message_handler(content_types=['new_chat_members'])
 def handler(m):
     if m.new_chat_members[0].id == bot_id:
@@ -152,15 +177,17 @@ def handler(m):
         pasuk.reply_to(m, 'Тут уже 1000000 твоих ботов')
     else:
         pasuk.reply_to(m, 'Добро пожаловать к нашему шалашу')
+
+
 @pasuk.message_handler()
 def texthandler(m):
     if m.forward_from:
         if m.forward_from.id == pasukid:
-            phrases.update_one({}, {'$set': {str(random.randint(1, 1000000000000000000)):m.text}})
+            phrases.update_one({}, {'$set': {str(random.randint(1, 1000000000000000000)): m.text}})
     else:
         if m.from_user.id == pasukid:
-            phrases.update_one({}, {'$set': {str(random.randint(1, 1000000000000000000)):m.text}})
-    if not pinloshadkin(m):# or not random.randint(1, 100) > 99:
+            phrases.update_one({}, {'$set': {str(random.randint(1, 1000000000000000000)): m.text}})
+    if not pinloshadkin(m):  # or not random.randint(1, 100) > 99:
         return
     response = random.choice(lophrase)
     sended = 0
@@ -174,16 +201,13 @@ def texthandler(m):
                     text = text.replace('я', 'ты').replace('ты', 'я')
                     if word.lower() in text.split(' ') and not sended:
                         bot.reply_to(m, phrase)
-                        sended +=1
+                        sended += 1
                         break
                         break
     else:
         user_response = m.text.lower()
         tts = getresponse(user_response).capitalize()
         bot.reply_to(m, tts)
-
-    
-
 
 
 def medit(message_text, chat_id, message_id, reply_markup=None, parse_mode='Markdown'):
@@ -202,6 +226,7 @@ def pinloshadkin(m):
             return True
         else:
             return False
+
 
 def google(m):
     text = m.text.split(' ', 1)[1]
@@ -231,5 +256,3 @@ def google(m):
         pasuk.send_message(m.chat.id, 'Ответов на ваш запрос нет')
         return
     pasuk.send_message(m.chat.id, text.encode('UTF-8'), parse_mode='HTML')
-
-
