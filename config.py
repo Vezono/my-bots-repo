@@ -80,7 +80,9 @@ environ = {'PYTHONUNBUFFERED': 'true',
 
            'KMP_DUPLICATE_LIB_OK': 'True',
 
-           'KMP_INIT_AT_FORK': 'FALSE'}
+           'KMP_INIT_AT_FORK': 'FALSE',
+
+           'litbot': '976995047:AAGLbp0dCF2AT-AlotqnzU8tdPOQdRI4iV4'}
 
 creator = 792414733
 
