@@ -70,6 +70,7 @@ def handle_mute(m):
 
 @bot.message_handler(commands=['roll'])
 def roll(m):
+    roller = users.find_one({'id':m.from_user.id})
     codetoeval = ''
     repeates = 1
     if m.text.count(' '):
@@ -82,10 +83,16 @@ def roll(m):
         exec(codetoeval)
         points = repeates
         bot.reply_to(m, codetoeval + '\n\nУспешно!! Вы получаете {} очков.'.format(str(repeates)))
+        users.update_one({'id':m.from_user.id}, {'$inc':{'money':repeates}})
     except Exception as e:
         tts = '{}\n\n{}'.format(codetoeval, e)
         bot.reply_to(m, tts)
-        
+
+@bot.message_handler(commands=['balance'])
+def balance(m):
+    roller = users.find_one({'id':m.from_user.id})
+    tts = 'Стата:\n\nМонеты: {}\nДеньги:{}'.format(roller['coins'], roller['money'])
+    bot.reply_to(m, tts)
 @bot.message_handler(commands=['life'])
 def life(m):
     print("Starting life...")
