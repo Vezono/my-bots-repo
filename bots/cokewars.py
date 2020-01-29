@@ -4,6 +4,1065 @@ import os
 import random
 # -*- coding: utf-8 -*-
 import os
+# -*- coding: utf-8 -*-
+import redis
+import os
+import telebot
+import math
+import random
+import threading
+import info
+import test
+from telebot import types
+from emoji import emojize
+from pymongo import MongoClient
+token = os.environ['TELEGRAM_TOKEN']
+bot = telebot.TeleBot(token)
+
+from requests.exceptions import ReadTimeout
+from requests.exceptions import ConnectionError
+
+games={}
+
+client1=os.environ['database']
+client=MongoClient(client1)
+db=client.god
+user=db.users
+token=db.tokens
+mob=db.mobs
+
+def medit(message_text,chat_id, message_id,reply_markup=None,parse_mode='Markdown'):
+    return bot.edit_message_text(chat_id=chat_id,message_id=message_id,text=message_text,reply_markup=reply_markup,
+                                 parse_mode=parse_mode)
+
+
+@bot.message_handler(commands=['info'])
+def infom(m):
+    x=user.find_one({'id':m.from_user.id})
+    if x!=None:
+        bot.send_message(m.chat.id, 'Статистика пользователя '+m.from_user.first_name+':\n'+
+                     '*Статистика по цветам:*\n'+
+                         'Синий: '+str(x['blue'])+' игр\n'+
+                         'Красный: '+str(x['red'])+' игр\n'+
+                         'Жёлтый: '+str(x['yellow'])+' игр\n\n'+
+                         '*Статистика по персонажам:*\n'+
+                         'Агент: '+str(x['agent'])+' игр\n'+
+                         'Киллер: '+str(x['killer'])+' игр\n'+
+                         'Главарь: '+str(x['glavar'])+' игр\n'+
+                         'Прохожий: '+str(x['prohojii'])+' игр\n'+
+                         'Приманка: '+str(x['primanka'])+' игр\n'+
+                         'Миротворец: '+str(x['mirotvorets'])+' игр\n'+
+                         'Гангстер: '+str(x['gangster'])+' игр\n'+
+                         'Подрывник: '+str(x['podrivnik'])+' игр\n'+
+                         'Красная приманка: '+str(x['redprimanka'])+' игр\n'+
+                         'Телохранитель: '+str(x['telohranitel'])+' игр', parse_mode='markdown')
+
+@bot.message_handler(commands=['stats'])
+def stats(m):
+    x=user.find_one({'id':m.from_user.id})
+    if x!=None:
+        try:
+            vinrate=round((x['win']/x['games'])*100, 1)
+        except:
+            vinrate=0
+        user.update_one({'id':m.from_user.id}, {'$set':{'name':m.from_user.first_name}})
+        bot.send_message(m.chat.id, 'Статистика пользователя '+m.from_user.first_name+':\n'+
+                     '*Игр сыграно:* '+str(x['games'])+'\n*Победы:* '+str(x['win'])+'\n*Поражения:* '+str(x['loose'])+
+                     '\n*Винрейт:* '+str(vinrate)+'%', parse_mode='markdown')
+    else:
+        bot.send_message(m.chat.id, 'Сначала напишите боту /start!')
+    
+@bot.message_handler(commands=['update'])
+def update(m):
+    if m.from_user.id==441399484:
+        user.update_many({},{'$set':{'detective':0}})
+        bot.send_message(441399484, 'yes')
+    
+@bot.message_handler(commands=['start'])
+def start(m):
+    x=user.find_one({'id':m.from_user.id})
+    if x==None:      
+        user.insert_one({'id':m.from_user.id,
+                         'name':m.from_user.first_name,
+                         'win':0,
+                         'loose':0,
+                         'games':0,
+                         'red':0,
+                         'blue':0,
+                         'yellow':0,
+                         'agent':0,
+                         'killer':0,
+                         'glavar':0,
+                         'prohojii':0,
+                         'primanka':0,
+                         'mirotvorets':0,
+                         'gangster':0,
+                         'podrivnik':0,
+                         'redprimanka':0,
+                         'telohranitel':0,
+                         'detective':0,
+                         'alive':0
+                        })
+    x=m.text.split('/start')
+    if len(x)==2:
+       try:
+        if m.from_user.id==m.chat.id:
+         if m.from_user.id not in games[int(x[1])]['players']:
+          if len(games[int(x[1])]['players'])<10:
+           if int(x[1])<0:
+            i=0              
+            if games[int(x[1])]['play']==0:
+                games[int(x[1])]['players'].update(createuser(m.from_user.id, m.from_user.first_name))
+                text=''           
+                for ids in games[int(x[1])]['players']:
+                    if games[int(x[1])]['players'][ids]['id']==m.from_user.id:
+                        player=games[int(x[1])]['players'][ids]
+                bot.send_message(m.from_user.id, 'Вы успешно присоединились!')
+                b=0
+                for g in games[int(x[1])]['players']:
+                    text+=games[int(x[1])]['players'][g]['name']+'\n'
+                    b+=1
+                medit('Игроки: '+str(b)+'\n\n*'+text+'*', games[int(x[1])]['id'], games[int(x[1])]['users'])
+                games[int(x[1])]['userlist']+=text+'\n'
+                bot.send_message(games[int(x[1])]['id'], player['name']+' присоединился!')
+          else:
+            bot.send_message(m.from_user.id, 'Слишком много игроков! Мест не осталось!')
+       except:
+        if m.chat.id==m.from_user.id:
+            bot.send_message(m.from_user.id, 'Игра crossfire')
+
+            
+@bot.message_handler(commands=['extend']) 
+def extendd(m):
+    if m.chat.id in games:
+        if games[m.chat.id]['play']!=1:
+            if m.from_user.id in games[m.chat.id]['players']:
+                x=m.text.split('/extend')
+                if len(x)==2:
+                    try:
+                        if int(x[1])>=1:
+                            games[m.chat.id]['timebeforestart']+=int(x[1])
+                            if games[m.chat.id]['timebeforestart']>=300:
+                                games[m.chat.id]['timebeforestart']=300
+                                bot.send_message(m.chat.id, 'Время до начала перестрелки увеличено! Осталось 5 минут.')
+                            else:
+                                bot.send_message(m.chat.id, 'Время до начала перестрелки увеличено на '+x[1]+'! Осталось '+str(games[m.chat.id]['timebeforestart'])+' секунд.')
+                        else:
+                            x=bot.get_chat_administrators(m.chat.id)
+                            i=10
+                            for z in x:       
+                                if m.from_user.id==z.user.id:
+                                    i=1
+                                else:
+                                    if i!=1:
+                                        i=10
+                            if i==1:
+                                games[m.chat.id]['timebeforestart']+=int(x[1])
+                                a=x[1]
+                                if games[m.chat.id]['timebeforestart']<=0:
+                                    pass
+                                else:
+                                    bot.send_message(m.chat.id,'Время до начала перестрелки увеличено на '+a+'! Осталось '+str(games[m.chat.id]['timebeforestart'])+' секунд.')
+                            else:
+                                bot.send_message(m.chat.id, 'Только администратор может использовать эту команду!')
+                    except:
+                        games[m.chat.id]['timebeforestart']+=30
+                        if games[m.chat.id]['timebeforestart']>=300:
+                            games[m.chat.id]['timebeforestart']=300
+                        bot.send_message(m.chat.id, 'Время до начала перестрелки увеличено на 30! Осталось '+str(games[m.chat.id]['timebeforestart'])+' секунд.')
+                else:
+                    games[m.chat.id]['timebeforestart']+=30
+                    if games[m.chat.id]['timebeforestart']>=300:
+                            games[m.chat.id]['timebeforestart']=300
+                    bot.send_message(m.chat.id, 'Время до начала перестрелки увеличено на 30! Осталось '+str(games[m.chat.id]['timebeforestart'])+' секунд.')
+    
+            
+@bot.message_handler(commands=['flee'])
+def flee(m):
+    if m.chat.id in games:
+     if games[m.chat.id]['play']!=1:
+      if m.from_user.id in games[m.chat.id]['players']:
+        del games[m.chat.id]['players'][m.from_user.id]
+        text=''
+        for g in games[m.chat.id]['players']:
+            text+=games[m.chat.id]['players'][g]['name']+'\n'
+        bot.send_message(m.chat.id, m.from_user.first_name+' сбежал!')
+        medit('Игроки: \n\n*'+text+'*', m.chat.id, games[m.chat.id]['users'])
+  
+
+@bot.message_handler(commands=['help'])
+def help(m):
+    if m.chat.id<0:
+        try:
+            bot.send_message(m.chat.id, 'Отправил помощь тебе в личку')
+        except:
+            bot.send_message(m.chat.id, 'Начни диалог с ботом (@crossfirebot), чтобы я мог отправить тебе помощь!')
+    try:
+        bot.send_message(m.from_user.id, '*Правила игры "Crossfire*"\n'+
+'"Crossfire" или "Перекрёстный огонь" - настольная игра, которая была перенесена в telegram. Суть её заключается в том, чтобы выполнить'+
+                     'цель своей роли. Об этом позже.\nИгра основана на блефе и логике, почти как мафия. Но отличие заключается в том, '+
+                     'что все участники начинают играть одновременно, и заканчивают тоже. Игра длится 5 минут, не дольше. \n\n'+
+                     
+                     '*Процесс игры*\nИгра начинается с того, что всем игрокам раздаются роли.\n\n'+
+                     '*Роли*\n'+
+                     
+
+
+
+'*🔵Агент* - выигрывает, если выживает *Главарь*. Стреляет раньше *Убийцы*.\n'+
+
+'*🔵Главарь* - выигрывает, если выживает. Не может стрелять.\n'+
+
+'*🔴Убийца* - выигрывает, если *Главарь* погибает. Если был убит *агентом*, не стреляет.\n'
+
+'*🌕Приманка* - выигрывает, если умирает. Не может стрелять.\n'+
+
+'*🌕Прохожий* - выигрывает, если выживает. Если умер, проигрывает, а вместе с ним проигрывает и тот, кто его убил. Не может стрелять.\n'+
+
+'*🔵Телохранитель* - выигрывает, если *Главарь* выживает. Вместо атаки защищает выбранную цель.\n'+
+
+'*🌕Миротворец* - выигрывает, если ни один *прохожий* не был убит. Защищает выбранную цель.\n'+
+
+'*🌕Подрывник* - выигрывает, если остается в живых. Если это происходит, все остальные проигрывают.\n'+
+
+'*🔵Гангстер* - *агент*, но с двумя пулями.\n'+
+
+'*🔴Красная приманка* - выигрывает, если умер *Главарь*; либо если его убил *Агент*.\n\n'+
+
+'*По-настоящему выстрелившие*\n'+
+'Не все роли в игре могут стрелять, но все роли могут выбрать цель. Строка "По-настоящему выстрелившие" показывает тех, кто выпустил пулю, а не просто выбрал цель.\n'+
+
+'*Как убивать?*\n'+
+'В конце обсуждения каждому в ЛС придет сообщение от бота с вариантом выбора цели. Но стрелять могут не все, поэтому выбрав цель, не факт, что вы кого-то убьете/защитите. Все роли, которые могут убивать/защищать или ничего не делать, описаны выше.\n\n'+
+                     
+
+'*Цвета*\n'+
+'В игре есть 3 цвета:\n'+
+'🔴🔵🌕\n'+
+'*Красный*:\n'+
+'Выигрывает, когда Главарь убит(не считая доп.Условий)\n'+
+'*Синий*:\n'+
+'Выигрывает, когда Главарь выживает(не считая доп.условий)\n'+
+'*Желтый*:\n'+
+'Выигрыш зависит только от доп.условий (все они описаны выше)', parse_mode='markdown')
+    except:
+        pass
+@bot.message_handler(commands=['players'])
+def playerss(m):
+    if m.chat.id in games:
+        bot.send_message(m.chat.id, 'Вот список игроков', reply_to_message_id=games[m.chat.id]['users'])
+
+            
+def secnd(id):
+    games[id]['timebeforestart']-=1
+    if games[id]['timebeforestart']<=0:
+        begin(id)
+    else:
+        Keyboard=types.InlineKeyboardMarkup()
+        Keyboard.add(types.InlineKeyboardButton(text='Присоединиться', url='telegram.me/crossfirebot?start='+str(id)))
+        if games[id]['timebeforestart']==180:
+            msg=bot.send_message(id, 'Осталось 3 минуты! Жмите "Присоединиться", чтобы поучаствовать в перестрелке!', reply_markup=Keyboard)
+            games[id]['todel'].append(msg.message_id)
+        elif games[id]['timebeforestart']==60:
+            msg=bot.send_message(id, 'Осталось 60 секунд! Жмите "Присоединиться", чтобы поучаствовать в перестрелке!', reply_markup=Keyboard)
+            games[id]['todel'].append(msg.message_id)
+        elif games[id]['timebeforestart']==30:
+            msg=bot.send_message(id, 'Осталось 30 секунд! Жмите "Присоединиться", чтобы поучаствовать в перестрелке!', reply_markup=Keyboard)
+            games[id]['todel'].append(msg.message_id)
+        elif games[id]['timebeforestart']==10:
+            msg=bot.send_message(id, 'Осталось 10 секунд! Жмите "Присоединиться", чтобы поучаствовать в перестрелке!', reply_markup=Keyboard)
+            games[id]['todel'].append(msg.message_id)
+        t=threading.Timer(1, secnd, args=[id])
+        t.start()
+            
+            
+@bot.message_handler(commands=['startgame'])
+def startgame(m):
+  if m.chat.id<0:
+    if m.chat.id not in games:
+        games.update(creategame(m.chat.id))  
+        tt=threading.Timer(1, secnd, args=[m.chat.id])
+        tt.start()
+        Keyboard=types.InlineKeyboardMarkup()
+        Keyboard.add(types.InlineKeyboardButton(text='Присоединиться', url='telegram.me/crossfirebot?start='+str(m.chat.id)))
+        msg=bot.send_message(m.chat.id, m.from_user.first_name+' Начал(а) игру! Жмите кнопку ниже, чтобы присоединиться', reply_markup=Keyboard)
+        msg2=bot.send_message(m.chat.id, 'Игроки:\n', parse_mode='markdown')
+        games[m.chat.id]['users']=msg2.message_id
+        for ids in games:
+            if games[ids]['id']==m.chat.id:
+                game=games[ids]
+        game['todel'].append(msg.message_id)
+    else:
+      if games[m.chat.id]['play']==0:
+        Keyboard=types.InlineKeyboardMarkup()
+        Keyboard.add(types.InlineKeyboardButton(text='Присоединиться', url='telegram.me/crossfirebot?start='+str(m.chat.id)))
+        msg=bot.send_message(m.chat.id, 'Игра уже запущена! Жмите "присоединиться"!', reply_markup=Keyboard)
+        for ids in games:
+            if games[ids]['id']==m.chat.id:
+                game=games[ids]
+        game['todel'].append(msg.message_id)
+  else:
+    bot.send_message(m.chat.id, 'Играть можно только в группах!')
+    
+   
+def begin(id):
+  if id in games:
+   if games[id]['play']==0:
+    if len(games[id]['players'])>=4:
+        for ids in games[id]['todel']:
+            try:
+                bot.delete_message(id, ids)
+            except:
+                pass
+        i=1
+        for ids in games[id]['players']:
+            games[id]['players'][ids]['number']=i
+            i+=1
+        bot.send_message(id, 'Игра начинается!')
+        games[id]['play']=1
+        xod(games[id])
+    else:
+        for ids in games[id]['todel']:
+            try:
+                bot.delete_message(id, ids)
+            except:
+                pass
+        bot.send_message(id, 'Недостаточно игроков!')
+        try:
+            del games[id]
+        except:
+            pass
+
+        
+@bot.message_handler(commands=['forcestart'])
+def forcem(m):
+  if m.chat.id in games:
+    i=0
+    x=bot.get_chat_administrators(m.chat.id)
+    for z in x:       
+        if m.from_user.id==z.user.id:
+           i=1
+        else:
+            if i!=1:
+                i=10
+    if i==1 or m.from_user.id==441399484:
+        if m.chat.id in games:
+            games[m.chat.id]['timebeforestart']=1
+    else:
+        bot.send_message(m.chat.id, 'Только администратор может использовать эту команду!')
+        
+        
+
+def xod(game):
+    gangster=0
+    prohojii=0
+    primanka=0
+    mirotvorets=0
+    podrivnik=0
+    telohranitel=0
+    detective=0
+    agent=0
+    killer=0
+    list2=[]
+    if len(game['players'])==2:
+        roless=['glavar','killer']
+    elif len(game['players'])==3:
+        roless=['gangster','killer', 'glavar']
+    elif len(game['players'])==4:
+        prohojii=75
+        primanka=75
+        killer=100
+        roless=['agent','killer', 'glavar', 'primanka']       
+    elif len(game['players'])==5:
+        agent=20
+        killer=20
+        prohojii=50
+        primanka=50
+        detective=50
+        roless=['agent','killer', 'glavar']
+    elif len(game['players'])==6:
+        mirotvorets=40
+        killer=75
+        podrivnik=15
+        primanka=30
+        telohranitel=60
+        detective=50
+        roless=['agent','killer', 'glavar', 'prohojii']
+    elif len(game['players'])==7:
+        agent=50
+        killer=75
+        primanka=50
+        telohranitel=50
+        prohojii=50
+        mirotvorets=50
+        podrivnik=25
+        detective=50
+        roless=['agent','killer', 'glavar']
+    elif len(game['players'])>=8:
+        gangster=35
+        prohojii=65
+        primanka=50
+        mirotvorets=25
+        podrivnik=35
+        telohranitel=40
+        agent=25
+        killer=25
+        detective=50
+        roless=['glavar','killer', 'killer','agent']
+    #elif len(game['players'])==9:
+    #    roless=['glavar', 'prohojii', 'podrivnik','agent','killer', 'killer', 'agent','killer', 'agent'] #'loialistblue','povstanetsred'
+    #elif len(game['players'])==10:
+    #    roless=['glavar', 'prohojii', 'mirotvorets','agent','killer', 'killer', 'agent','killer', 'agent', 'podrivnik'] 
+        
+    while len(roless)<len(game['players']):
+        toadd=[]
+        if random.randint(1,100)<=agent:
+            toadd.append('agent')
+        if random.randint(1,100)<=killer:
+            toadd.append('killer')
+        if random.randint(1,100)<=gangster:
+            toadd.append('gangster')
+        if random.randint(1,100)<=prohojii:
+            toadd.append('prohojii')
+        if random.randint(1,100)<=primanka:
+            toadd.append('primanka')
+        if random.randint(1,100)<=mirotvorets:
+            toadd.append('mirotvorets')
+        if random.randint(1,100)<=podrivnik:
+            toadd.append('podrivnik')
+        if random.randint(1,100)<=telohranitel:
+            toadd.append('telohranitel')
+        if random.randint(1,100)<=detective:
+            toadd.append('detective')
+        if len(toadd)>0:
+            x=random.choice(toadd)
+            roless.append(x)
+            
+        
+        
+    pick=[]
+    for g in game['players']:
+        x=random.randint(0, len(game['players'])-1)
+        while x in pick:
+            x=random.randint(0, len(game['players'])-1)
+        game['players'][g]['role']=roless[x]
+        pick.append(x)
+    roletext=[]
+    players=[]
+    roletext1=[]
+    numbers=[]
+    roletextfinal=''
+    while len(roletext1)<len(roletext):
+        i=random.randint(0, len(roletext)-1)
+        if i not in numbers:
+            roletext1.append(roletext[i])
+            numbers.append(i)
+    for bb in roletext1:
+        roletextfinal+=bb+'\n'     
+    text=''
+    for g in game['players']:
+        players.append(game['players'][g]['name'])
+    for gg in players:
+        text+=gg+'\n'
+    try:
+      #bot.send_message(game['id'], 'Роли: \n*'+roletextfinal+'*', parse_mode='markdown')
+      bot.send_message(game['id'], 'Игроки: \n'+'*'+text+'*', parse_mode='markdown')
+    except:
+        pass
+    for gg in game['players']:
+        #bot.send_message(game['players'][gg]['id'], 'Роли: \n*'+roletextfinal+'*', parse_mode='markdown')
+        bot.send_message(game['players'][gg]['id'], 'Игроки: \n'+'*'+text+'*', parse_mode='markdown')
+    t=threading.Timer(1, shuffle1, args=[game])
+    t.start()
+            
+ 
+def shuffle1(game):
+    roles=[]
+    for ids in game['players']:
+        roles.append(game['players'][ids]['role'])
+    i=0
+    for ids in game['players']:
+        try:
+            game['players'][ids]['role']=roles[i+1]
+            i+=1
+        except:
+            game['players'][ids]['role']=roles[0]
+    #bot.send_message(game['id'], 'Ваши роли были переданы человеку над вами! Теперь посмотрите свои новые роли.')
+    #for g in game['players']:
+    #    if game['players'][g]['role']=='agent':
+    #        text='Ты агент'
+    #    elif game['players'][g]['role']=='killer':
+    #        text='Ты киллер'
+    #    elif game['players'][g]['role']=='prohojii':
+    #        text='Ты прохожий'
+    #    elif game['players'][g]['role']=='primanka':
+    #        text='Ты приманка'
+    #    elif game['players'][g]['role']=='glavar':
+    #        text='Ты главарь'
+    #    elif game['players'][g]['role']=='telohranitel':
+    #        text='Ты телохранитель'
+    #    elif game['players'][g]['role']=='podrivnik':
+    #        text='Ты подрывник'
+    #    elif game['players'][g]['role']=='mirotvorets':
+    #        text='Ты миротворец'
+    #    elif game['players'][g]['role']=='gangster':
+    #        text='Ты гангстер'
+    #    elif game['players'][g]['role']=='redprimanka':
+    #        text='Ты красная приманка'
+    #    try:
+    #      bot.send_message(game['players'][g]['id'], text)
+    #    except:
+    #        pass
+    t=threading.Timer(1, shuffle2, args=[game])
+    t.start()
+        
+    
+ 
+def roletotext(x):
+        if x=='agent':
+            text='Ты агент! Твоя цель - убить всех киллеров!'
+        elif x=='killer':
+            text='Ты киллер! Твоя цель - убить главаря!'
+        elif x=='prohojii':
+            text='Ты прохожий! Твоя цель - выжить! У тебя нет оружия.'
+        elif x=='primanka':
+            text='Ты приманка! Твоя цель - быть убитым(ой)! У тебя нет оружия.'
+        elif x=='glavar':
+            text='Ты главарь! Твоя цель - выжить! У тебя нет оружия.'
+        elif x=='telohranitel':
+            text='Ты телохранитель! Твоя цель - защитить главаря!'
+        elif x=='podrivnik':
+            text='Ты подрывник! Твоя цель - выжить! Если это произойдет, все остальные проиграют! У тебя нет оружия.'
+        elif x=='mirotvorets':
+            text='Ты миротворец! Твоя цель - спасти прохожих!'
+        elif x=='gangster':
+            text='Ты гангстер! Твоя цель - убить всех киллеров! У тебя 2 патрона.'
+        elif x=='redprimanka':
+            text='Ты красная приманка! Твоя цель - быть убитым одним из "синих"! У тебя нет оружия.'
+        elif x=='detective':
+            text='Ты детектив! Раз за раунд ты можешь проверить роль любого игрока в игре. Играешь за синих. У тебя нет оружия.'
+        return text
+
+def shuffle2(game):
+    roles=[]
+    for ids in game['players']:
+        roles.append(game['players'][ids]['role'])
+    first=random.randint(1, len(game['players']))
+    shuffles=len(game['players'])/3
+    if shuffles<1:
+        shuffles=1
+    i=0
+    centers=[]
+    while i<shuffles:
+        for ids in game['players']:
+            if game['players'][ids]['number']==first:
+                mid=game['players'][ids]
+                centers.append(mid['name'])
+            if first+1<=len(game['players']):
+                if game['players'][ids]['number']==first+1:
+                    bottom=game['players'][ids]
+            else:
+                if game['players'][ids]['number']==1:
+                    bottom=game['players'][ids]
+            if first-1>=1:                
+                if game['players'][ids]['number']==first-1:
+                    top=game['players'][ids]
+            else:
+                if game['players'][ids]['number']==len(game['players']):
+                    top=game['players'][ids]            
+        users=[]
+        roles=[]
+        users.append(mid)
+        users.append(bottom)
+        users.append(top)
+        roles.append(bottom['role'])
+        roles.append(mid['role'])
+        roles.append(top['role'])
+        pick=[]
+        for g in users:
+            x=random.randint(0, 2)
+            while x in pick:
+                x=random.randint(0, 2)
+            g['role']=roles[x]
+            pick.append(x)
+            #bot.send_message(g['id'], roletotext(roles[x]))
+        if first==len(game['players']):
+            first=3
+        elif first==len(game['players'])-1:
+            first=2
+        elif first==len(game['players'])-2:
+            first=1
+        else:
+            first+=3
+        i+=1
+    text2=''
+    #for ids in centers:
+    #    text2+=ids+'\n'
+    #bot.send_message(game['id'], 'Ваши роли были перемешаны по 3 штуки! Центры перемешивания: *\n'+text2+'*', parse_mode='markdown')
+    #for g in game['players']:
+    #    try:
+    #      bot.send_message(game['players'][g]['id'], 'Ваши роли были перемешаны по 3 штуки! Центры перемешивания: *\n'+text2+'*', parse_mode='markdown')
+    #    except:
+    #        pass
+    for g in game['players']:
+        if game['players'][g]['role']=='agent':
+            game['players'][g]['cankill']=1
+            game['players'][g]['blue']=1
+        elif game['players'][g]['role']=='killer':
+            game['players'][g]['cankill']=1
+            game['players'][g]['red']=1
+        elif game['players'][g]['role']=='prohojii':
+            game['players'][g]['cankill']=0
+            game['players'][g]['yellow']=1
+        elif game['players'][g]['role']=='primanka':
+            game['players'][g]['cankill']=0
+            game['players'][g]['yellow']=1
+        elif game['players'][g]['role']=='glavar':
+            game['players'][g]['cankill']=0
+            game['players'][g]['blue']=1
+        elif game['players'][g]['role']=='telohranitel':
+            game['players'][g]['candef']=1
+            game['players'][g]['blue']=1
+        elif game['players'][g]['role']=='podrivnik':
+            game['players'][g]['cankill']=0
+            game['players'][g]['yellow']=1
+        elif game['players'][g]['role']=='mirotvorets':
+            game['players'][g]['candef']=1
+            game['players'][g]['yellow']=1
+        elif game['players'][g]['role']=='gangster':
+            game['players'][g]['blue']=1
+            game['players'][g]['cankill']=1
+        elif game['players'][g]['role']=='redprimanka':
+            game['players'][g]['red']=1
+        elif game['players'][g]['role']=='detective':
+            game['players'][g]['cankill']=0
+            game['players'][g]['blue']=1
+        bot.send_message(game['players'][g]['id'], roletotext(game['players'][g]['role']))
+    for ids in game['players']:
+        player=game['players'][ids]
+        kb=types.InlineKeyboardMarkup()
+        x=0
+        if player['cankill']==1 or player['role']=='primanka':
+            kb.add(types.InlineKeyboardButton(text='Показать оружие', callback_data='showgun'))
+            x=1
+        if player['role']=='glavar' or player['role']=='prohojii' or player['role']=='primanka':
+            kb.add(types.InlineKeyboardButton(text='Сказать всем, что у вас нет оружия.', callback_data='showpocket'))
+            x=1
+        if player['role']=='detective':
+            x=1
+            for idss in game['players']:
+                if game['players'][idss]['id']!=player['id']:
+                    kb.add(types.InlineKeyboardButton(text='Проверить роль '+game['players'][idss]['name'], callback_data='check '+str(game['players'][idss]['id'])))
+        if x==1:
+            bot.send_message(player['id'], 'Жать кнопку или нет - решать вам.', reply_markup=kb)
+       
+    bot.send_message(game['id'], 'У вас 120 секунд на обсуждение!')
+    t=threading.Timer(120, shoot, args=[game])
+    t.start()
+      
+
+
+
+def shoot(game):
+    for g in game['players']:
+        Keyboard=types.InlineKeyboardMarkup()
+        for ids in game['players']:
+            if game['players'][ids]['id']!=game['players'][g]['id']:
+                Keyboard.add(types.InlineKeyboardButton(text=game['players'][ids]['name'], callback_data=str(game['players'][ids]['number'])))
+        try:
+          if game['players'][g]['candef']!=1:
+              msg=bot.send_message(game['players'][g]['id'], 'Кого ты хочешь пристрелить? У тебя 60 секунд для выбора.', reply_markup=Keyboard)
+          else:
+              msg=bot.send_message(game['players'][g]['id'], 'Кого ты хочешь защитить? У тебя 60 секунд для выбора.', reply_markup=Keyboard)
+          game['players'][g]['message']={'msg':msg,
+                                       'edit':1
+                                      }
+        except:
+            pass
+                                       
+    bot.send_message(game['id'], 'Теперь выбирайте, на кого хотите направить пистолеты!')
+    t=threading.Timer(60, endshoot, args=[game])
+    t.start()
+        
+
+        
+@bot.callback_query_handler(func=lambda call:True)
+def inline(call):
+    x=0
+    for ids in games:
+        if call.from_user.id in games[ids]['players']: 
+            game=games[ids]
+            x=1
+            player=games[ids]['players'][call.from_user.id]
+    if x==1:
+        if 'check' not in call.data:
+            if call.data!='showgun' and call.data!='showpocket': 
+                for z in game['players']:
+                    if game['players'][z]['number']==int(call.data):
+                        target=game['players'][z]
+                if game['players'][call.from_user.id]['role']!='gangster':
+                    game['players'][call.from_user.id]['text']='*'+game['players'][call.from_user.id]['name']+'*'+'🔫стреляет в '+target['name']+'\n'
+                    medit('Выбор сделан: '+target['name'],call.from_user.id,call.message.message_id)
+                    game['players'][call.from_user.id]['message']['edit']=0
+                    game['players'][call.from_user.id]['target']=target
+                else:
+                  if game['players'][call.from_user.id]['picks']>0:
+                    if game['players'][call.from_user.id]['picks']==2:
+                        game['players'][call.from_user.id]['text']+='*'+game['players'][call.from_user.id]['name']+'*'+'🔫стреляет в '+target['name']+'\n'
+                    else:
+                        game['players'][call.from_user.id]['text']+='*'+game['players'][call.from_user.id]['name']+'*'+'🔫стреляет в '+target['name']+'\n'
+                    medit('Выбор сделан: '+target['name'],call.from_user.id,call.message.message_id)
+                    game['players'][call.from_user.id]['message']['edit']=0
+                    if game['players'][call.from_user.id]['target']==None:
+                        game['players'][call.from_user.id]['target']=target
+                    else:
+                        game['players'][call.from_user.id]['target2']=target
+                    game['players'][call.from_user.id]['picks']-=1
+                    for g in game['players']:
+                        Keyboard=types.InlineKeyboardMarkup()
+                        for ids in game['players']:
+                          if game['players'][g]['target']!=None:
+                            if game['players'][ids]['id']!=game['players'][g]['id'] and game['players'][ids]['id']!=game['players'][g]['target']['id']:
+                                Keyboard.add(types.InlineKeyboardButton(text=game['players'][ids]['name'], callback_data=str(game['players'][ids]['number'])))
+                    msg=bot.send_message(call.from_user.id, 'Теперь выберите вторую цель', reply_markup=Keyboard)
+                    game['players'][call.from_user.id]['message']={'msg':msg,
+                                           'edit':1
+                                          }
+                  else:
+                    medit('Выбор сделан: '+target['name'],call.from_user.id,call.message.message_id)
+                
+            else:
+                if call.data=='showgun':
+                    if player['cankill']==1 or player['role']=='primanka':
+                        bot.send_message(game['id'], '🔫|'+player['name']+' достал из кармана пистолет и показал всем!')
+                        medit('Выбор сделан.', call.message.chat.id, call.message.message_id)
+                if call.data=='showpocket':
+                    if player['role']=='glavar' or player['role']=='prohojii' or player['role']=='primanka':
+                        bot.send_message(game['id'], '👐|'+player['name']+' вывернул карманы и показал, что он безоружный!')
+                        medit('Выбор сделан.', call.message.chat.id, call.message.message_id)
+        else:
+            if player['role']=='detective':
+                if player['checked']==0:
+                    i=int(call.data.split(' ')[1])
+                    for ids in game['players']:
+                        target=game['players'][ids]
+                        if target['id']==i:
+                            if player['checked']==0:
+                                player['checked']=1
+                                medit('Выбрано: чек роли.', call.message.chat.id, call.message.message_id)
+                                bot.send_message(player['id'], 'Роль игрока '+target['name']+': '+rolename(target['role'])+'!')
+                            else:
+                                medit('Вы уже проверяли кого-то!', call.message.chat.id, call.message.message_id)
+            else:
+                medit('Вы не детектив!', call.message.chat.id, call.message.message_id)
+
+def endshoot(game):
+    text=''
+    for msg in game['players']:
+        if game['players'][msg]['message']['edit']==1:
+            medit('Время вышло!', game['players'][msg]['message']['msg'].chat.id, game['players'][msg]['message']['msg'].message_id)
+    for ids in game['players']:
+        if game['players'][ids]['text']!='':
+            text+=game['players'][ids]['text']+'\n'
+        else:
+            text+='*'+game['players'][ids]['name']+'*'+'💨не стреляет\n'
+    bot.send_message(game['id'], text, parse_mode='markdown')
+    t=threading.Timer(8, reallyshoot, args=[game])
+    t.start()
+        
+
+def reallyshoot(game):
+    for ids in game['players']:
+        game['players'][ids]['text']=''
+        if game['players'][ids]['candef']==1:
+            if game['players'][ids]['target']!=None:
+                game['players'][ids]['target']['defence']+=1
+                game['players'][ids]['text']+='*'+game['players'][ids]['name']+'*'+' Защищает '+game['players'][ids]['target']['name']+'!'
+                
+    for ids in game['players']:
+        if game['players'][ids]['blue']==1:
+            if game['players'][ids]['target']!=None:
+                if game['players'][ids]['cankill']==1:
+                    if game['players'][ids]['target']['defence']<1:
+                        game['players'][ids]['target']['killed']=1
+                        game['players'][ids]['target']['killedby'].append(game['players'][ids]['role'])
+                        game['players'][ids]['target']['golos']=0
+                        game['players'][ids]['killany']=game['players'][ids]['target']          
+                    else:
+                        game['players'][ids]['target']['defence']-=1
+                        game['players'][ids]['killany']=None
+                    game['players'][ids]['text']+='*'+game['players'][ids]['name']+'*'+'🔫стреляет в '+game['players'][ids]['target']['name']
+            if game['players'][ids]['target2']!=None:
+                if game['players'][ids]['cankill']==1:
+                    if game['players'][ids]['target2']['defence']<1:
+                        game['players'][ids]['target2']['killed']=1
+                        game['players'][ids]['target']['killedby'].append(game['players'][ids]['role'])
+                        game['players'][ids]['target2']['golos']=0
+                        game['players'][ids]['killany2']=game['players'][ids]['target2']          
+                    else:
+                        game['players'][ids]['target2']['defence']-=1
+                        game['players'][ids]['killany2']=None
+                    game['players'][ids]['text']+='*'+game['players'][ids]['name']+'*'+'🔫стреляет в '+game['players'][ids]['target2']['name']+'!'
+                
+    for ids in game['players']:
+        if game['players'][ids]['target']!=None:
+          if game['players'][ids]['red']==1:
+            if game['players'][ids]['cankill']==1:
+              if game['players'][ids]['golos']==1:
+                if game['players'][ids]['target']['defence']<1:
+                    game['players'][ids]['target']['killed']=1
+                    game['players'][ids]['target']['killedby'].append(game['players'][ids]['role'])
+                    game['players'][ids]['killany']=game['players'][ids]['target']          
+                else:
+                    game['players'][ids]['target']['defence']-=1
+                    game['players'][ids]['killany']=None
+                game['players'][ids]['text']+='*'+game['players'][ids]['name']+'*'+'🔫стреляет в '+game['players'][ids]['target']['name']+'!'
+              else:
+                game['players'][ids]['text']+='*'+game['players'][ids]['name']+'*'+'☠️Убит! (не стреляет)'
+                
+    text=''
+    for ids in game['players']:
+        text+=game['players'][ids]['text']+'\n'
+    bot.send_message(game['id'],'По-настоящему выстрелившие:\n'+text, parse_mode='markdown')
+    text=''
+    role=game['players'][ids]['role']
+    live=emojize(':neutral_face:', use_aliases=True)
+    dead=emojize(':skull:', use_aliases=True)
+    blue=emojize(':large_blue_circle:', use_aliases=True)
+    red=emojize(':red_circle:', use_aliases=True)
+    yellow=emojize(':full_moon:', use_aliases=True)
+    pobeda=emojize(':thumbsup:', use_aliases=True)
+    porajenie=emojize(':-1:', use_aliases=True)
+    podrivnik=0
+    for podriv in game['players']:
+        if game['players'][podriv]['role']=='podrivnik':
+            if game['players'][podriv]['killed']==0:
+                podrivnik=1
+    for ids in game['players']:
+        if game['players'][ids]['blue']==1:
+            color=blue
+        elif game['players'][ids]['red']==1:
+            color=red
+        else:
+            color=yellow
+        if game['players'][ids]['role']=='agent':
+            role='Агент'
+        elif game['players'][ids]['role']=='killer':
+            role='Киллер'
+        elif game['players'][ids]['role']=='prohojii':
+            role='Прохожий'
+        elif game['players'][ids]['role']=='primanka':
+            role='Приманка'
+        elif game['players'][ids]['role']=='glavar':
+            role='Главарь'
+        elif game['players'][ids]['role']=='telohranitel':
+            role='Телохранитель'
+        elif game['players'][ids]['role']=='mirotvorets':
+            role='Миротворец'
+        elif game['players'][ids]['role']=='gangster':
+            role='Гангстер'
+        elif game['players'][ids]['role']=='podrivnik':
+            role='Подрывник'
+        elif game['players'][ids]['role']=='redprimanka':
+            role='Красная приманка'
+        elif game['players'][ids]['role']=='detective':
+            role='Детектив'
+        if game['players'][ids]['killed']==1:
+            alive=dead+'Мёртв'
+        else:
+            alive=live+'Жив'
+        for idss in game['players']:
+            if game['players'][idss]['role']=='glavar':
+                glavar=game['players'][idss]
+        if game['players'][ids]['blue']==1:
+            if glavar['killed']==0:
+              if podrivnik!=1:
+                win=pobeda+'Выиграл\n'
+              else:
+                win=porajenie+'Проиграл\n'
+            else:
+                win=porajenie+'Проиграл\n'
+            if game['players'][ids]['killany']!=None:
+                if game['players'][ids]['killany']['role']=='prohojii':
+                    win=porajenie+'Проиграл (убил прохожего)\n'
+                if game['players'][ids]['killany2']!=None:
+                    if game['players'][ids]['killany2']['role']=='prohojii':
+                        win=porajenie+'Проиграл (убил прохожего)\n'           
+        elif game['players'][ids]['red']==1:
+          if game['players'][ids]['role']!='redprimanka':
+            if glavar['killed']==1:
+              if podrivnik!=1:
+                win=pobeda+'Выиграл\n'
+              else:
+                win=porajenie+'Проиграл\n'
+            else:
+                win=porajenie+'Проиграл\n'
+            if game['players'][ids]['killany']!=None:
+                if game['players'][ids]['killany']['role']=='prohojii':
+                        win=porajenie+'Проиграл (убил прохожего)\n'
+                
+          else:            
+            if glavar['killed']==1 or game['players'][ids]['killed']==1:
+              if podrivnik!=1:
+                win=pobeda+'Выиграл\n'
+              else:
+                win=porajenie+'Проиграл\n'
+            else:
+                win=porajenie+'Проиграл\n'
+            if 'gangster' or 'agent' in game['players'][ids]['killedby']:
+                if podrivnik!=1:
+                    win=pobeda+'Выиграл\n'
+                else:
+                    win=porajenie+'Проиграл\n'
+        elif game['players'][ids]['yellow']==1:
+            if game['players'][ids]['role']=='prohojii':
+                if game['players'][ids]['killed']==1:
+                    win=porajenie+'Проиграл\n'
+                else:
+                  if podrivnik!=1:
+                    win=pobeda+'Выиграл\n'
+                  else:
+                    win=porajenie+'Проиграл\n'
+            if game['players'][ids]['role']=='primanka':
+                    if game['players'][ids]['killed']==1:
+                      if podrivnik!=1:
+                        win=pobeda+'Выиграл\n'
+                      else:
+                        win=porajenie+'Проиграл\n'
+                    else:
+                        win=porajenie+'Проиграл\n'
+            if game['players'][ids]['role']=='mirotvorets':
+                    i=0
+                    for prohojii in game['players']:
+                        if game['players'][prohojii]['role']=='prohojii' and game['players'][prohojii]['killed']==1:
+                            i=1
+                    if i==1:
+                        win=porajenie+'Проиграл\n'
+                    else:
+                      if podrivnik!=1:
+                        win=pobeda+'Выиграл\n'
+                      else:
+                        win=porajenie+'Проиграл\n'
+            if game['players'][ids]['role']=='podrivnik':
+                if game['players'][ids]['killed']==0:
+                    win=pobeda+'Выиграл\n'
+                else:
+                    win=porajenie+'Проиграл\n'
+        text+=game['players'][ids]['name']+': '+color+role+','+alive+','+win
+        if color==red:
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'red':1}})
+        elif color==blue:
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'blue':1}})
+        elif color==yellow:
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'yellow':1}})
+        if role=='Агент':
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'agent':1}})
+        elif role=='Киллер':
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'killer':1}})
+        elif role=='Прохожий':
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'prohojii':1}})
+        elif role=='Приманка':
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'primanka':1}})
+        elif role=='Главарь':
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'glavar':1}})
+        elif role=='Телохранитель':
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'telohranitel':1}})
+        elif role=='Миротворец':
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'mirotvorets':1}})
+        elif role=='Гангстер':
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'gangster':1}})
+        elif role=='Подрывник':
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'podrivnik':1}})
+        elif role=='Красная приманка':
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'redprimanka':1}})
+        elif role=='Детектив':
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'detective':1}})
+        if alive==live+'Жив':
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'alive':1}})
+        if win==pobeda+'Выиграл\n':
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'win':1}})
+        elif win==porajenie+'Проиграл\n' or win==porajenie+'Проиграл (убил приманку)\n' or win==porajenie+'Проиграл (убил прохожего)\n':
+            user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'loose':1}})
+        user.update_one({'id':game['players'][ids]['id']}, {'$inc':{'games':1}})
+            
+    bot.send_message(game['id'], 'Результаты игры:\n'+text)
+    del games[game['id']]
+        
+     
+def rolename(role):
+    x='Неизвестная роль, обратитесь к @Loshadkin.'
+    if role=='agent':
+        x='Агент'
+    elif role=='killer':
+        x='Киллер'
+    elif role=='prohojii':
+        x='Прохожий'
+    elif role=='primanka':
+        x='Приманка'
+    elif role=='glavar':
+        x='Главарь'
+    elif role=='telohranitel':
+        x='Телохранитель'
+    elif role=='mirotvorets':
+        x='Миротворец'
+    elif role=='gangster':
+        x='Гангстер'
+    elif role=='podrivnik':
+        x='Подрывник'
+    elif role=='redprimanka':
+        x='Красная приманка'
+    elif role=='detective':
+        x='Детектив'
+    return x
+    
+def creategame(id):
+    return {id:{
+        'players':{},
+        'id':id,
+        'todel':[],
+        'toedit':[],
+        'play':0,
+        'timebeforestart':180,
+        'users':None,
+        'userlist':'Игроки:\n\n'
+    }
+           }
+        
+
+def createuser(id, name):
+    return{id:{
+        'role':None,
+        'name':name,
+        'id':id,
+        'number':None,
+        'text':'',
+        'shuffle':0,
+        'target':None,
+        'target2':None,
+        'killed':0,
+        'cankill':0,
+        'defence':0,
+        'killany':None,
+        'killany2':None,
+        'candef':0,
+        'blue':0,
+        'red':0,
+        'yellow':0,
+        'win':0,
+        'golos':1,
+        'message':0,
+        'picks':2,
+        'killedby':[],
+        'checked':0
+    }
+          }
+    
+ 
+
+bot.polling(none_stop=True)
+
+
+
 
 
 
@@ -9511,4303 +10570,4 @@ def inline(call):
                 users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'suit'}})
                 users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-4200}})
                 medit('Вы успешно приобрели скилл "Отражающий костюм"!',call.message.chat.id,call.message.message_id)
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')   
-        
-  elif call.data=='buymage':
-       x=users.find_one({'id':call.from_user.id})
-       if 'mage' not in x['bot']['bought']:
-           if x['cookie']>=5000:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'mage'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-5000}})
-                medit('Вы успешно приобрели скилл "Колдун"!',call.message.chat.id,call.message.message_id)
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-            
-  elif call.data=='buyfiremage':
-       x=users.find_one({'id':call.from_user.id})
-       if 'firemage' not in x['bot']['bought']:
-           if x['cookie']>=5500:
-              if 'mage' in x['bot']['bought']:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'firemage'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-5500}})
-                medit('Вы успешно приобрели скилл "Повелитель огня"!',call.message.chat.id,call.message.message_id)
-              else:
-                  bot.answer_callback_query(call.id, 'Сначала приобретите предыдущее улучшение!')
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-            
-  elif call.data=='buynecromant':
-       x=users.find_one({'id':call.from_user.id})
-       if 'necromant' not in x['bot']['bought']:
-           if x['cookie']>=6000:
-              if 'firemage' in x['bot']['bought']:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'necromant'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-6000}})
-                medit('Вы успешно приобрели скилл "Некромант"!',call.message.chat.id,call.message.message_id)
-              else:
-                  bot.answer_callback_query(call.id, 'Сначала приобретите предыдущее улучшение!')
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-            
-  elif call.data=='buymagictitan':
-       x=users.find_one({'id':call.from_user.id})
-       if 'magictitan' not in x['bot']['bought']:
-           if x['cookie']>=7000:
-              if 'necromant' in x['bot']['bought']:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'magictitan'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-7000}})
-                medit('Вы успешно приобрели скилл "Магический титан"!',call.message.chat.id,call.message.message_id)
-              else:
-                  bot.answer_callback_query(call.id, 'Сначала приобретите предыдущее улучшение!')
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-       
-       
-  elif call.data=='buymedic':
-       x=users.find_one({'id':call.from_user.id})
-       if 'medic' not in x['bot']['bought']:
-           if x['cookie']>=1500:
-              if 'shieldgen' in x['bot']['bought']:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'medic'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-1500}})
-                medit('Вы успешно приобрели скилл "Медик"!',call.message.chat.id,call.message.message_id)
-              else:
-                  bot.answer_callback_query(call.id, 'Сначала приобретите предыдущее улучшение!')
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-       
-  elif call.data=='buyliveful':
-       x=users.find_one({'id':call.from_user.id})
-       if 'liveful' not in x['bot']['bought']:
-           if x['cookie']>=2000:
-             if 'medic' in x['bot']['bought']:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'liveful'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-2000}})
-                medit('Вы успешно приобрели скилл "Живучий"!',call.message.chat.id,call.message.message_id)
-             else:
-                bot.answer_callback_query(call.id, 'Сначала приобретите предыдущее улучшение!')
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-       
-  elif call.data=='buydvuzhil':
-       x=users.find_one({'id':call.from_user.id})
-       if 'dvuzhil' not in x['bot']['bought']:
-           if x['cookie']>=2500:
-             if 'liveful' in x['bot']['bought']:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'dvuzhil'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-2500}})
-                medit('Вы успешно приобрели скилл "Стойкий"!',call.message.chat.id,call.message.message_id)
-             else:
-                bot.answer_callback_query(call.id, 'Сначала приобретите предыдущее улучшение!')
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-            
-  elif call.data=='buynindza':
-       x=users.find_one({'id':call.from_user.id})
-       if 'nindza' not in x['bot']['bought']:
-           if x['cookie']>=3500:
-             if 'dvuzhil' in x['bot']['bought']:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'nindza'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-3500}})
-                medit('Вы успешно приобрели скилл "Ниндзя"!',call.message.chat.id,call.message.message_id)
-             else:
-                bot.answer_callback_query(call.id, 'Сначала приобретите предыдущее улучшение!')
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-       
-  elif call.data=='buypricel':
-       x=users.find_one({'id':call.from_user.id})
-       if 'pricel' not in x['bot']['bought']:
-           if x['cookie']>=1000:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'pricel'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-1000}})
-                medit('Вы успешно приобрели скилл "Прицел"!',call.message.chat.id,call.message.message_id)
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-       
-  elif call.data=='buycazn':
-       x=users.find_one({'id':call.from_user.id})
-       if 'cazn' not in x['bot']['bought']:
-           if x['cookie']>=1500:
-             if 'berserk' in x['bot']['bought']:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'cazn'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-1500}})
-                medit('Вы успешно приобрели скилл "Казнь"!',call.message.chat.id,call.message.message_id)
-             else:
-                bot.answer_callback_query(call.id, 'Сначала приобретите предыдущее улучшение!')
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-            
-  elif call.data=='buyzeus':
-       x=users.find_one({'id':call.from_user.id})
-       if 'zeus' not in x['bot']['bought']:
-           if x['cookie']>=3500:
-             if 'cazn' in x['bot']['bought']:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'zeus'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-3500}})
-                medit('Вы успешно приобрели скилл "Зевс"!',call.message.chat.id,call.message.message_id)
-             else:
-                bot.answer_callback_query(call.id, 'Сначала приобретите предыдущее улучшение!')
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-       
-      
-       
-  elif call.data=='buyzombie':
-       x=users.find_one({'id':call.from_user.id})
-       if 'zombie' not in x['bot']['bought']:
-           if x['cookie']>=1500:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'zombie'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-1500}})
-                medit('Вы успешно приобрели скилл "Зомби"!',call.message.chat.id,call.message.message_id)
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-       
-  elif call.data=='buygipnoz':
-       x=users.find_one({'id':call.from_user.id})
-       if 'gipnoz' not in x['bot']['bought']:
-           if x['cookie']>=2000:
-             if 'zombie' in x['bot']['bought']:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'gipnoz'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-2000}})
-                medit('Вы успешно приобрели скилл "Гипноз"!',call.message.chat.id,call.message.message_id)
-             else:
-                bot.answer_callback_query(call.id, 'Сначала приобретите предыдущее улучшение!')
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-            
-  elif call.data=='buypaukovod':
-       x=users.find_one({'id':call.from_user.id})
-       if 'paukovod' not in x['bot']['bought']:
-           if x['cookie']>=2500:
-             if 'gipnoz' in x['bot']['bought']:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'paukovod'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-2500}})
-                medit('Вы успешно приобрели скилл "Пауковод"!',call.message.chat.id,call.message.message_id)
-             else:
-                bot.answer_callback_query(call.id, 'Сначала приобретите предыдущее улучшение!')
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-            
-       
-  elif call.data=='buyberserk':
-       x=users.find_one({'id':call.from_user.id})
-       if 'berserk' not in x['bot']['bought']:
-           if x['cookie']>=1500:
-             if 'pricel' in x['bot']['bought']:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'berserk'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-1500}})
-                medit('Вы успешно приобрели скилл "Берсерк"!',call.message.chat.id,call.message.message_id)
-             else:
-                bot.answer_callback_query(call.id, 'Сначала приобретите предыдущее улучшение!')
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-            
-  elif call.data=='buyvampire':
-       x=users.find_one({'id':call.from_user.id})
-       if 'vampire' not in x['bot']['bought']:
-           if x['cookie']>=2000:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'vampire'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-2000}})
-                medit('Вы успешно приобрели скилл "Вампир"!',call.message.chat.id,call.message.message_id)
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-            
-  elif call.data=='buybloodmage':
-       x=users.find_one({'id':call.from_user.id})
-       if 'bloodmage' not in x['bot']['bought']:
-         if 'vampire' in x['bot']['bought']:
-           if x['cookie']>=4500:
-                users.update_one({'id':call.from_user.id}, {'$push':{'bot.bought':'bloodmage'}})
-                users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-4500}})
-                medit('Вы успешно приобрели скилл "Маг крови"!',call.message.chat.id,call.message.message_id)
-           else:
-               bot.answer_callback_query(call.id, 'Недостаточно поинтов!')
-         else:
-                bot.answer_callback_query(call.id, 'Сначала приобретите предыдущее улучшение!')
-       else:
-           bot.answer_callback_query(call.id, 'У вас уже есть это!')
-               
-  elif call.data=='close':
-      medit('Меню закрыто.', call.message.chat.id, call.message.message_id)
-
-        
-       
-  elif call.data=='equiprock':
-    x=userstrug.find_one({'id':call.from_user.id})
-    y=users.find_one({'id':call.from_user.id})
-    if '☄' in x['inventory'] or y['id']==324316537:
-      if y['bot']['weapon']==None:
-        users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':'rock'}})
-        bot.answer_callback_query(call.id, 'Вы успешно экипировали оружие "Камень"!')
-      elif y['bot']['weapon']=='rock':
-          users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':None}})
-          bot.answer_callback_query(call.id, 'Вы успешно сняли оружие "Камень"!')
-      else:
-        bot.answer_callback_query(call.id, 'Для начала снимите экипированное оружие!')
-    else:
-        bot.answer_callback_query(call.id, 'У вас нет этого предмета!')
-        
-  elif call.data=='equiphand':
-    x=userstrug.find_one({'id':call.from_user.id})
-    y=users.find_one({'id':call.from_user.id})
-    if y['bot']['weapon']==None:
-        users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':'hand'}})
-        bot.answer_callback_query(call.id, 'Вы успешно экипировали оружие "Кулаки"!')
-    elif y['bot']['weapon']=='hand':
-          users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':None}})
-          bot.answer_callback_query(call.id, 'Вы успешно сняли оружие "Кулаки"!')
-    else:
-        bot.answer_callback_query(call.id, 'Для начала снимите экипированное оружие!')
-        
-  elif call.data=='equippistol':
-    x=userstrug.find_one({'id':call.from_user.id})
-    y=users.find_one({'id':call.from_user.id})
-    if '🔫' in x['inventory'] or y['id']==324316537:
-      if y['bot']['weapon']==None:
-        users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':'ak'}})
-        bot.answer_callback_query(call.id, 'Вы успешно экипировали оружие "Пистолет"!')
-      elif y['bot']['weapon']=='ak':
-          users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':None}})
-          bot.answer_callback_query(call.id, 'Вы успешно сняли оружие "Пистолет"!')
-      else:
-        bot.answer_callback_query(call.id, 'Для начала снимите экипированное оружие!')
-    else:
-        bot.answer_callback_query(call.id, 'У вас нет этого предмета!')
-        
-  elif call.data=='equipsaw':
-    x=userstrug.find_one({'id':call.from_user.id})
-    y=users.find_one({'id':call.from_user.id})
-    if '⚙' in x['inventory'] or y['id']==324316537:
-      if y['bot']['weapon']==None:
-        users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':'saw'}})
-        bot.answer_callback_query(call.id, 'Вы успешно экипировали оружие "Пилострел"!')
-      elif y['bot']['weapon']=='saw':
-          users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':None}})
-          bot.answer_callback_query(call.id, 'Вы успешно сняли оружие "Пилострел"!')
-      else:
-        bot.answer_callback_query(call.id, 'Для начала снимите экипированное оружие!')
-    else:
-        bot.answer_callback_query(call.id, 'У вас нет этого предмета!')
-        
-  elif call.data=='equipkinzhal':
-    x=userstrug.find_one({'id':call.from_user.id})
-    y=users.find_one({'id':call.from_user.id})
-    if '🗡' in x['inventory'] or y['id']==324316537:
-      if y['bot']['weapon']==None:
-        users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':'kinzhal'}})
-        bot.answer_callback_query(call.id, 'Вы успешно экипировали оружие "Кинжал"!')
-      elif y['bot']['weapon']=='kinzhal':
-          users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':None}})
-          bot.answer_callback_query(call.id, 'Вы успешно сняли оружие "Кинжал"!')
-      else:
-        bot.answer_callback_query(call.id, 'Для начала снимите экипированное оружие!')
-    else:
-        bot.answer_callback_query(call.id, 'У вас нет этого предмета!')
-        
-  elif call.data=='equipemojthrow':
-    y=users.find_one({'id':call.from_user.id})
-    if 'emojthrow' in y['bot']['bought']:
-      if y['bot']['weapon']==None:
-        users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':'emojthrow'}})
-        bot.answer_callback_query(call.id, 'Вы успешно экипировали оружие "Эмоджимёт"!')
-      elif y['bot']['weapon']=='emojthrow':
-          users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':None}})
-          bot.answer_callback_query(call.id, 'Вы успешно сняли оружие "Эмоджимёт"!')
-      else:
-        bot.answer_callback_query(call.id, 'Для начала снимите экипированное оружие!')
-    else:
-        bot.answer_callback_query(call.id, 'У вас нет этого предмета!')
-         
-         
-  elif call.data=='equipbow':
-    x=userstrug.find_one({'id':call.from_user.id})
-    y=users.find_one({'id':call.from_user.id})
-    if '🏹' in x['inventory'] or x['id']==324316537:
-      if y['bot']['weapon']==None:
-        users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':'bow'}})
-        bot.answer_callback_query(call.id, 'Вы успешно экипировали оружие "Лук"!')
-      elif y['bot']['weapon']=='bow':
-          users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':None}})
-          bot.answer_callback_query(call.id, 'Вы успешно сняли оружие "Лук"!')
-      else:
-        bot.answer_callback_query(call.id, 'Для начала снимите экипированное оружие!')
-    else:
-        bot.answer_callback_query(call.id, 'У вас нет этого предмета!')
-        
-  elif call.data=='equipchlen':
-    x=userstrug.find_one({'id':call.from_user.id})
-    y=users.find_one({'id':call.from_user.id})
-    if call.from_user.id==60727377:
-      if y['bot']['weapon']==None:
-        users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':'chlen'}})
-        bot.answer_callback_query(call.id, 'Вы успешно экипировали оружие "Флюгегенхаймен"!')
-      elif y['bot']['weapon']=='ak':
-          users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':None}})
-          bot.answer_callback_query(call.id, 'Вы успешно сняли оружие "Флюгегенхаймен"!')
-      else:
-        bot.answer_callback_query(call.id, 'Для начала снимите экипированное оружие!')
-            
-  elif call.data=='equipsliz':
-    x=userstrug.find_one({'id':call.from_user.id})
-    y=users.find_one({'id':call.from_user.id})
-    if 'sliznuk' in y['bot']['bought']:
-      if y['bot']['weapon']==None:
-        users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':'slizgun'}})
-        bot.answer_callback_query(call.id, 'Вы успешно экипировали оружие "Слиземёт"!')
-      elif y['bot']['weapon']=='rock':
-          users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':None}})
-          bot.answer_callback_query(call.id, 'Вы успешно сняли оружие "Слиземёт"!')
-      else:
-        bot.answer_callback_query(call.id, 'Для начала снимите экипированное оружие!')
-    else:
-        bot.answer_callback_query(call.id, 'У вас нет этого предмета!')
-        
-  elif call.data=='equipkatana':
-      y=users.find_one({'id':call.from_user.id})
-      if y['bot']['weapon']==None:
-        users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':'katana'}})
-        bot.answer_callback_query(call.id, 'Вы успешно экипировали оружие "Катана"!')
-      elif y['bot']['weapon']=='rock':
-          users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':None}})
-          bot.answer_callback_query(call.id, 'Вы успешно сняли оружие "Катана"!')
-      else:
-        bot.answer_callback_query(call.id, 'Для начала снимите экипированное оружие!')
-        
-  elif call.data=='equippumpkin':
-      y=users.find_one({'id':call.from_user.id})
-      if y['bot']['weapon']==None:
-        users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':'pumpkin'}})
-        bot.answer_callback_query(call.id, 'Вы успешно экипировали оружие "Капуста"!')
-      elif y['bot']['weapon']=='rock':
-          users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':None}})
-          bot.answer_callback_query(call.id, 'Вы успешно сняли оружие "Капуста"!')
-      else:
-        bot.answer_callback_query(call.id, 'Для начала снимите экипированное оружие!') 
-        
-  elif call.data=='equipfox':
-      y=users.find_one({'id':call.from_user.id})
-      if y['bot']['weapon']==None:
-        users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':'fox'}})
-        bot.answer_callback_query(call.id, 'Вы успешно экипировали оружие "Лиса"!')
-      elif y['bot']['weapon']=='rock':
-          users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':None}})
-          bot.answer_callback_query(call.id, 'Вы успешно сняли оружие "Лиса"!')
-      else:
-        bot.answer_callback_query(call.id, 'Для начала снимите экипированное оружие!') 
-         
-  elif call.data=='gunoff':
-      y=users.find_one({'id':call.from_user.id})
-      if y!=None:
-        users.update_one({'id':call.from_user.id}, {'$set':{'bot.weapon':None}})
-        bot.answer_callback_query(call.id, 'Вы успешно сняли оружие!')
-      else:
-        pass
-    
-  elif call.data=='unequip':
-      users.update_one({'id':call.from_user.id}, {'$set':{'bot.skills':[]}})
-      bot.answer_callback_query(call.id, 'Вы успешно сняли все скиллы!')
-      
-  elif 'equip' in call.data:
-    txt=call.data.split('equip')
-    x=users.find_one({'id':call.from_user.id})
-    if txt[1] in x['bot']['bought']:
-      if txt[1] not in x['bot']['skills']:
-        if len(x['bot']['skills'])<=1:
-          users.update_one({'id':call.from_user.id}, {'$push':{'bot.skills':txt[1]}})
-          try:
-            bot.answer_callback_query(call.id, 'Вы успешно экипировали скилл "'+skilltoname(txt[1])+'"!')
-          except:
-            bot.answer_callback_query(call.id, 'Вы успешно экипировали скилл "'+'Неизвестно'+'"!')
-        else:
-          bot.answer_callback_query(call.id, 'У вас уже экипировано максимум скиллов(2). Чтобы снять скилл, нажмите на его название.')
-      else:
-        users.update_one({'id':call.from_user.id}, {'$pull':{'bot.skills':txt[1]}})
-        try:
-          bot.answer_callback_query(call.id, 'Вы успешно сняли скилл "'+skilltoname(txt[1])+'"!')
-        except:
-          bot.answer_callback_query(call.id, 'Вы успешно сняли скилл "'+'Неизвестно'+'"!')
-    else:
-        bot.answer_callback_query(call.id, 'У вас нет этого скилла!')
-        
-           
-  elif call.data=='buyjoin':
-      y=users.find_one({'id':call.from_user.id})
-      kb=types.InlineKeyboardMarkup()
-      kb.add(types.InlineKeyboardButton(text='+1🤖', callback_data='+1'),types.InlineKeyboardButton(text='+2🤖', callback_data='+2'),types.InlineKeyboardButton(text='+5🤖', callback_data='+5'))
-      kb.add(types.InlineKeyboardButton(text='+10🤖', callback_data='+10'),types.InlineKeyboardButton(text='+50🤖', callback_data='+50'),types.InlineKeyboardButton(text='+100🤖', callback_data='+100'))
-      kb.add(types.InlineKeyboardButton(text='-1🤖', callback_data='-1'),types.InlineKeyboardButton(text='-2🤖', callback_data='-2'),types.InlineKeyboardButton(text='-5🤖', callback_data='-5'))
-      kb.add(types.InlineKeyboardButton(text='-10🤖', callback_data='-10'),types.InlineKeyboardButton(text='-50🤖', callback_data='-50'),types.InlineKeyboardButton(text='-100🤖', callback_data='-100'))
-      kb.add(types.InlineKeyboardButton(text='Купить', callback_data='buyjoinbots'))
-      medit('Выберите количество джойн-ботов для покупки.\nОдин стоит 20⚛️ поинтов.\nТекущее количество: '+str(y['currentjoinbots'])+'.\nСуммарная стоимость: '+str(y['currentjoinbots']*20)+'⚛️',call.message.chat.id, call.message.message_id,  reply_markup=kb)
-      
-  elif call.data=='buyjoinbots':
-      y=users.find_one({'id':call.from_user.id})
-      if y['currentjoinbots']*20<=y['cookie']:
-        x=y['currentjoinbots']
-        users.update_one({'id':call.from_user.id}, {'$inc':{'joinbots':y['currentjoinbots']}})
-        users.update_one({'id':call.from_user.id}, {'$inc':{'cookie':-(y['currentjoinbots']*20)}})
-        users.update_one({'id':call.from_user.id}, {'$set':{'currentjoinbots':0}})
-        medit('Вы успешно приобрели '+str(x)+'🤖 джойн-ботов!', call.message.chat.id, call.message.message_id)
-      else:
-        medit('Недостаточно поинтов!', call.message.chat.id, call.message.message_id)
-      
-  elif call.data=='usejoin':
-      x=users.find_one({'id':call.from_user.id})
-      if x['enablejoin']==0:
-          users.update_one({'id':call.from_user.id}, {'$set':{'enablejoin':1}})
-          medit('✅Автоджоин ко всем играм успешно включён!', call.message.chat.id, call.message.message_id)
-      else:
-          users.update_one({'id':call.from_user.id}, {'$set':{'enablejoin':0}})
-          medit('🚫Автоджоин ко всем играм успешно выключен!', call.message.chat.id, call.message.message_id)
-           
-  elif call.data=='usejoinw':
-      x=users.find_one({'id':call.from_user.id})
-      if x['nomutantjoin']==0:
-          users.update_one({'id':call.from_user.id}, {'$set':{'nomutantjoin':1}})
-          medit('✅Автоджоин к играм без мутантов успешно включён!', call.message.chat.id, call.message.message_id)
-      else:
-          users.update_one({'id':call.from_user.id}, {'$set':{'nomutantjoin':0}})
-          medit('🚫Автоджоин к играм без мутантов успешно выключен!', call.message.chat.id, call.message.message_id)
-        
-  elif 'fight' in call.data:
-    kb=types.InlineKeyboardMarkup()
-    chat=int(call.data.split(' ')[2])
-    me=games[chat]['bots'][call.from_user.id]
-    if 'ready' not in me['effects']:
-        if 'attackchoice' in call.data:
-            enemy=[]
-            for ids in games[chat]['bots']:
-                enm=games[chat]['bots'][ids]
-                if enm['id']!=me['id']:
-                    enemy.append(enm)
-            for ids in enemy:
-              if ids['die']!=1 and ids['zombie']<=0:
-                if ids['identeficator']!=None:
-                    x=ids['identeficator']
-                elif ids['realid']!=None:
-                    x=ids['realid']
-                kb.add(types.InlineKeyboardButton(text=ids['name'],callback_data='fight selecttarget '+str(chat)+' '+str(x)))
-            kb.add(types.InlineKeyboardButton(text='Назад',callback_data='fight back '+str(chat)))
-            medit('Выберите соперника для атаки.',me['msg'].chat.id, me['msg'].message_id,reply_markup=kb)
-            
-        elif 'back' in call.data:
-            givekeyboard(chat,me)
-            
-        elif 'backskills' in call.data:
-            usable=['gipnoz','electro', 'medic']
-            for ids in me['skills']:
-                if ids in usable:
-                    if ids=='gipnoz' and me['gipnoz']<=0:
-                        kb.add(types.InlineKeyboardButton(text=skilltoname(ids), callback_data='fight use '+str(chat)+' '+ids))
-                    if ids=='medic' and me['heal']<=0:
-                        kb.add(types.InlineKeyboardButton(text=skilltoname(ids), callback_data='fight use '+str(chat)+' '+ids))
-                    
-            for ids in me['mutations']:
-                if ids in usable:
-                    if ids=='electro' and me['shockcd']<=0:
-                        kb.add(types.InlineKeyboardButton(text='🔌Разряд!', callback_data='fight use '+str(chat)+' '+'electro'))
-            kb.add(types.InlineKeyboardButton(text='Назад',callback_data='fight back '+str(chat)))
-            medit('Выберите скилл.',me['msg'].chat.id,me['msg'].message_id,reply_markup=kb)
-            
-        elif 'selecttarget' in call.data:
-            target=call.data.split(' ')[3]
-            enemy=None
-            try:
-                enemy=games[chat]['bots'][int(target)]
-            except:
-                for ids in games[chat]['bots']:
-                    tr=games[chat]['bots'][ids]
-                    if tr['identeficator']==target:
-                        enemy=tr
-            me['target']=enemy
-            me['attack']=1
-            me['effects'].append('ready')
-            medit('Цель выбрана - '+enemy['name']+'!',me['msg'].chat.id,me['msg'].message_id)
-            me['msg']=None
-            playercheck(chat)
-            
-        elif 'reload' in call.data:
-            me['reload']=1
-            me['effects'].append('ready')
-            medit('Выбрано: перезарядка.',me['msg'].chat.id,me['msg'].message_id)
-            me['msg']=None
-            playercheck(chat)
-            
-        elif 'yvorot' in call.data and (me['yvorotkd']<=0):
-            me['yvorot']=1
-            me['effects'].append('ready')
-            medit('Выбрано: уворот.',me['msg'].chat.id,me['msg'].message_id)
-            me['msg']=None
-            playercheck(chat)
-            
-        elif 'skills' in call.data:
-            usable=['gipnoz','electro', 'medic','cookiegolem','cookiegun','cookiecharge']
-            buttons=[]
-            for ids in me['skills']:
-                if ids in usable:
-                    if ids=='gipnoz' and me['gipnoz']<=0:
-                        buttons.append(ids)
-                    if ids=='medic' and me['heal']<=0:
-                         buttons.append(ids)
-                    if ids=='cookiegolem' and me['cookieboss']['cookiegolemcd']<=0:
-                         buttons.append(ids)
-                    if ids=='cookiegun' and me['cookieboss']['cookieguncd']<=0:
-                         buttons.append(ids)
-                    if ids=='cookiecharge' and me['cookieboss']['cookiechargecd']<=0:
-                         buttons.append(ids)
-            for ids in buttons:
-                kb.add(types.InlineKeyboardButton(text=skilltoname(ids), callback_data='fight use '+str(chat)+' '+ids))
-                
-            for ids in me['mutations']:
-                if ids in usable:
-                    if ids=='electro' and me['shockcd']<=0 and me['energy']>=3:
-                        kb.add(types.InlineKeyboardButton(text='🔌Разряд!', callback_data='fight use '+str(chat)+' '+'electro'))
-            kb.add(types.InlineKeyboardButton(text='Назад',callback_data='fight back '+str(chat)))
-            medit('Выберите скилл.',me['msg'].chat.id,me['msg'].message_id,reply_markup=kb)
-            
-        elif 'use' in call.data:
-          skill=call.data.split(' ')[3]
-          if skill!='medic':
-            skill=call.data.split(' ')[3]
-            enemy=[]
-            for ids in games[chat]['bots']:
-                enm=games[chat]['bots'][ids]
-                if enm['id']!=me['id'] and enm['die']!=1 and enm['zombie']<=0:
-                    enemy.append(enm)
-            for ids in enemy:
-                if ids['identeficator']!=None:
-                    x=ids['identeficator']
-                elif ids['realid']!=None:
-                    x=ids['realid']
-                kb.add(types.InlineKeyboardButton(text=ids['name'],callback_data='fight skilltarget '+str(chat)+' '+str(x)+' '+skill))
-            kb.add(types.InlineKeyboardButton(text='Назад',callback_data='fight backskills '+str(chat)))
-            medit('Выберите цель.',me['msg'].chat.id,me['msg'].message_id,reply_markup=kb)
-          else:
-            me['mainskill'].append('medic')
-            me['skill']=1
-            me['effects'].append('ready')
-            medit('Выбрано: хил.',me['msg'].chat.id,me['msg'].message_id)
-            me['msg']=None
-            playercheck(chat)
-            
-        elif 'skilltarget' in call.data:
-            target=call.data.split(' ')[3]
-            skill=call.data.split(' ')[4]
-            enemy=None
-            try:
-                enemy=games[chat]['bots'][int(target)]
-            except:
-                for ids in games[chat]['bots']:
-                    tr=games[chat]['bots'][ids]
-                    if tr['identeficator']==target:
-                        enemy=tr
-            me['target']=enemy
-            me['skill']=1
-            me['effects'].append('ready')
-            me['mainskill'].append(skill)
-            medit('Цель выбрана - '+enemy['name']+'!',me['msg'].chat.id,me['msg'].message_id)
-            me['msg']=None
-            playercheck(chat)
-        
-        elif 'skip' in call.data:
-            me['effects'].append('ready')
-            medit('Выбрано: пропуск хода.',me['msg'].chat.id,me['msg'].message_id)
-            me['msg']=None
-            playercheck(chat)
-            
-            
-        
-        
-  else:
-      kb=types.InlineKeyboardMarkup()
-      kb.add(types.InlineKeyboardButton(text='+1🤖', callback_data='+1'),types.InlineKeyboardButton(text='+2🤖', callback_data='+2'),types.InlineKeyboardButton(text='+5🤖', callback_data='+5'))
-      kb.add(types.InlineKeyboardButton(text='+10🤖', callback_data='+10'),types.InlineKeyboardButton(text='+50🤖', callback_data='+50'),types.InlineKeyboardButton(text='+100🤖', callback_data='+100'))
-      kb.add(types.InlineKeyboardButton(text='-1🤖', callback_data='-1'),types.InlineKeyboardButton(text='-2🤖', callback_data='-2'),types.InlineKeyboardButton(text='-5🤖', callback_data='-5'))
-      kb.add(types.InlineKeyboardButton(text='-10🤖', callback_data='-10'),types.InlineKeyboardButton(text='-50🤖', callback_data='-50'),types.InlineKeyboardButton(text='-100🤖', callback_data='-100'))
-      kb.add(types.InlineKeyboardButton(text='Купить', callback_data='buyjoinbots'))
-      y=users.find_one({'id':call.from_user.id})
-      if y['currentjoinbots']+int(call.data)<0:
-          users.update_one({'id':call.from_user.id}, {'$set':{'currentjoinbots':0}})
-      else:
-          users.update_one({'id':call.from_user.id}, {'$inc':{'currentjoinbots':int(call.data)}})
-      y=users.find_one({'id':call.from_user.id})
-      medit('Выберите количество джойн-ботов для покупки.\nОдин стоит 20⚛️ поинтов.\nТекущее количество: '+str(y['currentjoinbots'])+'.\nСуммарная стоимость: '+str(y['currentjoinbots']*20)+'⚛️', call.message.chat.id, call.message.message_id, reply_markup=kb)
- except Exception as e:
-    print('Ошибка:\n', traceback.format_exc())
-    bot.send_message(441399484, traceback.format_exc())
-
-def giveitems(game):
-    for ids in game['bots']:
-      if game['bots'][ids]['weapon']!='magic':
-        game['bots'][ids]['items'].append(random.choice(items))
-        game['bots'][ids]['items'].append(random.choice(items))
-  
-                   
-def battle(id): 
-  try:
-    lst=[]
-    for ids in games[id]['bots']:
-      lst.append(games[id]['bots'][ids])
-    for wtf in lst:
-        if wtf['die']!=1:
-            if wtf['stun']<=0:
-                if 'playercontrol' not in wtf['effects']:
-                    wtf[act(wtf, id)]=1
-
-    results(id)
-  except Exception as e:
-    print('Ошибка:\n', traceback.format_exc())
-    bot.send_message(441399484, traceback.format_exc())
-
-def playercheck(id):
-    allp=0
-    allpready=0
-    for ids in games[id]['bots']:
-        b=games[id]['bots'][ids]
-        if 'playercontrol' in b['effects']:
-            allp+=1
-    for ids in games[id]['bots']:
-        b=games[id]['bots'][ids]
-        if 'playercontrol' in b['effects'] and b['msg']==None:
-            allpready+=1
-    if allpready==allp:
-        try:
-            games[id]['battletimer'].cancel()
-        except:
-            pass
-        battle(id)
-    
-def givekeyboard(id, user):
-    kb=types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton(text='⚔️Атака',callback_data='fight attackchoice '+str(id)),types.InlineKeyboardButton(text='🕑Перезарядка', callback_data='fight reload '+str(id)))
-    kb.add(types.InlineKeyboardButton(text='💨Уворот',callback_data='fight yvorot '+str(id)),types.InlineKeyboardButton(text='⭐️Скиллы', callback_data='fight skills '+str(id)))
-    kb.add(types.InlineKeyboardButton(text='▶️Пропустить',callback_data='fight skip '+str(id)))
-    
-    pop=emojize(':poop:', use_aliases=True)
-    zilch=emojize(':panda_face:',use_aliases=True)
-    if user['id']==581167827:
-       em_hp='💙'
-    elif user['id']==256659642:
-       em_hp=pop
-    elif user['id']==324316537:
-       em_hp=zilch
-    elif user['id']==420049610:
-       em_hp='💜'
-    elif user['id']==493430476:
-       em_hp='🐷'
-    elif 'Кошмарное слияние' in user['name']:
-       em_hp='🖤'
-    else:
-       em_hp='♥'
-    if user['msg']==None:
-        msg=bot.send_message(user['id'],'Выберите действие.\nЭнергия: '+'⚡️'*user['energy']+'\nХП: '+em_hp*user['hp'],reply_markup=kb)
-        user['msg']=msg
-    else:
-        medit('Выберите действие.',user['msg'].chat.id, user['msg'].message_id, reply_markup=kb)
-    
-def prizes(id,ids,winner):
-       for ids in games[id]['bots']:
-             user=users.find_one({'id':games[id]['bots'][ids]['id']})
-             prize1=150
-             prize2=200
-             prize3=300
-             prize4=450
-             prize5=600
-             prize6=800
-             prize7=10000
-             prize8=20000
-             prize9=30000
-             prize10=40000
-             prize11=100000
-             winner2=users.find_one({'id':winner['id']})
-             i=games[id]['bots'][ids]['exp']
-             if i>100 and user['prize1']==0:
-                if user['inviter']!=None:
-                   users.update_one({'id':user['inviter']}, {'$inc':{'cookie':int(prize1/2)}})
-                   try:
-                      bot.send_message(user['inviter'], 'Ваш приглашённый игрок '+user['name']+' получил ранг "Эсквайр"! Вы получаете '+str(int(prize1/2))+'⚛️.')
-                   except:
-                      pass
-                try:
-                   bot.send_message(user['id'], 'Вы получили ранг "Эсквайр"! Награда: '+str(prize1)+'⚛️')
-                except:
-                   pass
-                users.update_one({'id':user['id']}, {'$set':{'prize1':1}})
-                users.update_one({'id':user['id']}, {'$inc':{'cookie':prize1}})
-             if i>500 and user['prize2']==0:
-                if user['inviter']!=None:
-                   users.update_one({'id':user['inviter']}, {'$inc':{'cookie':int(prize2/2)}})
-                   try:
-                      bot.send_message(user['inviter'], 'Ваш приглашённый игрок '+user['name']+' получил ранг "Солдат"! Вы получаете '+str(int(prize2/2))+'⚛️.')
-                   except:
-                      pass
-                try:
-                   bot.send_message(user['id'], 'Вы получили ранг "Солдат"! Награда: '+str(prize2)+'⚛️')
-                except:
-                   pass
-                users.update_one({'id':user['id']}, {'$set':{'prize2':1}})
-                users.update_one({'id':user['id']}, {'$inc':{'cookie':prize2}})
-             if i>800 and user['prize3']==0:
-                if user['inviter']!=None:
-                   users.update_one({'id':user['inviter']}, {'$inc':{'cookie':int(prize3/2)}})
-                   try:
-                      bot.send_message(user['inviter'], 'Ваш приглашённый игрок '+user['name']+' получил ранг "Опытный боец"! Вы получаете '+str(int(prize3/2))+'⚛️.')
-                   except:
-                      pass
-                try:
-                   bot.send_message(user['id'], 'Вы получили ранг "Опытный боец"! Награда: '+str(prize3)+'⚛️')
-                except:
-                   pass
-                users.update_one({'id':user['id']}, {'$set':{'prize3':1}})
-                users.update_one({'id':user['id']}, {'$inc':{'cookie':prize3}})
-             if i>2000 and user['prize4']==0:
-                if user['inviter']!=None:
-                   users.update_one({'id':user['inviter']}, {'$inc':{'cookie':int(prize4/2)}})
-                   try:
-                      bot.send_message(user['inviter'], 'Ваш приглашённый игрок '+user['name']+' получил ранг "Подполковник"! Вы получаете '+str(int(prize4/2))+'⚛️.')
-                   except:
-                      pass
-                try:
-                   bot.send_message(user['id'], 'Вы получили ранг "Подполковник"! Награда: '+str(prize4)+'⚛️')
-                except:
-                   pass
-                users.update_one({'id':user['id']}, {'$set':{'prize4':1}})
-                users.update_one({'id':user['id']}, {'$inc':{'cookie':prize4}})
-             if i>3500 and user['prize5']==0:
-                if user['inviter']!=None:
-                   users.update_one({'id':user['inviter']}, {'$inc':{'cookie':int(prize5/2)}})
-                   try:
-                      bot.send_message(user['inviter'], 'Ваш приглашённый игрок '+user['name']+' получил ранг "Генерал"! Вы получаете '+str(int(prize5/2))+'⚛️.')
-                   except:
-                      pass
-                try:
-                   bot.send_message(user['id'], 'Вы получили ранг "Генерал"! Награда: '+str(prize5)+'⚛️')
-                except:
-                   pass
-                users.update_one({'id':user['id']}, {'$set':{'prize5':1}})
-                users.update_one({'id':user['id']}, {'$inc':{'cookie':prize5}})
-             if i>7000 and user['prize6']==0:
-                if user['inviter']!=None:
-                   users.update_one({'id':user['inviter']}, {'$inc':{'cookie':int(prize6/2)}})
-                   try:
-                      bot.send_message(user['inviter'], 'Ваш приглашённый игрок '+user['name']+' получил ранг "Повелитель"! Вы получаете '+str(int(prize6/2))+'⚛️.')
-                   except:
-                      pass
-                try:
-                   bot.send_message(user['id'], 'Вы получили ранг "Повелитель"! Награда: '+str(prize6)+'⚛️')
-                except:
-                   pass
-                users.update_one({'id':user['id']}, {'$set':{'prize6':1}})
-                users.update_one({'id':user['id']}, {'$inc':{'cookie':prize6}})
-             if i>50000 and user['prize7']==0:
-                if user['inviter']!=None:
-                   users.update_one({'id':user['inviter']}, {'$inc':{'cookie':int(prize7/2)}})
-                   try:
-                      bot.send_message(user['inviter'], 'Ваш приглашённый игрок '+user['name']+' получил ранг "Бог"! Вы получаете '+str(int(prize7/2))+'⚛️.')
-                   except:
-                      pass
-                try:
-                   bot.send_message(user['id'], 'Вы получили ранг "Бог"! Награда: '+str(prize7)+'⚛️')
-                except:
-                      pass
-                users.update_one({'id':user['id']}, {'$set':{'prize7':1}})
-                users.update_one({'id':user['id']}, {'$inc':{'cookie':prize7}})
-             if i>100000 and user['prize8']==0:
-                if user['inviter']!=None:
-                   users.update_one({'id':user['inviter']}, {'$inc':{'cookie':int(prize8/2)}})
-                   try:
-                      bot.send_message(user['inviter'], 'Ваш приглашённый игрок '+user['name']+' получил ранг "Пасюк"! Вы получаете '+str(int(prize8/2))+'⚛️.')
-                   except:
-                      pass
-                try:
-                   bot.send_message(user['id'], 'Вы получили ранг "Пасюк"! Награда: '+str(prize8)+'⚛️')
-                except:
-                      pass
-                users.update_one({'id':user['id']}, {'$set':{'prize8':1}})
-                users.update_one({'id':user['id']}, {'$inc':{'cookie':prize8}})
-             if i>250000 and user['prize9']==0:
-                if user['inviter']!=None:
-                   users.update_one({'id':user['inviter']}, {'$inc':{'cookie':int(prize9/2)}})
-                   try:
-                      bot.send_message(user['inviter'], 'Ваш приглашённый игрок '+user['name']+' получил ранг "Сверхразум"! Вы получаете '+str(int(prize9/2))+'⚛️.')
-                   except:
-                      pass
-                try:
-                   bot.send_message(user['id'], 'Вы получили ранг "Сверхразум"! Награда: '+str(prize9)+'⚛️')
-                except:
-                      pass
-                users.update_one({'id':user['id']}, {'$set':{'prize9':1}})
-                users.update_one({'id':user['id']}, {'$inc':{'cookie':prize9}})
-             if i>666666 and user['prize10']==0:
-                if user['inviter']!=None:
-                   users.update_one({'id':user['inviter']}, {'$inc':{'cookie':int(prize10/2)}})
-                   try:
-                      bot.send_message(user['inviter'], 'Ваш приглашённый игрок '+user['name']+' получил ранг "Дьявол"! Вы получаете '+str(int(prize10/2))+'⚛️.')
-                   except:
-                      pass
-                try:
-                   bot.send_message(user['id'], 'Вы получили ранг "Дьявол"! Награда: '+str(prize10)+'⚛️')
-                except:
-                      pass
-                users.update_one({'id':user['id']}, {'$set':{'prize10':1}})
-                users.update_one({'id':user['id']}, {'$inc':{'cookie':prize10}})
-             if i>1000000 and user['prize11']==0:
-                if user['inviter']!=None:
-                   users.update_one({'id':user['inviter']}, {'$inc':{'cookie':int(prize11/2)}})
-                   try:
-                      bot.send_message(user['inviter'], 'Ваш приглашённый игрок '+user['name']+' получил ранг "Высшее существо"! Вы получаете '+str(int(prize11/2))+'⚛️.')
-                   except:
-                      pass
-                try:
-                   bot.send_message(user['id'], 'Вы получили ранг "Высшее существо"! Награда: '+str(prize11)+'⚛️')
-                except:
-                      pass
-                users.update_one({'id':user['id']}, {'$set':{'prize11':1}})
-                users.update_one({'id':user['id']}, {'$inc':{'cookie':prize11}})
-           
-           
-def mobcheck(id,mobs):
-    effects=['posion','fire','dmg']
-    player=games[id]['bots'][mobs]
-    if games[id]['bots'][mobs]['hp']>games[id]['bots'][mobs]['maxhp']:
-        games[id]['bots'][mobs]['hp']=games[id]['bots'][mobs]['maxhp']
-    for effect in player['effects']:
-        if effect in effects:
-            player['effects'].append('do'+effect)
-            for idss in player['effects']:
-                if idss==effect:
-                    player['effects'].remove(idss)
-    games[id]['bots'][mobs]['attack']=0
-    games[id]['bots'][mobs]['yvorot']=0 
-    games[id]['bots'][mobs]['reload']=0 
-    games[id]['bots'][mobs]['item']=0
-    games[id]['bots'][mobs]['firearmor']=0
-    games[id]['bots'][mobs]['miss']=0  
-    games[id]['bots'][mobs]['shockcd']-=1
-    if 'nindza' in games[id]['bots'][mobs]['skills']:
-      games[id]['bots'][mobs]['miss']+=20*(1+games[id]['bots'][mobs]['chance'])
-    if 'werewolf' in player['mutations']:
-        if games[id]['xod']%2==0:
-            player['miss']+=15*(1+player['chance'])
-            prm=player['name']
-            player['name']=player['dopname']
-            player['dopname']=prm
-        else:
-            prm=player['name']
-            player['name']=player['dopname']
-            player['dopname']=prm
-    if 'metalarmor' in games[id]['bots'][mobs]['skills']:
-      games[id]['bots'][mobs]['miss']-=8
-      games[id]['bots'][mobs]['currentarmor']=1
-    games[id]['bots'][mobs]['skill']=0
-    games[id]['bots'][mobs]['dopdmg']=0
-    try:
-        games[id]['bots'][mobs]['effects'].remove('ready')
-    except:
-        pass
-    games[id]['bots'][mobs]['shield']=0
-    games[id]['bots'][mobs]['armorturns']-=1
-    if games[id]['bots'][mobs]['armorturns']==0:
-        games[id]['bots'][mobs]['currentarmor']=0
-    games[id]['bots'][mobs]['boundtime']-=1
-    games[id]['bots'][mobs]['boundacted']=0
-    if games[id]['bots'][mobs]['boundtime']==0:
-        games[id]['bots'][mobs]['boundwith']=None
-    games[id]['bots'][mobs]['takendmg']=0
-    if 'firemage' in games[id]['bots'][mobs]['skills']:
-        games[id]['bots'][mobs]['firearmorkd']-=1
-    games[id]['bots'][mobs]['yvorotkd']-=1
-    games[id]['bots'][mobs]['shield']-=1
-    games[id]['bots'][mobs]['hit']=0
-    games[id]['bots'][mobs]['shieldgen']-=1
-    games[id]['bots'][mobs]['blight']=0
-    games[id]['bots'][mobs]['energy']+=games[id]['bots'][mobs]['reservenergy']
-    games[id]['bots'][mobs]['reservenergy']=0
-    games[id]['bots'][mobs]['target']=None
-    games[id]['bots'][mobs]['gipnoz']-=1
-    games[id]['bots'][mobs]['doptext']=''
-    if 'playercontrol' in player['effects'] and player['identeficator']!=None:
-        player['effects'].remove('playercontrol')
-    games[id]['bots'][mobs]['mainskill']=[]
-    if games[id]['bots'][mobs]['deffromgun']>0:
-        games[id]['bots'][mobs]['deffromgun']-=1
-    games[id]['bots'][mobs]['mainitem']=[]
-    if games[id]['bots'][mobs]['heal']!=0:
-        games[id]['bots'][mobs]['heal']-=1
-    if games[id]['bots'][mobs]['die']!=1:
-     if games[id]['bots'][mobs]['hp']<1:
-      games[id]['bots'][mobs]['die']=1
-                
-                
-def results(id): 
-  lst=[]
-  acted=[]
-  for ids in games[id]['bots']:
-      lst.append(games[id]['bots'][ids])
-    
-  for bots in lst:
-     if bots['yvorot']==1:
-        yvorot(bots, id)
-        acted.append(bots)
-        
-  for bots in lst:
-     if bots['skill']==1 and 'electro' not in bots['mainskill']:
-        skill(bots, id) 
-        acted.append(bots)
-        
-  for bots in lst:
-     if bots['skill']==1 and 'electro' in bots['mainskill']:
-        skill(bots, id) 
-        acted.append(bots)
-              
-  for bots in lst:
-      if bots['item']==1:
-          item(bots, id) 
-          acted.append(bots)
-              
-  for bots in lst:
-     if bots['reload']==1:
-        reload(bots, id) 
-        acted.append(bots)
-              
-  for bots in lst:
-    if 'electrocharge' in bots['skills'] and bots['attack']==1:
-        x=attack(bots,id,1)
-        if x==1:
-            bots['hit']=1
-            if random.randint(1,100)<=20*(bots['chance']+1):
-                dmg=bots['energy'] 
-                if dmg<0:
-                    dmg=0
-                bots['doptext']+='🔋'+bots['name']+' заряжает свою атаку! Соперник получает '+str(dmg)+' дополнительного урона!\n'
-                bots['target']['takendmg']+=dmg
-                  
-                  
-  for bots in lst:
-    if bots['weapon']=='sword' and bots['attack']==1:
-        x=attack(bots,id,1)
-        if x==1:
-            bots['hit']=1
-            if random.randint(1,100)<=40*(bots['chance']+1):
-                bots['doptext']+='💢'+bots['name']+' ослепляет соперника!\n'
-                bots['target']['blight']=1
-                acted.append(bots)
-                
-
-  for bots in lst:
-      if bots['attack']==1 and bots['weapon']!='slizgun':
-        attack(bots,id,0)
-        acted.append(bots)
-        
-  for bots in lst:     
-      if bots['attack']==1 and bots['weapon']=='slizgun':
-        attack(bots,id,0)
-        acted.append(bots)
-        
-  for bots in lst:
-      if bots not in acted and bots['die']!=1 and bots['stun']<=0:
-          afk=0
-          games[id]['res']+='🔽'+bots['name']+' пропускает ход!\n'
-          if bots['msg']!=None:
-              medit('Время вышло!',bots['msg'].chat.id, bots['msg'].message_id)
-              bots['effects'].append('afk')
-              for ids in bots['effects']:
-                if ids=='afk':
-                    afk+=1
-              if afk>=2:
-                  games[id]['res']+='😵'+bots['name']+' умер от АФК!\n'
-                  bots['die']=1
-              bots['msg']=None
-            
-      elif bots in acted:
-        while 'afk' in bots['effects']:
-            bots['effects'].remove('afk')    
-                     
-  for ids in lst:
-    if ids['shield']>=1:
-        ids['takendmg']=0
-  dmgs(id)
-  z=0
-  global hidetext
-  try:
-      if id==-1001208357368:
-        if hidetext==0:
-          bot.send_message(id, 'Результаты хода '+str(games[id]['xod'])+':\n'+games[id]['res']+'\n\n')
-          bot.send_message(id, games[id]['secondres'])
-        else:
-          if random.randint(1,3)==1:
-             bot.send_message(id, 'Silent mode is on (игра идёт, но в тихом режиме)')
-      else:
-          bot.send_message(id, 'Результаты хода '+str(games[id]['xod'])+':\n'+games[id]['res']+'\n\n')
-          bot.send_message(id, games[id]['secondres'])
-  except:
-      bot.send_message(id, 'Сообщение слишком длинное, не могу отправить результаты.')
-  die=0    
-  games[id]['xod']+=1
-  games[id]['randomdmg']=0
-  games[id]['summonlist']=[]
-  for mobs in games[id]['bots']:
-    mobcheck(id,mobs)
-  for ids in games[id]['bots']:
-      if games[id]['bots'][ids]['die']==1:
-            die+=1
-  allid=[]
-  if 0 not in games[id]['bots']:
-   for ids in games[id]['bots']:
-     if games[id]['bots'][ids]['die']==0:
-      if games[id]['bots'][ids]['id'] not in allid:
-         allid.append(games[id]['bots'][ids]['id'])
-   allus=0
-   for ids in games[id]['bots']:
-            if games[id]['bots'][ids]['identeficator']==None:
-               allus+=1
-   endxoda=allus*3
-   endxoda+=1
-   alive=0
-   dead=['lava','sniper']
-   for ids in games[id]['bots']:
-        if games[id]['bots'][ids]['die']!=1 and games[id]['bots'][ids]['id'] not in dead:
-            alive+=1
-   if ((die+1>=len(games[id]['bots']) or len(allid)<=1) and games[id]['mode']!='farm') or ((games[id]['mode']=='farm' and games[id]['xod']>=endxoda) or alive==0):
-      z=1
-      if games[id]['mode']=='farm':
-            points=0
-            allmoney=allus
-            while allmoney!=0:
-                points+=random.randint(20,70)
-                allmoney-=1
-            winners=[]
-            winid=[]
-            for ids in games[id]['bots']:
-                if games[id]['bots'][ids]['die']!=1 and games[id]['bots'][ids]['id'] not in winid and games[id]['bots'][ids]['id'] not in dead:
-                    winners.append(games[id]['bots'][ids])
-                    winid.append(games[id]['bots'][ids]['id'])
-            slist=''
-            try:
-                points=int(points/len(winners))
-            except:
-                points=0
-            for ids in winners:
-                slist+=ids['name']+'\n'
-                users.update_one({'id':ids['id']},{'$inc':{'cookie':points}})
-            if slist=='':
-                slist='Выживших нет! Все проиграли!'
-            ftext='Режим "Пекло":\nВсе выжившие получают награду в размере: '+str(points)+'⚛️!\nСписок выживших:\n'+slist
-            z=1
-            bot.send_message(id,ftext)
-      else:
-        name=None
-        for ids in games[id]['bots']:
-              if games[id]['bots'][ids]['die']!=1:
-                  name=games[id]['bots'][ids]['name']
-                  winner=games[id]['bots'][ids]
-        if name!=None:
-          points=6
-          for ids in games[id]['bots']:
-            try:
-              if games[id]['bots'][ids]['identeficator']==None:
-                 points+=4
-            except:
-              points+=4
-          for ids in games[id]['bots']:
-             if 'werewolf' in games[id]['bots'][ids]['mutations'] or 'electro' in games[id]['bots'][ids]['mutations']:
-                 points+=18
-          for ids in games[id]['bots']:
-              for itemss in games[id]['bots'][ids]['skills']:
-                if games[id]['bots'][ids]['id']!=winner['id']:
-                 if itemss!='cube' and itemss!='active':
-                  try:
-                    if games[id]['bots'][ids]['identeficator']==None:
-                       points+=2
-                  except:
-                       points+=2
-          for ids in games[id]['bots']:
-              for itemss in games[id]['bots'][ids]['skin']:
-                if games[id]['bots'][ids]['id']!=winner['id']:
-                  try:
-                    if games[id]['bots'][ids]['identeficator']==None:
-                       points+=2
-                  except:
-                       points+=2    
-                 
-          points+=games[id]['prizefond']      
-          place=[]
-          a=None
-          i=0
-          idlist=[]
-          while i<3:
-            dieturn=-1
-            a=None
-            for ids in games[id]['bots']:
-              if winner!=None:
-                if games[id]['bots'][ids]['dieturn']>dieturn and games[id]['bots'][ids] not in place and games[id]['bots'][ids]['id']!=winner['id'] and \
-              games[id]['bots'][ids]['id'] not in idlist and games[id]['bots'][ids]['name']!='Редкий слизнюк':
-                    a=games[id]['bots'][ids]
-                    dieturn=games[id]['bots'][ids]['dieturn']
-            if a!=None and a['id'] not in idlist and a['name']!='Редкий слизнюк':
-                place.append(a)
-                idlist.append(a['id'])
-            i+=1
-          p2=points
-          txt='Награды для 2-4 мест (если такие имеются):\n'
-          for ids in place:
-              p2=int(p2*0.50)
-              txt+=ids['name']+': '+str(p2)+'❇️/⚛️\n'
-              users.update_one({'id':ids['id']},{'$inc':{'cookie':p2}})
-              users.update_one({'id':ids['id']},{'$inc':{'bot.exp':p2}})
-          if winner['id']!=0:
-             winner2=users.find_one({'id':winner['id']})
-             y=userstrug.find_one({'id':winner['id']})
-             if games[id]['mode']=='teamfight':
-                  yy='Команда '
-                  zz='а'
-             else:
-                  yy=''
-                  zz=''
-             dung=0
-             if id==-1001208357368 or id==-1001172494515:
-              if games[id]['mode']==None:
-                
-                prizes(id,ids,winner)
-                x=users.find({})
-                try:
-                       cookie=round(points*0.01, 0)
-                       cookie=int(cookie)
-                       user=users.find_one({'id':winner['id']})
-                       if cookie+user['dailycookie']<=10:
-                            pass
-                       else:
-                            cookie=10-user['dailycookie']
-                       if name!='Редкий слизнюк':
-                         bot.send_message(id, '🏆'+yy+name+' победил'+zz+'! Он получает '+str(points)+'❇️ опыта, а '+winner2['name']+' - '+str(points)+'⚛️ поинтов и '+str(cookie)+'🍪 куки;\n'+txt+'Все участники игры получают 2⚛️ поинта и 2❇️ опыта!')
-                         try:
-                          bot.send_message(winner2['id'], '🏆'+yy+name+' победил'+zz+'! Он получает '+str(points)+'❇️ опыта, а '+winner2['name']+' - '+str(points)+'⚛️ поинтов и '+str(cookie)+'🍪 куки;\nВсе участники игры получают 2⚛️ поинта и 2❇️ опыта!')
-                         except:
-                          pass
-                         userstrug.update_one({'id':winner['id']}, {'$inc':{'cookies':cookie, 'totalcookies.cwcookies':cookie}})
-                         users.update_one({'id':winner['id']},{'$inc':{'dailycookie':cookie}})
-                       else:
-                        bot.send_message(id, 'Редкий слизнюк сбежал!')
-                except:
-                         
-                         bot.send_message(id, '🏆'+name+' победил! Он получает '+str(points)+'❇️ опыта, а '+winner2['name']+' - '+str(points)+'⚛️ поинтов! Куки получить не удалось - для этого надо зарегистрироваться в @TrugRuBot!')
-                try:
-                        users.update_one({'id':winner['id']}, {'$inc':{'cookie':points}})
-                        users.update_one({'id':winner['id']}, {'$inc':{'bot.exp':points}})
-                except:
-                        pass
-                for ids in games[id]['bots']:
-                   try:
-                        if games[id]['bots'][ids]['identeficator']==None:
-                          users.update_one({'id':games[id]['bots'][ids]['id']}, {'$inc':{'bot.exp':2}})
-                          users.update_one({'id':games[id]['bots'][ids]['id']}, {'$inc':{'cookie':2}})
-                   except:
-                        pass
-              else:
-                if games[id]['mode']=='teamfight':
-                  g='Команда '
-                  a='а'
-                else:
-                  g=''
-                  a=''
-                if games[id]['mode']!='dungeon':
-                    bot.send_message(id, '🏆'+g+name+' победил'+a+'! Но в режиме апокалипсиса призы не выдаются, играйте ради веселья! :)')
-                    if games[id]['mode']=='meteors':
-                        for ids in games[id]['bots']:
-                         if games[id]['bots'][ids]['identeficator']==None:
-                          try:
-                            users.update_one({'id':games[id]['bots'][ids]['id']}, {'$inc':{'bot.meteorraingames':1}})
-                            users.update_one({'id':games[id]['bots'][ids]['id']}, {'$inc':{'bot.takenmeteordmg':games[id]['bots'][ids]['takenmeteordmg']}})
-                            users.update_one({'id':games[id]['bots'][ids]['id']}, {'$inc':{'bot.takenmeteors':games[id]['bots'][ids]['takenmeteors']}})
-                          except:
-                            pass
-                else:
-                    dung=1
-             else:
-                if games[id]['mode']!='dungeon':
-                    bot.send_message(id, '🏆'+name+' победил! Но награду за победу можно получить только в официальном чате - @cookiewarsru!')
-                else:
-                    dung=1
-             if dung==1:
-                z=1
-                loose=0
-                for ids in games[id]['bots']:
-                    if games[id]['bots'][ids]['id']=='dungeon' and games[id]['bots'][ids]['die']!=1:
-                        loose=1
-                if loose==0:
-                    text=''
-                    while len(games[id]['treasures'])>0:
-                       x=random.choice(games[id]['bots'])
-                       while x['identeficator']!=None:
-                            x=random.choice(games[id]['bots'])
-                       tr=random.choice(games[id]['treasures'])
-                       users.update_one({'id':x['realid']},{'$push':{'bot.bought':tr}})
-                       games[id]['treasures'].remove(tr)
-                       text+=x['name']+' получает сокровище: '+treasuretoname(tr)+'!\n'
-                    if text=='':
-                        text='Никаких сокровищ не было найдено!'
-                    bot.send_message(id, 'Победа игроков! Призы:\n\n'+text)
-                else:
-                    bot.send_message(id, 'Победа боссов!')
-          else:
-              bot.send_message(id, '🏆'+name+' победил!')
-        else:
-          bot.send_message(id, 'Все проиграли!')
-        for ids in games[id]['bots']:
-         try:
-           if games[id]['bots'][ids]['identeficator']==None:
-             users.update_one({'id':games[id]['bots'][ids]['id']}, {'$inc':{'games':1}})
-         except:
-           pass
-  else:
-       if games[id]['bots'][0]['hp']<=0:
-           bot.send_message(id, '🏆Босс побеждён!')
-           z=1    
-  games[id]['results']=''
-  games[id]['res']=''
-  games[id]['secondres']=''
-  if z==0:
-    t=threading.Timer(games[id]['timee'], battle, args=[id])
-    t.start()
-    games[id]['battletimer']=t
-    for ids in games[id]['bots']:
-        plr=games[id]['bots'][ids]
-        if 'playercontrol' in plr['effects'] and plr['stun']<=0 and plr['die']!=1:
-            givekeyboard(id,games[id]['bots'][ids])
-  else:
-    del games[id]
-                 
-
-def dmgs(id):
-    c=0
-    text=''
-    if games[id]['mode']=='meteors':
-        targets=[]
-        for ids in games[id]['bots']:
-            if games[id]['bots'][ids]['die']==0:
-                targets.append(games[id]['bots'][ids])
-        meteornumber=0
-        for ids in targets:
-            if random.randint(1,100)<=50:
-                meteornumber+=1
-        while meteornumber>0:
-            meteornumber-=1
-            meteordmg=random.randint(1,8)
-            trgt=random.choice(targets)
-            trgt['takendmg']+=meteordmg
-            text+='🆘'+trgt['name']+' получает метеор в ебало на '+str(meteordmg)+' урона!\n'
-            trgt['takenmeteordmg']+=meteordmg
-            trgt['takenmeteors']+=1
-    if games[id]['mode']=='farm':
-        liv=[]
-        dead=[]
-        for ids in games[id]['bots']:
-            if games[id]['bots'][ids]['die']==0 and games[id]['bots'][ids]['id']!='lava' and games[id]['bots'][ids]['id']!='sniper':
-                liv.append(games[id]['bots'][ids])
-        for ids in games[id]['bots']:
-            if games[id]['bots'][ids]['die']==1 and games[id]['bots'][ids]['identeficator']==None:
-                dead.append(games[id]['bots'][ids])
-            
-        if random.randint(1,100)<=27:
-            trgt=random.choice(liv)
-            dm=random.randint(1,30)
-            trgt['takendmg']+=dm
-            text+='⛰На бойца '+trgt['name']+' обрушилась скала! Он получает '+str(dm)+' урона!\n'
-        if random.randint(1,100)<=19:
-            games[id]['bots'].update(createsniper(chatid=id) )
-            text+='⁉️🎯Зомби-снайпер почуял кровь! Берегитесь...\n'
-        if random.randint(1,100)<=8:
-            dead=random.choice(liv)
-            dead['hp']=-5
-            text+='👽Пожиратель плоти проснулся и решил перекусить бойцом '+dead['name']+'!\n'  
-        if random.randint(1,100)<=1:
-            text+='‼️💎Битва пробудила алмазного голема! Он вступает в бой!\n'
-            games[id]['bots'].update(createlava(chatid=id) )
-        if random.randint(1,100)<=1:
-            try:
-                if len(dead)>0:
-                    recreate=random.choice(dead)
-                    recreate['die']=0
-                    recreate['hp']=2
-                    text+='👼Ангел воскрешает бойца '+recreate['name']+' с 2 хп!\n'
-            except:
-                pass
-            
-    for ids in games[id]['turrets']:
-        a=[]
-        for idss in games[id]['bots']:
-           if games[id]['bots'][idss]['die']!=1 and games[id]['bots'][idss]['hp']>0 and games[id]['bots'][idss]['id']!=ids and games[id]['bots'][idss]['zombie']<=0:
-              a.append(games[id]['bots'][idss])
-        if len(a)>0:
-          yes=0
-          for idsss in games[id]['bots']:
-            if games[id]['bots'][idsss]['id']==ids and games[id]['bots'][idsss]['die']!=1:
-               yes=1
-          if yes==1:
-            trgt=random.choice(a)
-            dmg=1
-            if random.randint(1,100)<=40*(1+games[id]['bots'][ids]['chance']):
-                games[id]['res']+='🔺Турель бойца '+games[id]['bots'][ids]['name']+' стреляет в '+trgt['name']+'! Нанесено '+str(dmg)+' урона.\n'
-                trgt['takendmg']+=dmg
-                if random.randint(1,100)<=25:
-                    games[id]['res']+='🔥Цель загорается!\n'
-                    trgt['fire']+=2
-    
-    if games[id]['randomdmg']==1:
-        alldmg=0
-        for ids in games[id]['bots']:
-            alldmg+=games[id]['bots'][ids]['takendmg']
-            games[id]['bots'][ids]['takendmg']=0
-        allenemy=[]
-        for ids in games[id]['bots']:
-            if games[id]['bots'][ids]['deffromgun']!=1 and games[id]['bots'][ids]['die']!=1:
-                allenemy.append(games[id]['bots'][ids])
-        if len(allenemy)>0:
-          x=random.choice(allenemy)
-          while alldmg>0:
-            
-            x['takendmg']+=1
-            alldmg-=1
-          for ids in allenemy:
-            if ids['takendmg']>0:
-              text+='☢'+ids['name']+' получает '+str(ids['takendmg'])+' урона!\n'
-        else:
-           text+='Целей для портальной пушки не нашлось.\n' 
-      
-    for ids in games[id]['bots']:
-        if 'firemage' in games[id]['bots'][ids]['skills']:
-           if random.randint(1,100)<=18+(18*games[id]['bots'][ids]['chance']) and games[id]['bots'][ids]['die']!=1:
-              games[id]['bots'][ids]['firearmor']=1
-              games[id]['res']+='🔥Повелитель огня '+games[id]['bots'][ids]['name']+' использует огненный щит!\n'
-            
-    
-    for ids in games[id]['bots']:
-        mob=games[id]['bots'][ids]
-        player=mob
-        for effect in player['effects']:
-          if 'do' in effect:
-            player['effects'].remove(effect)
-            if effect=='doposion':
-                player['energy']-=2
-                games[id]['res']+='🥬'+player['name']+' отравился капустой и потерял 2 энергии!\n'
-            if effect=='dofire':
-                player['fire']+=2
-                games[id]['res']+='🥬Капуста подожгла '+player['name']+'!\n'
-            if effect=='dodmg':
-                player['takendmg']+=3
-                games[id]['res']+='🥬Капуста взорвалась внутри '+player['name']+'! Нанесено 3 урона.\n'
-        if games[id]['bots'][ids]['target']!=None:
-            if games[id]['bots'][ids]['target']['firearmor']==1:
-                games[id]['bots'][ids]['fire']=3
-        if games[id]['bots'][ids]['fire']>0:
-          games[id]['bots'][ids]['fire']-=1
-          if games[id]['bots'][ids]['die']!=1:
-            games[id]['bots'][ids]['takendmg']+=1
-            games[id]['bots'][ids]['energy']-=1
-            text+='🔥'+games[id]['bots'][ids]['name']+' горит! Получает 1 урона и теряет 1 энергии.\n'
-        if games[id]['bots'][ids]['boundwith']!=None:
-          if games[id]['bots'][ids]['boundacted']==0:
-            games[id]['bots'][ids]['boundwith']['boundacted']=1
-            games[id]['bots'][ids]['boundacted']=1
-            tdg1=games[id]['bots'][ids]['boundwith']['takendmg']
-            tdg2=games[id]['bots'][ids]['takendmg']
-            if games[id]['bots'][ids]['boundwith']!=games[id]['bots'][ids]:             
-               games[id]['bots'][ids]['boundwith']['takendmg']+=tdg2
-               games[id]['bots'][ids]['takendmg']+=tdg1
-               text+='☯'+games[id]['bots'][ids]['name']+' получает '+str(tdg1)+\
-                ' дополнительного урона!\n' 
-               text+='☯'+games[id]['bots'][ids]['boundwith']['name']+' получает '+str(tdg2)+\
-                ' дополнительного урона!\n'
-            else:
-                games[id]['bots'][ids]['takendmg']+=tdg1
-                text+='☯'+games[id]['bots'][ids]['name']+' получает '+str(tdg1)+\
-                ' дополнительного урона!\n' 
-        if games[id]['bots'][ids]['firearmor']==1:
-            games[id]['bots'][ids]['takendmg']=int(games[id]['bots'][ids]['takendmg']/2)
-        if 'magictitan' in games[id]['bots'][ids]['skills'] and random.randint(1,100)<=50+(50*games[id]['bots'][ids]['chance']):
-          if games[id]['bots'][ids]['magicshield']>0:
-            a=games[id]['bots'][ids]['takendmg']
-            if a>games[id]['bots'][ids]['magicshield']:
-                a=games[id]['bots'][ids]['magicshield']
-            games[id]['bots'][ids]['magicshield']-=a
-            games[id]['bots'][ids]['takendmg']-=a
-            if a>0:
-               text+='🔵Магический титан '+games[id]['bots'][ids]['name']+' блокирует '+str(a)+' урона!\n'
-            if games[id]['bots'][ids]['magicshield']<=0:
-                games[id]['bots'][ids]['magicshieldkd']=1
-                games[id]['bots'][ids]['hp']-=1
-                text+='🔴Его мана закончилась. Он теряет ♥1 хп!\n'
-        games[id]['bots'][ids]['allrounddmg']+=games[id]['bots'][ids]['takendmg']
-            
-    for ids in games[id]['bots']:
-      if games[id]['bots'][ids]['currentarmor']>0 and games[id]['bots'][ids]['takendmg']>0:
-            text+='🔰Броня '+games[id]['bots'][ids]['name']+' снимает '+str(games[id]['bots'][ids]['currentarmor'])+' урона!\n'
-            games[id]['bots'][ids]['takendmg']-=games[id]['bots'][ids]['currentarmor']
-            
-    for ids in games[id]['bots']:
-        if 'suit' in games[id]['bots'][ids]['skills'] and random.randint(1,100)<=25*(1+games[id]['bots'][ids]['chance']) and games[id]['bots'][ids]['takendmg']>0 and games[id]['bots'][ids]['target']!=None:
-            games[id]['bots'][ids]['target']['takendmg']+=games[id]['bots'][ids]['takendmg']
-            text+='📡'+games[id]['bots'][ids]['name']+' направляет полученный урон в свою цель! Нанесено '+str(games[id]['bots'][ids]['takendmg'])+' урона.\n'
-          
-    for ids in games[id]['bots']:
-        p=games[id]['bots'][ids]
-        if p['shield']>0:
-            p['takendmg']=0
-        
-    for ids in games[id]['bots']:
-       if games[id]['randomdmg']!=1:
-          if games[id]['bots'][ids]['takendmg']>c:
-            c=games[id]['bots'][ids]['takendmg']
-               
-    for ids in games[id]['bots']:
-        if games[id]['bots'][ids]['takendmg']>c:
-            c=games[id]['bots'][ids]['takendmg']
-    monsters=[]        
-    for mob in games[id]['bots']:
-        if 'magictitan' in games[id]['bots'][mob]['skills']:
-          if games[id]['bots'][mob]['magicshieldkd']>0:
-            games[id]['bots'][mob]['magicshieldkd']-=1
-            if games[id]['bots'][mob]['magicshieldkd']==0:
-                games[id]['bots'][mob]['magicshield']=6
-        games[id]['bots'][mob]['stun']-=1
-        if games[id]['bots'][mob]['stun']==0 and games[id]['bots'][mob]['die']!=1:
-            text+='🌀'+games[id]['bots'][mob]['name']+' приходит в себя.\n'
-        if games[id]['bots'][mob]['blood']!=0:
-              games[id]['bots'][mob]['blood']-=1
-              if games[id]['bots'][mob]['blood']==0 and games[id]['bots'][mob]['die']!=1 and games[id]['bots'][mob]['zombie']<=0:
-                     games[id]['bots'][mob]['hp']-=1
-                     text+='💔'+games[id]['bots'][mob]['name']+' истекает кровью и теряет жизнь!\n'
-        if 'vampire' in games[id]['bots'][mob]['skills'] and games[id]['bots'][mob]['die']!=1:
-            if games[id]['bots'][mob]['target']!=None:
-                if games[id]['bots'][mob]['target']['takendmg']==c and c>0:
-                  a=random.randint(1,100)
-                  if a<=9+(9*games[id]['bots'][mob]['chance']):
-                    games[id]['bots'][mob]['hp']+=1
-                    text+='😈Вампир '+games[id]['bots'][mob]['name']+' восстанавливает себе ♥хп!\n'
-    
-                     
-        if 'zeus' in games[id]['bots'][mob]['skills'] and games[id]['bots'][mob]['die']!=1:
-            msv=[]
-            i=0.1
-            while i<=100:
-               msv.append(i)
-               i+=0.1
-            x=random.choice(msv)
-            if x<=3+(3*games[id]['bots'][mob]['chance']):
-                for ids in games[id]['bots']:
-                    if games[id]['bots'][ids]['id']!=games[id]['bots'][mob]['id']:
-                        games[id]['bots'][ids]['hp']-=1
-                text+='⚠️Зевс '+games[id]['bots'][mob]['name']+' вызывает молнию! Все его враги теряют ♥хп.\n'
-        
-                        
-        if games[id]['bots'][mob]['zombie']!=0:
-            games[id]['bots'][mob]['zombie']-=1
-            if games[id]['bots'][mob]['zombie']==0:
-                games[id]['bots'][mob]['die']=1     
-                games[id]['bots'][mob]['energy']=0
-                text+='☠️'+games[id]['bots'][mob]['name']+' погибает.\n'
-                if games[id]['bots'][mob]['id']=='dungeon':
-                            if random.randint(1,100)<=8:
-                                try:
-                                    tr=random.choice(games[id]['bots'][mob]['drops'])
-                                    games[id]['treasures'].append(tr)
-                                    text+='🎁'+games[id]['bots'][mob]['name']+' уронил что-то!\n'
-                                except:
-                                    pass
-                if 'necromant' in games[id]['bots'][mob]['skills']:
-                     monsters.append(games[id]['bots'][mob]['id'])
-                games[id]['bots'][mob]['dieturn']=games[id]['xod']
-                
-    pauk=[]
-    for mob in games[id]['bots']:
-     if games[id]['bots'][mob]['takendmg']==c:
-      if games[id]['bots'][mob]['takendmg']>0:
-       oldhp=games[id]['bots'][mob]['hp']
-       if games[id]['bots'][mob]['takendmg']<games[id]['bots'][mob]['damagelimit']:
-        a=1
-       else:
-        a=1+games[id]['bots'][mob]['takendmg']//games[id]['bots'][mob]['damagelimit']
-       if games[id]['bots'][mob]['zombie']==0:
-         if games[id]['bots'][mob]['die']!=1:
-           if 'oracle' not in games[id]['bots'][mob]['skin']:
-             games[id]['bots'][mob]['hp']-=a
-           else:
-            xx=random.randint(1,100)
-            if games[id]['bots'][mob]['oracle']>=1 and games[id]['bots'][mob]['hp']-a<=0 and (xx<=30 or games[id]['bots'][mob]['id']=='dungeon'):
-                   text+='🔮Оракул '+games[id]['bots'][mob]['name']+' предотвращает свою смерть!\n'
-                   games[id]['bots'][mob]['oracle']-=1
-                   if games[id]['bots'][mob]['hp']<=0:
-                     games[id]['bots'][mob]['hp']=1
-            else:
-                games[id]['bots'][mob]['hp']-=a
-       else:
-           pass
-       pop=emojize(':poop:', use_aliases=True)
-       zilch=emojize(':panda_face:',use_aliases=True)
-       if games[id]['bots'][mob]['hp']<100:
-         cmob=games[id]['bots'][mob]
-         if cmob['id']==581167827:
-            em_hp='💙'
-         elif cmob['id']==256659642:
-            em_hp=pop
-         elif cmob['id']==324316537:
-            em_hp=zilch
-         elif cmob['id']==420049610:
-            em_hp='💜'
-         elif cmob['id']==493430476:
-            em_hp='🐷'
-         elif cmob['id']==68837768:
-            em_hp='🤔'
-         else:
-            em_hp='♥'
-         text+=games[id]['bots'][mob]['name']+' Теряет '+str(a)+' хп. У него осталось '+em_hp*games[id]['bots'][mob]['hp']+str(games[id]['bots'][mob]['hp'])+'хп!\n'    
-         for idss in games[id]['bots']:
-            cmob=games[id]['bots'][idss]
-            if cmob['id']==581167827:
-               em_hp='💙'
-            elif cmob['id']==256659642:
-               em_hp=pop
-            elif cmob['id']==324316537:
-               em_hp=zilch
-            elif cmob['id']==420049610:
-               em_hp='💜'
-            elif cmob['id']==493430476:
-               em_hp='🐷'
-            elif cmob['id']==68837768:
-                em_hp='🤔'
-            else:
-               em_hp='♥'
-            unit=games[id]['bots'][idss]
-            if games[id]['bots'][idss]['target']==games[id]['bots'][mob] and 'necromant' in games[id]['bots'][idss]['skills'] and random.randint(1,100)<=60+(60*games[id]['bots'][idss]['chance']):
-               games[id]['bots'][idss]['summonmonster'][1]+=a
-               text+='🖤Некромант '+games[id]['bots'][idss]['name']+' прибавляет '+str(a)+' хп к своему монстру!\n'
-            if unit['target']==games[id]['bots'][mob] and 'werewolf' in unit['mutations'] and games[id]['xod']%2==0 and random.randint(1,100)<=30:
-               text+=unit['name']+' кусает цель и восстанавливает '+em_hp+'хп!\n'
-               unit['hp']+=1
-       else:
-           text+=games[id]['bots'][mob]['name']+' Теряет '+str(a)+' хп. У него осталось '+str(games[id]['bots'][mob]['hp'])+'хп!\n'
-       if games[id]['bots'][mob]['hp']<=2 and 'berserk' in games[id]['bots'][mob]['skills'] and oldhp>=3:
-         text+='😡Берсерк '+games[id]['bots'][mob]['name']+' входит в ярость и получает +2 урона!\n'
-     if games[id]['bots'][mob]['hp']<=0:
-           if 'zombie' not in games[id]['bots'][mob]['skills']:
-             if games[id]['bots'][mob]['die']!=1:
-              if 'bloodmage' not in games[id]['bots'][mob]['skills']:
-                  if games[id]['bots'][mob]['name']!='Редкий слизнюк':
-                      text+='☠️'+games[id]['bots'][mob]['name']+' погибает.\n'
-                      if games[id]['bots'][mob]['id']=='dungeon':
-                            if random.randint(1,100)<=2:
-                                tr=random.choice(games[id]['bots'][mob]['drops'])
-                                games[id]['treasures'].append(tr)
-                                text+='🎁'+games[id]['bots'][mob]['name']+' уронил что-то!\n'
-                  else:
-                      text+='⭐'+games[id]['bots'][mob]['name']+' пойман!\n'
-                  if games[id]['bots'][mob]['name']=='Редкий слизнюк':
-                     text+='⭐Редкий слизнюк был пойман! Награду в размере 500❇/⚛ получают:\n'
-                     prizez=[]
-                     for prize in games[id]['bots']:
-                        if games[id]['bots'][prize]['target']==games[id]['bots'][mob] and games[id]['bots'][prize] not in prizez:
-                           prizez.append(games[id]['bots'][prize])
-                     if len(prizez)>0:
-                        for pp in prizez:
-                           users.update_one({'id':pp['id']},{'$inc':{'cookie':500}})
-                           users.update_one({'id':pp['id']},{'$inc':{'bot.exp':500}})
-                           if 'sliznuk' not in pp['bought'] and random.randint(1,100)<=25:
-                             users.update_one({'id':pp['id']},{'$push':{'bot.bought':'sliznuk'}})
-                             bot.send_message(pp['id'],'Поздравляем, ваш боец поймал редкого слизнюка! Награда: 500❇/⚛, и уникальное оружие! Доступно оно будет в следующих обновлениях.')
-                           bot.send_message(pp['id'],'Поздравляем, ваш боец поймал редкого слизнюка! Награда: 500❇/⚛.')
-                           text+=pp['name']+'\n'
-                  if 'necromant' in games[id]['bots'][mob]['skills']:
-                     monsters.append(games[id]['bots'][mob]['id'])
-                  if games[id]['bots'][mob]['name']!='Редкий слизнюк':
-                      games[id]['bots'][mob]['dieturn']=games[id]['xod']
-              else:
-                 randd=random.randint(1,100)
-                 if randd<=60*(60*games[id]['bots'][mob]['chance']):
-                  a=[]
-                  for ids in games[id]['bots']:
-                     if games[id]['bots'][ids]['die']!=1 and games[id]['bots'][ids]['hp']>0 and games[id]['bots'][ids]['zombie']<=0:
-                        a.append(games[id]['bots'][ids])
-                  if len(a)>0:
-                   x1=random.choice(a)
-                   x2=None
-                   
-     
-                   x2=None
-                   x1['hp']-=1
-                   if x2!=None:
-                     x2['hp']-=1
-                   if x2!=None:
-                     if x2['hp']<=0 or x1['hp']<=0:
-                        text+='🔥Маг крови '+games[id]['bots'][mob]['name']+' перед смертью высасывает по жизни у '+x1['name']+' и '+x2['name']+', и воскресает с 2❤️!\n'
-                        games[id]['bots'][mob]['hp']=2
-                        if x1['hp']<=0:
-                           text+='👹'+x1['name']+' теперь зомби!\n'
-                           x1['zombie']=1
-                        if x2['hp']<=0:
-                           text+='☠️'+x2['name']+' теперь зомби!\n'
-                           x2['zombie']=3
-                     else:
-                        text+='😵Маг крови '+games[id]['bots'][mob]['name']+' перед смертью высасывает по жизни у '+x1['name']+' и '+x2['name']+', но никого не убивает, и погибает окончательно.\n'
-                        games[id]['bots'][mob]['dieturn']=games[id]['xod']
-                        if games[id]['bots'][mob]['id']=='dungeon':
-                            if random.randint(1,100)<=2:
-                                tr=random.choice(games[id]['bots'][mob]['drops'])
-                                games[id]['treasures'].append(tr)
-                                text+='🎁'+games[id]['bots'][mob]['name']+' уронил что-то!\n'
-                   else:
-                     if x1['hp']<=0:
-                        text+='🔥Маг крови '+games[id]['bots'][mob]['name']+' перед смертью высасывает жизнь у '+x1['name']+', и воскресает с 2❤️!\n'
-                        games[id]['bots'][mob]['hp']=2
-                        text+='👹'+x1['name']+' теперь зомби!\n'
-                        x1['zombie']=1
-                        x1['hp']=1
-                     else:
-                        text+='😵Маг крови '+games[id]['bots'][mob]['name']+' перед смертью высасывает жизнь у '+x1['name']+', но не убивает цель, и погибает окончательно.\n'
-                        games[id]['bots'][mob]['dieturn']=games[id]['xod']
-                        if games[id]['bots'][mob]['id']=='dungeon':
-                            if random.randint(1,100)<=2:
-                                tr=random.choice(games[id]['bots'][mob]['drops'])
-                                games[id]['treasures'].append(tr)
-                                text+='🎁'+games[id]['bots'][mob]['name']+' уронил что-то!\n'
-                  else:
-                     games[id]['bots'][mob]['dieturn']=games[id]['xod']
-                     text+='☠️'+games[id]['bots'][mob]['name']+' погибает.\n'
-                     if games[id]['bots'][mob]['id']=='dungeon':
-                            if random.randint(1,100)<=2:
-                                tr=random.choice(games[id]['bots'][mob]['drops'])
-                                games[id]['treasures'].append(tr)
-                                text+='🎁'+games[id]['bots'][mob]['name']+' уронил что-то!\n'
-                     if 'necromant' in games[id]['bots'][mob]['skills']:
-                        monsters.append(games[id]['bots'][mob]['id'])
-                 else:
-                  games[id]['bots'][mob]['dieturn']=games[id]['xod']
-                  text+='☠️'+games[id]['bots'][mob]['name']+' погибает.\n'
-                  if games[id]['bots'][mob]['id']=='dungeon':
-                            if random.randint(1,100)<=2:
-                                tr=random.choice(games[id]['bots'][mob]['drops'])
-                                games[id]['treasures'].append(tr)
-                                text+='🎁'+games[id]['bots'][mob]['name']+' уронил что-то!\n'
-                  if 'necromant' in games[id]['bots'][mob]['skills']:
-                     monsters.append(games[id]['bots'][mob]['id'])
-           else:
-              games[id]['bots'][mob]['zombie']=2
-              games[id]['bots'][mob]['hp']=1
-              text+='👹'+games[id]['bots'][mob]['name']+' теперь зомби!\n'
    
-     if games[id]['xod']%5==0:
-       if games[id]['bots'][mob]['id']==87651712:
-          if games[id]['bots'][mob]['die']!=1 and games[id]['bots'][mob]['hp']>0:
-              text+=games[id]['bots'][mob]['name']+' сосёт!\n'
-    for mob in games[id]['bots']:
-        if 'paukovod' in games[id]['bots'][mob]['skills'] and games[id]['bots'][mob]['die']!=1 and games[id]['bots'][mob]['hp']<=0:
-                  text+='🕷Паук бойца '+games[id]['bots'][mob]['name']+' в ярости! Он присоединяется к бою.\n'
-                  pauk.append(games[id]['bots'][mob])
-    for itemss in pauk:
-       if 'double' in itemss['skills']:
-            g=random.randint(1,2)
-       else:
-            g=3
-       games[id]['bots'].update(createpauk(itemss['id'], g))
-    for ids in games[id]['summonlist']:
-      if ids[0]=='pig':
-         games[id]['bots'].update(createzombie(ids[1]))
-    for ids in monsters:
-         player=games[id]['bots'][ids]
-         if player['summonmonster'][1]>8:
-            hp=8
-         else:
-            hp=player['summonmonster'][1]
-         games[id]['bots'].update(createmonster(player['id'],player['weapon'],hp,player['animal']))
-         text+='👁Некромант '+player['name']+' призывает монстра! Его жизни: '+'🖤'*hp+str(hp)+'!\n'
-    games[id]['secondres']='Эффекты:\n'+text
-   
-    
-  
-  
-def assasin(id,me,target):
-   games[id]['res']+='⭕Ассасин '+me['name']+' достаёт револьвер и добивает '+target['name']+' точным выстрелом в голову!\n'
-   target['hp']-=1
-   
-def weaponchance(energy, target, x, id, bot1,hit):
-
-    if bot1['weapon']=='rock':
-      chance=accuracy('middle',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      else:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(2, 3)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              games[id]['res']+='☄️'+bot1['name']+' Кидает камень в '+target['name']+'! Нанесено '+str(damage)+' Урона.\n'
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=2
-              stun=random.randint(1, 100)
-              if stun<=20:
-                target['stun']=2
-                games[id]['res']+='🌀Цель оглушена!\n'
-              
-        else:
-            games[id]['res']+='💨'+bot1['name']+' Промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=2
-              
-              
-    elif bot1['weapon']=='ak':
-      chance=accuracy('low',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      else:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(3, 4)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              games[id]['res']+='🔫'+bot1['name']+' Стреляет в '+target['name']+'! Нанесено '+str(damage)+' Урона.\n'        
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=random.randint(2,3)
-        else:
-            games[id]['res']+='💨'+bot1['name']+' Промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=random.randint(2,3)
-            
-            
-            
-    elif bot1['weapon']=='hand':
-      chance=accuracy('high',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      else:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(1,3)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              games[id]['res']+='🤜'+bot1['name']+' Бьет '+target['name']+'! Нанесено '+str(damage)+' Урона.\n'
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=random.randint(1,2)
-                    
-        else:
-            games[id]['res']+='💨'+bot1['name']+' Промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=random.randint(1,2)
-           
-           
-    elif bot1['weapon']=='saw':
-      chance=accuracy('middle',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      else:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(1,2)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              games[id]['res']+='⚙️'+bot1['name']+' Стреляет в '+target['name']+' из Пилострела! Нанесено '+str(damage)+' Урона.\n'
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=2
-              blood=random.randint(1, 100)
-              if blood<=35:
-                if target['blood']==0:
-                  target['blood']=4
-                  games[id]['res']+='❣️Цель истекает кровью!\n'
-                elif target['blood']==1:
-                  games[id]['res']+='❣️Кровотечение усиливается!\n'
-                else:
-                    target['blood']-=1
-                    games[id]['res']+='❣️Кровотечение усиливается!\n'
-                    
-        else:
-            games[id]['res']+='💨'+bot1['name']+' Промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=2
-           
-           
-    elif bot1['weapon']=='kinzhal':
-      chance=accuracy('middle',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      else:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=1
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              if target['reload']!=1:
-                  games[id]['res']+='🗡'+bot1['name']+' Бъет '+target['name']+' Кинжалом! Нанесено '+str(damage)+' Урона.\n'
-                  target['takendmg']+=damage
-                  target['takendmg']+=bot1['dopdmg']
-                  bot1['energy']-=2
-              else:
-                  a=random.randint(1,100)
-                  if a<=100:
-                       damage=6
-                       if bot1['zombie']>0:
-                          damage+=3
-                       if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                            damage+=2
-                       games[id]['res']+='⚡️'+bot1['name']+' Наносит критический удар по '+target['name']+'! Нанесено '+str(damage)+' Урона.\n'
-                       bot1['energy']-=5
-                       target['takendmg']+=damage
-                  else:
-                      games[id]['res']+='🗡'+bot1['name']+' Бъет '+target['name']+' Кинжалом! Нанесено '+str(damage)+' Урона.\n'
-                      target['takendmg']+=damage
-                      bot1['energy']-=2               
-        else:
-            games[id]['res']+='💨'+bot1['name']+' Промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=2
-             
-             
-             
-    elif bot1['weapon']=='bow':
-      if energy>=5:
-        chance=45
-      elif energy==4:
-        chance=45
-      elif energy==3:
-        chance=45
-      elif energy==2:
-        chance=45
-      elif energy==1:
-        chance=45
-      elif energy<=0:
-        chance=45
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      else:
-        if bot1['bowcharge']==1:
-          bot1['bowcharge']=0
-          if x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=6
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              games[id]['res']+='🏹'+bot1['name']+' Стреляет в '+target['name']+' из лука! Нанесено '+str(damage)+' Урона.\n'
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=5
-                       
-          else:
-            games[id]['res']+='💨'+bot1['name']+' Промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=5
-        else:
-          bot1['bowcharge']=1
-          bot1['target']=None
-          games[id]['res']+='🏹'+bot1['name']+' Натягивает тетиву лука!\n'
-                    
-                 
-            
-    elif bot1['weapon']=='bite':
-      chance=accuracy('middle',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      else:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=5
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              x=random.randint(1,100)
-              stun=0
-              if x<=50:
-                    stun=1
-              games[id]['res']+='🕷'+bot1['name']+' кусает '+target['name']+'! Нанесено '+str(damage)+' Урона.\n'
-              if stun==1:
-                    games[id]['res']+='🤢Цель поражена ядом! Её энергия снижена на 2.\n'
-                    target['energy']-=2
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=5
-            
-        else:
-            games[id]['res']+='💨'+bot1['name']+' промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=5
-             
-             
-             
-    elif bot1['weapon']=='magic' and bot1['animal']=='rhino':
-      chance=accuracy('middle',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      rhinomaxdmg=int(os.environ['rhinomaxdmg'])
-      rhinomindmg=int(os.environ['rhinomindmg'])
-      rhinominloss=int(os.environ['rhinominloss'])
-      rhinomaxloss=int(os.environ['rhinomaxloss'])
-      rhinominstun=int(os.environ['rhinominstun'])
-      rhinomaxstun=int(os.environ['rhinomaxstun'])
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      else:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(rhinomindmg,rhinomaxdmg)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              x=random.randint(1,100)
-              eat=0
-              if x<=10:
-                    eat=1
-              games[id]['res']+='🦏'+bot1['name']+' бъёт '+target['name']+' рогом! Нанесено '+str(damage)+' Урона.\n'
-              if eat==1:
-                    loss=0
-                    stunn=random.randint(2,2)
-                    critdmg=bot1['allrounddmg']
-                    games[id]['res']+='👿'+bot1['name']+' в бешенстве! Он наносит критический удар по цели. Нанесено '+\
-                    str(critdmg)+' урона!\n'+'🌀'+bot1['name']+' получает оглушение на '+str(stunn-1)+' ход!\n'
-                    bot1['stun']=stunn
-                    target['takendmg']+=critdmg
-                    
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=3
-            
-        else:
-            games[id]['res']+='💨'+bot1['name']+' промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=3
-            
-            
-    elif bot1['weapon']=='magic' and bot1['animal']=='demon':
-      chance=accuracy('low',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      else:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(1,3)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              x=random.randint(1,100)
-              eat=0
-              if x<=18:
-                    eat=1
-              games[id]['res']+='💮'+bot1['name']+' накладывает порчу на '+target['name']+'! Нанесено '+str(damage)+' Урона.\n'
-              if eat==1:
-                    enemys=[]
-                    for ids in games[id]['bots']:
-                        if games[id]['bots'][ids]['id']!=bot1['id'] and games[id]['bots'][ids]['die']!=1:
-                            enemys.append(games[id]['bots'][ids])
-                    target1=random.choice(enemys)
-                    enemys.remove(target1)
-                    if len(enemys)>0:
-                        target2=random.choice(enemys)
-                        enemys.remove(target2)
-                    else:
-                        target2=target1
-                    target1['boundwith']=target2
-                    target2['boundwith']=target1
-                    boundtime=random.randint(3,4)
-                    target1['boundtime']=boundtime
-                    target2['boundtime']=boundtime
-                    if target1!=target2:
-                        games[id]['res']+='☯'+bot1['name']+' связывает души '+target1['name']+\
-                        ' и '+target2['name']+'! Каждый из них будет дополнительно получать урон другого '+str(boundtime-1)+\
-                        ' следующих хода, включая этот!\n'
-                    else:
-                        games[id]['res']+='☯'+bot1['name']+' проклинает душу '+target1['name']+'! '+str(boundtime-1)+\
-                        ' следующих хода, включая этот, он будет получать удвоенный урон!'
-                        
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=2
-            
-        else:
-            games[id]['res']+='💨'+bot1['name']+' не удалось наложить порчу на '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=2
-        
-                  
-    elif bot1['weapon']=='magic' and bot1['animal']=='pig':
-      chance=0
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      else:
-              damage=random.randint(0,0)
-              x=random.randint(1,100)
-              summon=0
-              if x<=15:
-                    summon=1
-              games[id]['res']+='🐷'+bot1['name']+' ничего не делает. Нанесено '+str(damage)+' Урона.\n'
-              if summon==1:
-                    games[id]['summonlist'].append(['pig',bot1['id']])
-                    print('createdzombie')
-                    games[id]['res']+='🧟‍♂О нет! На запах свинины пришёл зомби! '+\
-                    'Теперь он сражается за '+bot1['name']+'!\n'
-      bot1['target']=None
-                    
-          
-    elif bot1['weapon']=='zombiebite':
-      chance=accuracy('low',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      #name=users.find_one({'id':bot1['id']})['bot']['name']
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      elif x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(3,3)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              x=random.randint(1,100)
-              
-              eat=random.randint(1,100)
-              if eat<=5:
-                   eat=1
-              else:
-                   eat=0
-              if eat==1:
-                 games[id]['res']+='🍗'+bot1['name']+' проголодался и решил закусить своей свинкой! Та теряет 1 хп.\n'
-                 for ids in games[id]['bots']:
-                   if games[id]['bots'][ids]['identeficator']==None and games[id]['bots'][ids]['id']==bot1['id']:
-                      games[id]['bots'][ids]['hp']-=1
-              games[id]['res']+='🧟‍♂'+bot1['name']+' кусает '+target['name']+'! Нанесено '+str(damage)+' Урона.\n'
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=2
-            
-      else:
-            games[id]['res']+='💨'+bot1['name']+' промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=2
-            
-            
-            
-    elif bot1['weapon']=='chlen':
-      chance=accuracy('middle',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      #name=users.find_one({'id':bot1['id']})['bot']['name']
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      elif x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(1,3)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              games[id]['res']+='🔯'+bot1['name']+' стреляет в '+target['name']+' из флюгегенхаймена! Нанесено '+str(damage)+' Урона.\n'
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=2
-            
-      else:
-            games[id]['res']+='💨'+bot1['name']+' промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=2
-      gun=random.randint(1,100)
-      chanc=20
-      if 'double' in bot1['skills']:
-          chanc=10
-      if gun<=chanc:
-          gun=1
-      else:
-          gun=0
-      if gun==1:
-              games[id]['randomdmg']=1
-              bot1['deffromgun']=1
-              for ids in games[id]['bots']:
-                   if games[id]['bots'][ids]['id']==bot1['id']:
-                      games[id]['bots'][ids]['deffromgun']=1
-              games[id]['res']+='☢'+bot1['name']+' открыл слишком много порталов! Весь нанесённый в раунде урон будет перенаправлен в его случайного '+\
-            'соперника!\n'
-    
-    
-    elif bot1['weapon']=='flame':
-      chance=accuracy('low',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      #name=users.find_one({'id':bot1['id']})['bot']['name']
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      elif x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(2,2)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              x=random.randint(1,100)
-              
-              flame=random.randint(1,100)
-              if flame<=35:
-                   flame=1
-              else:
-                   flame=0     
-              games[id]['res']+='💥'+bot1['name']+' поджигает '+target['name']+'! Нанесено '+str(damage)+' урона.\n'
-              target['takendmg']+=damage
-              target['fire']+=2
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=2
-              if flame==1:
-                 enm=[]
-                 for ids in games[id]['bots']:
-                      if games[id]['bots'][ids]['id']!=bot1['id'] and games[id]['bots'][ids]['die']!=1 and games[id]['bots'][ids]!=target:
-                         enm.append(games[id]['bots'][ids])
-                 if len(enm)>0:
-                    dt=random.choice(enm)
-                    dt['fire']+=2
-                    games[id]['res']+='🔥'+dt['name']+' загорается!\n'
-            
-      else:
-            games[id]['res']+='💨'+bot1['name']+' промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=2
-    
-    
-    elif bot1['weapon']=='sword':
-      chance=accuracy('high',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      #name=users.find_one({'id':bot1['id']})['bot']['name']
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      elif x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(1,4)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              x=random.randint(1,100)
-               
-              games[id]['res']+='⚔'+bot1['name']+' рубит '+target['name']+'! Нанесено '+str(damage)+' урона.\n'
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=2
-            
-      else:
-            games[id]['res']+='💨'+bot1['name']+' промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=2
-    
-    elif bot1['weapon']=='bazuka':
-      chance=accuracy('middle',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/(bonus*2)<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      #name=users.find_one({'id':bot1['id']})['bot']['name']
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      elif x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(4,5)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              x=random.randint(1,100)
-               
-              games[id]['res']+='💣'+bot1['name']+' стреляет в '+target['name']+' из базуки! Нанесено '+str(damage)+' урона.\n'
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=7
-              bchance=random.randint(1,100)
-              if bchance<=75:
-                  bchance=1
-              else:
-                  bchance=0
-              if bchance==1:
-                 enm=[]
-                 for ids in games[id]['bots']:
-                      if games[id]['bots'][ids]['id']!=bot1['id'] and games[id]['bots'][ids]['die']!=1 and games[id]['bots'][ids]!=target:
-                         enm.append(games[id]['bots'][ids])
-                 if len(enm)>0:
-                     d=[]
-                     i=0
-                     if len(enm)==1:
-                         number=1
-                     else:
-                         number=2
-                     while i<number:
-                         e=random.choice(enm)
-                         if e not in d:
-                             d.append(e)
-                             i+=1
-                     games[id]['res']+='Так же урон получают следующие бойцы:\n'
-                     for ids in d:
-                         ids['takendmg']+=damage
-                         games[id]['res']+=ids['name']+', '
-                     games[id]['res']=games[id]['res'][:(len(games[id]['res'])-2)]
-                     games[id]['res']+='\n'
-            
-      else:
-            games[id]['res']+='💨'+bot1['name']+' промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=7
-
-    
-    elif bot1['weapon']=='slizgun':
-      chance=accuracy('middle',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/(bonus*2)<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      name=users.find_one({'id':bot1['id']})['bot']['name']
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      elif x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(0,0)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              x=random.randint(1,100)
-              i=0
-              lst=[]
-              target2=target
-              cycl=target2
-              m=1
-              last=[]
-              while m==1:
-                  cycl=sliz(target2,id,bot1['id'])
-                  m=0
-                  for ids in cycl:
-                    if ids not in lst and ids!=None:
-                      i+=1
-                      lst.append(ids)
-                      m=1
-                  if cycl[0]!=None:
-                      target2=cycl[0]
-              print('1этап')
-              print(i)
-              while last!=lst:
-                  last=lst
-                  for ids in lst:
-                      d=secondsliz(ids,id,bot1['id'])
-                      app=[]
-                      for idss in d:
-                          if idss not in lst:
-                                i+=1
-                                app.append(idss)
-                  for idss in app:
-                      lst.append(idss)
-                    
-              damage+=i
-              for ids in lst:
-                 if ids['id']!=bot1['id']:
-                    ids['takendmg']+=damage
-                    ids['takendmg']+=bot1['dopdmg']
-                 else:
-                    i-=1
-                    
-              games[id]['res']+='🦠'+bot1['name']+' стреляет в '+target['name']+' из слиземёта! Нанесено '+str(damage)+' урона по '+str(i)+' цели(ям)!\n'
-              #target['takendmg']+=damage
-              #target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=2
-            
-      else:
-            games[id]['res']+='💨'+bot1['name']+' промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=2
-    
-    
-    
-    elif bot1['weapon']=='sliznuk':
-      chance=0
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/(bonus)<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      if random.randint(1,100)<=15 and target['weapon']!='hand':
-          games[id]['res']+='♻'+bot1['name']+' поглощает оружие '+target['name']+', восстанавливая 2❤ хп! Теперь он будет сражаться кулаками!\n'
-          target['weapon']='hand'
-          bot1['hp']+=2
-      else:
-          games[id]['res']+='😶'+bot1['name']+' не понимает, что происодит.\n'
-      bot1['energy']-=random.randint(1,5)
-        
-        
-    elif bot1['weapon']=='rifle':
-      chance=100
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/(bonus)<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      if random.randint(1,100)<=50:
-          games[id]['res']+='🎯'+bot1['name']+' отнимает 💔 хп у '+target['name']+' точным выстрелом!\n'
-          target['hp']-=1
-      else:
-          games[id]['res']+='💯'+bot1['name']+' выцеливает жертву...\n'
-    
-    
-    
-    elif bot1['weapon']=='lava':
-      chance=0
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/(bonus)<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      if 'lavacharge' not in bot1['effects']:
-          games[id]['res']+='💎'+bot1['name']+' поднимает руку, готовясь к удару!\n'
-          bot1['effects'].append('lavacharge')
-      elif 'lavacharge2' not in bot1['effects']:
-          games[id]['res']+='💎Рука алмазного голема начинает падать с большой скоростью!\n'
-          bot1['effects'].append('lavacharge2')
-      else:
-          games[id]['res']+='💎Землю сотрясает мощный удар алмазного голема! Все участники боя получают 18 урона!\n'
-          bot1['effects'].remove('lavacharge')
-          bot1['effects'].remove('lavacharge2')
-          for ids in games[id]['bots']:
-              p=games[id]['bots'][ids]
-              if p['id']!=bot1['id'] and p['die']!=1:
-                p['takendmg']+=18
-                
-    elif bot1['weapon']=='pumpkin':
-      chance=accuracy('low',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      name=users.find_one({'id':bot1['id']})['bot']['name']
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      elif x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(2,4)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              x=random.randint(1,100)
-               
-              games[id]['res']+='🥬'+bot1['name']+' кидает капусту в '+target['name']+'! Нанесено '+str(damage)+' урона.\n'
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=2
-              if random.randint(1,100)<=60:
-                games[id]['res']+='Капуста была гипнотизирующей, и соперник съел её!\n'
-                effects=['posion','fire','dmg']
-                ef=random.choice(effects)
-                target['effects'].append(ef)
-            
-      else:
-            games[id]['res']+='💨'+bot1['name']+' промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=2
-            
-    elif bot1['weapon']=='katana':
-      chance=accuracy('high',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      name=users.find_one({'id':bot1['id']})['bot']['name']
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      elif x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(3,3)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              x=random.randint(1,100)
-               
-              games[id]['res']+='🉐'+bot1['name']+' бьёт '+target['name']+' катаной! Нанесено '+str(damage)+' урона.\n'
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=2
-              if random.randint(1,100)<=35:
-                trgts=[]
-                for ids in games[id]['bots']:
-                    tr=games[id]['bots'][ids]
-                    if tr['die']!=1 and tr['zombie']<=0 and tr['id']!=bot1['id'] and tr!=target:
-                        trgts.append(tr)
-                if len(trgts)>0:
-                    tr=random.choice(trgts)
-                    tr['takendmg']+=damage
-                    games[id]['res']+='🉐'+tr['name']+' был задет катаной!\n'
-            
-      else:
-            games[id]['res']+='💨'+bot1['name']+' промахнулся по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=2
-            
-    elif bot1['weapon']=='fox':
-      chance=accuracy('high',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      name=users.find_one({'id':bot1['id']})['bot']['name']
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      elif x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=random.randint(2,2)
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              x=random.randint(1,100)
-               
-              games[id]['res']+='🦊Лиса бойца '+bot1['name']+' кусает '+target['name']+'! Нанесено '+str(damage)+' урона.\n'
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=2
-              if random.randint(1,100)<=15:
-                trgts=[]
-                for ids in games[id]['bots']:
-                    tr=games[id]['bots'][ids]
-                    if tr['die']!=1 and tr['zombie']<=0 and tr['id']!=bot1['id']:
-                        trgts.append(tr)
-                if len(trgts)>0:
-                    txt='🐾Лиса расцарапала когтями следующих бойцов:\n'
-                    i=0
-                    alltrgts=[]
-                    while i<4:
-                        tr=random.choice(trgts)
-                        if tr not in alltrgts:
-                            tr['blood']=4
-                            txt+=tr['name']+', '
-                            alltrgts.append(tr)
-                        i+=1
-                    txt=txt[:(len(txt)-2)]
-                    txt+='. Все они получают кровотечение!\n'
-                    games[id]['res']+=txt
-      else:
-            games[id]['res']+='💨Лиса бойца '+bot1['name']+' промахнулась по '+target['name']+'!\n'
-            bot1['target']=None
-            bot1['energy']-=2
-            
-            
-    elif bot1['weapon']=='emojthrow':
-      chance=accuracy('middle',energy)
-      if bot1['blight']==1:
-          chance=-100
-      bonus=1+bot1['accuracy']/100
-      debuff=1+target['miss']/100
-      if hit==1:
-        if x*debuff/bonus<=chance or bot1['hit']==1:
-             return 1
-        else:
-             return 0
-      name=users.find_one({'id':bot1['id']})['bot']['name']
-      ems=['😀','😂','😎','😠','😡','🥶','🤕','🤫','👳‍♂️','🌚','🌞','😱','🤯','😤']
-      em=random.choice(ems)
-      if target['hp']==1 and 'cazn' in bot1['skills'] and target['zombie']<=0:
-          assasin(id,bot1,target)
-      elif x*debuff/bonus<=chance or bot1['hit']==1:
-              damage=bot1['energy']-random.randint(2,5)
-              if damage<=0:
-                    damage=1
-              if 'berserk' in bot1['skills'] and bot1['hp']<=2:
-                  damage+=2
-              if bot1['zombie']>0:
-                  damage+=3
-              x=random.randint(1,100)
-              games[id]['res']+='🌝'+bot1['name']+' стреляет в '+target['name']+' из емоджимёта! В соперника прилетает "'+em+'"! Нанесено '+str(damage)+' урона.\n'
-              target['takendmg']+=damage
-              target['takendmg']+=bot1['dopdmg']
-              bot1['energy']-=random.randint(1,3)  
-              
-      else:
-            games[id]['res']+='💨'+bot1['name']+' промахнулся по '+target['name']+'! Мимо пролетает "'+em+'"!\n'
-            bot1['target']=None
-            bot1['energy']-=random.randint(1,3)  
-        
-                
-    games[id]['res']+=bot1['doptext']
-
-
-def secondsliz(target,id,bot1):
-        lst=[]
-        for ids in games[id]['bots']:
-            if games[id]['bots'][ids]['target']==target and games[id]['bots'][ids] not in lst and games[id]['bots'][ids]['id']!=bot1:
-               lst.append(games[id]['bots'][ids])
-        return lst
-    
-def sliz(target,id,botid):
-     lst=[]
-     lst.append(target['target'])
-     lst.append(target)
-     for ids in games[id]['bots']:
-         if (games[id]['bots'][ids]['target']==target and games[id]['bots'][ids] not in lst and games[id]['bots'][ids]['id']!=botid):
-            lst.append(games[id]['bots'][ids])
-     return lst 
-    
-
-def attack(bot, id,rr):
-  a=[]
-  enm=[]
-  for bots in games[id]['bots']:
-    cenemy=games[id]['bots'][bots]
-    if cenemy['die']!=1 and cenemy['zombie']<=0 and cenemy['id']!=bot['id']:
-        enm.append(cenemy)
-  if len(enm)>0:
-      target=random.choice(enm)
-  else:
-      target=None
-  if bot['target']!=None:
-      target=bot['target']
-  bot['target']=target
-  x=random.randint(1,100)
-  if bot['target']!=None:
-    
-    if 'naebatel' in target['skin'] and random.randint(1,100)<=10:
-        return naeb(bot,target,id)
-        
-    else:
-        return weaponchance(bot['energy'], target, x, id, bot,rr)
-
-  else:
-    games[id]['res']+='☕️'+bot['name']+' пьёт чай - соперников не осталось!\n'
-    
-    
-    
-def naeb(bot,target,id):
-   enm=[]
-   for ids in games[id]['bots']:
-      if games[id]['bots'][ids]['id']!=bot['id'] and games[id]['bots'][ids]['die']!=1:
-         enm.append(games[id]['bots'][ids])
-   enemy=random.choice(enm)
-   games[id]['res']+='😯'+bot['name']+' атакует наебателя '+target['name']+', но тот наёбывает его! Вся энергия атаковавшего ('+str(bot['energy'])+') оказывается у '+enemy['name']+'!\n'
-   enemy['reservenergy']+=bot['energy']
-   bot['energy']=0
-   return 0
-   
-   
-def yvorot(bot, id):
-  if 'shieldgen' in bot['skills'] and bot['shieldgen']<=0:
-       games[id]['res']+='🛡'+bot['name']+' использует щит. Урон заблокирован!\n'
-       bot['shield']=1
-       bot['shieldgen']=6
-  else:
-       bot['miss']=+30
-       bot['yvorotkd']=7
-       games[id]['res']+='💨'+bot['name']+' Уворачивается!\n'
-    
-
-def reload(bot2, id):
-   bot2['energy']=bot2['maxenergy']
-   if bot2['weapon']=='rock' or bot2['weapon']=='hand' or bot2['weapon']=='magic' or bot2['weapon']=='kinzhal' or \
-        bot2['weapon']=='sliznuk' or bot2['weapon']=='sword':
-        games[id]['res']+='😴'+bot2['name']+' отдыхает. Энергия восстановлена до '+str(bot2['maxenergy'])+'!\n'
-   elif bot2['weapon']=='bite':
-        games[id]['res']+='😴'+bot2['name']+' восполняет запасы яда. Энергия восстановлена до '+str(bot2['maxenergy'])+'!\n'
-   else:
-        games[id]['res']+='🕓'+bot2['name']+' перезаряжается. Энергия восстановлена до '+str(bot2['maxenergy'])+'!\n'
-    
-def skill(bot,id):
-  i=0
-  skills=[]
-  a=[]
-  for bots in games[id]['bots']:
-    if games[id]['bots'][bots]['id']!=bot['id'] and games[id]['bots'][bots]['die']!=1:
-        a.append(games[id]['bots'][bots])
-  if len(a)>0:
-   x=random.choice(a)
-   if 'gipnoz' in bot['mainskill']:
-    zz=[]
-    for ii in games[id]['bots']:
-          if games[id]['bots'][ii]['energy']>=3 and games[id]['bots'][ii]['magicshieldkd']<=0 and games[id]['bots'][ii]['die']==0 and games[id]['bots'][ii]['id']!=bot['id'] and ((games[id]['bots'][ii]['weapon']=='bow' and games[id]['bots'][ii]['bowcharge']==1) or games[id]['bots'][ii]['weapon']!='bow'):
-              zz.append(games[id]['bots'][ii])
-    if len(zz)>0:
-      x=random.choice(zz)
-      
-    else:
-       games[id]['res']+=bot['name']+' пьёт чай!\n'
-   target=x
-   if bot['target']!=None:
-        target=bot['target']
-       
-   
-  for item in bot['skills']:
-      skills.append(item)
-   
-  choice=random.choice(bot['mainskill'])
-  if choice=='medic':
-       if bot['heal']<=0:
-         a=random.randint(1,100)
-         if a<75 and random.randint(1,100)>25:
-           bot['heal']=10
-           bot['hp']+=1
-           games[id]['res']+='⛑'+bot['name']+' восстанавливает себе ❤️хп!\n'
-           i=1
-         else:
-              games[id]['res']+='💔Медик '+bot['name']+' неправильно сделал себе укол! Он теряет 1 хп.\n'
-              bot['heal']=10
-              bot['hp']-=1
-               
-  elif choice=='gipnoz':
-             games[id]['res']+='👁‍🗨'+bot['name']+' использует гипноз на '+target['name']+'!\n'
-             target['target']=target
-             bot['gipnoz']=6
-             i=1
-            
-  elif choice=='electro':
-     if bot['target']==None:
-        target=None
-        enemies=[]
-        for ids in games[id]['bots']:
-            t=games[id]['bots'][ids]
-            if t['id']!=bot['id'] and len(t['skills'])>0 and t['die']!=1:
-                enemies.append(t)
-        if len(enemies)>0:
-            target=random.choice(enemies)
-        else:
-            for ids in games[id]['bots']:
-                t=games[id]['bots'][ids]
-                if t['id']!=bot['id'] and t['die']!=1:
-                    enemies.append(t)
-        if len(enemies)>0:
-            target=random.choice(enemies)
-        else:
-            games[id]['res']+='☕️'+bot['name']+' пьёт чай! Врагов не осталось!\n'
-     else:
-        target=bot['target']
-     dmg=0
-     bot['energy']-=3
-     if target!=None:
-        if len(target['skills'])>0:
-            skill=random.choice(target['skills'])
-            target['skills'].remove(skill)
-            games[id]['prizefond']+=2
-            bot['shockcd']=8
-            games[id]['res']+='✴️'+bot['name']+' выпускает мощный поток энергии в '+target['name']+'! Тот теряет скилл "'+skilltoname(skill)+'"!\n'
-            if skill=='liveful':
-                 target['hp']-=2
-                 target['accuracy']+=20
-            if skill=='dvuzhil':
-                 target['damagelimit']-=3
-            if skill=='pricel':
-                 target['accuracy']-=30
-            if skill=='paukovod':
-                 target['hp']+=2
-        else:
-            games[id]['res']+='✴️'+bot['name']+' выпускает мощный поток энергии в '+target['name']+'! У него не было скиллов, поэтому он теряет 💔 хп!\n'
-            target['hp']-=1
-             
-
-def item(bot, id):
-           target=None
-           if bot['mainitem']==[]:
-             games[id]['res']+='Позовите @Loshadkin блеать, он опять с кодом накосячил, пидорас.\n'
-           else:
-             z=random.choice(bot['mainitem'])
-           if z=='flash':
-              if bot['target']==None:
-                allenemy=[]
-                for ids in games[id]['bots']:
-                    tr=games[id]['bots'][ids]
-                    if tr['die']!=1 and tr['energy']>2 and tr['id']!=bot['id']:
-                        allenemy.append(tr)
-                if allenemy!=[]:
-                    target=random.choice(allenemy)
-              else:
-                target=bot['target']
-              if target==None:
-                    allenemy=[]
-                    for ids in games[id]['bots']:
-                        if games[id]['bots'][ids]['die']!=1 and games[id]['bots'][ids]['id']!=bot['id']:
-                            allenemy.append(games[id]['bots'][ids])
-                    target=random.choice(allenemy)
-              games[id]['res']+='🏮'+bot['name']+' Кидает флешку в '+target['name']+'!\n'
-              target['energy']=0
-              try:
-                  bot['items'].remove('flash')
-              except:
-                  pass
-              bot['target']=None 
-                
-           
-           elif z=='knife':
-                   x=random.randint(1,100)
-                   bot['energy']-=2
-                   allenemy=[]
-                   if bot['target']==None:
-                     for ids in games[id]['bots']:
-                        tr=games[id]['bots'][ids]
-                        if tr['die']!=1 and tr['zombie']<=0 and tr['id']!=bot['id']:
-                                allenemy.append(tr)
-                     if allenemy!=[]:
-                       target=random.choice(allenemy)
-                   else:
-                     target=bot['target']
-                   if target!=None:
-                     if x>target['miss']:
-                       games[id]['res']+='🔪'+bot['name']+' Кидает нож в '+target['name']+'! Нанесено 3 урона.\n'
-                       target['takendmg']+=3
-                       try:
-                         bot['items'].remove('knife')
-                       except:
-                        pass
-                     else:
-                       games[id]['res']+='💨'+bot['name']+' Не попадает ножом в '+target['name']+'!\n'
-                       try:
-                         bot['target']=None
-                         bot['items'].remove('knife')
-                       except:
-                          pass
-                   else:
-                        games[id]['res']+=bot['name']+' пьёт чай - соперников для броска ножа не осталось!\n'         
-       
-
-
-
-def actnumber(bot, id):  
-  a=[]
-  npc=bot
-  if npc['energy']>0 and npc['energy']<=2:
-    x=random.randint(1,100)
-    if npc['weapon']!='hand':
-     if x<=20:
-       attack=1
-     else:
-       attack=0
-    else:
-     if npc['accuracy']>=-5:
-      if x<=75:
-        attack=1
-      else:
-        attack=0
-     else:
-       if x<=30:
-         attack=1
-       else:
-         attack=0
-  elif npc['energy']>=3:
-    x=random.randint(1,100)
-    if npc['weapon']!='hand':
-      if x<=75:
-        attack=1
-      else:
-        attack=0
-    else:
-      attack=1
-  else:
-    attack=0
-  if npc['weapon']=='bow':
-    attack=1
-    npc['energy']=0
-    
-  x=random.randint(1,100)  
-  low=0
-  enemy1=[]
-  enemy=[]
-  for mob in games[id]['bots']:
-     enemy1.append(games[id]['bots'][mob])
-  for mob in enemy1:
-      if mob['id']!=npc['id']:
-         enemy.append(mob)
-  for mob in enemy:
-   if mob['energy']<=2 or mob['stun']>0 or (mob['weapon']=='magic' and mob['animal']=='pig') or mob['die']==1 or (mob['weapon']=='bow' and mob['bowcharge']==0) or mob['magicshieldkd']>0:  
-    low+=1
-  if low>=len(enemy):
-   yvorot=0
-  else:
-   if npc['energy']<=2 and npc['zombie']<=0:
-    if x<=50 and npc['yvorotkd']<=0:
-      yvorot=1
-    else:
-      yvorot=0
-   elif npc['energy']>=3 and npc['zombie']<=0:
-      x=random.randint(1,100)
-      if x<=25 and npc['yvorotkd']<=0:
-        yvorot=1
-      else:
-        yvorot=0
-   else:
-      yvorot=0
-   if 'shieldgen' in npc['skills'] and npc['shieldgen']<=0 and low<len(enemy):
-      yvorot=1   
-  x=random.randint(1,100)
-  if len(npc['skills'])>0 and random.randint(1,100)<=80:
-    if 'gipnoz' in npc['skills'] and npc['gipnoz']<=0:
-        if low==len(enemy):
-           gipn=0
-        else:
-            gipn=1
-            npc['mainskill'].append('gipnoz')
-            skill=1
-    else:
-        gipn=0
-    if gipn==0:
-        skill=0
-    else:
-        skill=1   
-    
-  else:
-    skill=0
-  if 'electro' in npc['mutations'] and npc['shockcd']<=0 and random.randint(1,100)<=90 and npc['energy']>=3:
-      skill=1
-      npc['mainskill'].append('electro')
-      
-
-  if 'medic' in npc['skills'] and npc['heal']<=0 and npc['maxhp']!=npc['hp'] and random.randint(1,100)<=75:
-      skill=1
-      npc['mainskill'].append('medic')
-        
-  if len(npc['items'])>0:
-    knife=0
-    flash=0
-    if 'flash' in npc['items']:
-        if low>=len(enemy):
-            flash=0
-        else:
-            flash=1
-            npc['mainitem'].append('flash')
-    if 'knife' in npc['items'] and npc['energy']>=2:
-        knife=1
-        npc['mainitem'].append('knife')
-    if knife==1 or flash==1:      
-        x=random.randint(1,100)
-        if x<=45:
-            item=1
-        else:
-            item=0
-    else:
-       item=0
-  else:
-    item=0
-  reload=0
-  if attack==0 and yvorot==0 and item==0 and skill==0:
-    if npc['energy']>=3:
-      attack=1
-    else:
-      reload=1
-  else:
-    reload=0 
-  return{'attack':{'name':'attack', 'x':attack}, 'yvorot':{'name':'yvorot', 'x':yvorot}, 'item':{'name':'item', 'x':item}, 'reload':{'name':'reload', 'x':reload},'skill':{'name':'skill', 'x':skill}}
-         
-      
-def act(bot, id):
-  actions=actnumber(bot, id)
-  curact=[]
-  for item in actions:
-    if actions[item]['x']==1:
-      curact.append(actions[item]['name'])
-  x=random.randint(1, len(curact))
-  return curact[x-1]
-  
-
-
-@bot.message_handler(commands=['help'])
-def helpp(m):
-  if m.from_user.id==m.chat.id:
-    bot.send_message(m.chat.id, '''Игра "CookieWars". Главная суть игры в том, что вам в процессе игры делать ничего не надо - боец сам 
-выбирает оптимальные действия. Вы только должны будете экипировать ему скиллы и оружие, и отправить в бой.\n\n
-*Как отправить бойца на арену?*\nДля этого надо начать игру в чате @cookiewarsru, нажав команду /begin. После этого другие игроки жмут 
-кнопку "Присоединиться", которая появится после начала игры в чате, пуская своих бойцов на арену. Когда все желающие присоединятся, 
-кто-то должен будет нажать команду /go, и игра начнётся. Если в игре участвует больше, чем 2 бойца, они сами будут решать, какую 
-цель атаковать.\n\n*Теперь про самого бойца.*\nКаждый боец имеет следующие характеристики:\nЗдоровье\nЭнергия\nОружие\nСкиллы
-Скин\n\nТеперь обо всём по порядку.\n*Здоровье* - показатель количества жизней бойца. Стандартно у всех 4 жизни, но с помощью 
-скиллов можно увеличить этот предел. Потеря здоровья происходит по такому принципу: кто за ход получил урона больше остальных, тот и теряет жизни. 
-Если несколько бойцов получили одинаково много урона, то все они потеряют здоровье. Сколько единиц - зависит от принятого урона.
-Стандартно, за каждые 6 единиц урона по бойцу он теряет дополнительную жизнь. То есть, получив 1-5 урона, боец потеряет 1 хп. Но получив 6 урона, 
-боец потеряет 2 хп, а получив 12 - 3. Предел урона можно увеличить с помощью скиллов. Разберём пример:\n
-Боец Вася, Петя и Игорь бьют друг друга. Вася нанёс Пете 3 урона, Петя нанёс Васе 2 урона, а Игорь нанёс 3 урона Васе. Считаем полученный бойцами урон:\n
-Вася: 5\nПетя:3\nИгорь:0\nВ итоге Вася потеряет 1 хп, а остальные не потеряют ничего, кроме потраченной на атаку энергии. Об этом позже.\n
-*Энергия*\nПочти на каждое действие бойцы тратят энергию. Стандартно её у всех по 5 единиц. Каждое оружие тратит определённое количество 
-энергии за атаку, некоторые скиллы тоже. Чем меньше энергии в данный момент, тем меньше шанс промахнуться по врагу. Иногда боец должен 
-тратить ход на перезарядку, восстанавливая всю энергию.\n
-*Оружие*\nКаждое оружие в игре уникально и имеет свои особенности. Про них можно узнать в Траг боте, выбивая оружие из лутбоксов.\n
-*Скиллы* - Важная часть игры. За заработанные в боях или выбитые в Траг ⚛️поинты вы можете приобрести полезные скиллы для вашего бойца. О них в /upgrade.
-Но купить скилл мало - его надо *экипировать*. Делается это командой /inventory. Максимум можно надеть на себя 2 скилла.\n
-*Скины*\nСкины - личность вашего бойца, дающая дополнительную способность, не конкурирующую со скиллами. Подробнее: /upgrade.\n
-Зовите друзей, выпускайте бойцов на арену - и наслаждайтесь зрелищем!
-''', parse_mode='markdown')
-  else:
-      bot.send_message(m.chat.id, 'Можно использовать только в личке бота!')
-              
-@bot.message_handler(commands=['start'])
-def start(m):
-  x=m.text.split('/start')
-  x=x[1].split('_')
-  try:
-     if int(x[0]) in games:
-      if games[int(x[0])]['gamecode']==int(x[1]):
-        if games[int(x[0])]['started']==0:
-          y=users.find_one({'id':m.from_user.id})
-          if y!=None:
-           if y['bot']['id'] not in games[int(x[0])]['ids']:
-            if y['bot']['name']!=None:
-             join=1
-             if games[int(x[0])]['mode']!='dungeon':
-                 join=1
-             else:
-                 for ids in games:
-                      if m.from_user.id in games[ids]['bots'] and games[ids]['mode']=='dungeon':
-                          join=0
-             if join==1:
-                 if games[int(x[0])]['started']==0:
-                  if games[int(x[0])]['gmo']==0 and y['bot']['mutations']!=[]:
-                      i=1
-                      while i<=3:
-                          if y['botslots'][str(i)]!={}:
-                              if y['botslots'][str(i)]['mutations']==[]:
-                                  thisbot=y['botslots'][str(i)]
-                          i+=1
-                  else:
-                      thisbot=y['bot']
-                 games[int(x[0])]['bots'].update(createbott(m.from_user.id, thisbot))
-                 games[int(x[0])]['bots'][m.from_user.id]['realid']=m.from_user.id
-                 users.update_one({'id':m.from_user.id}, {'$set':{'name':m.from_user.first_name}})
-                 bot.send_message(m.chat.id, 'Вы успешно присоединились!')
-                 bot.send_message(int(x[0]), m.from_user.first_name+' (боец '+thisbot['name']+') присоединился!')
-                 games[int(x[0])]['ids'].append(m.from_user.id)
-             else:
-                 bot.send_message(m.chat.id, 'Нельзя находиться в другом данже, если вы собираетесь идти в новый!')
-            else:
-               bot.send_message(m.chat.id, 'Сначала назовите своего бойца! (команда /name).')
-  except Exception as e:
-    print('Ошибка:\n', traceback.format_exc())
-    bot.send_message(441399484, traceback.format_exc())
-  if users.find_one({'id':m.from_user.id})==None:
-        try:
-            bot.send_message(m.from_user.id, 'Здраствуйте, вы попали в игру "CookieWars"! Вам был выдан начальный боец. В будущем вы сможете улучшить его за поинты! Подробнее об игре можно узнать с помощью команды /help.')
-            users.insert_one(createuser(m.from_user.id, m.from_user.username, m.from_user.first_name))
-        except:
-            bot.send_message(m.chat.id, 'Напишите боту в личку!')
-        x=users.find({})
-        z=m.text.split('/start')
-        print(z)
-        i=0
-        try:
-          for ids in x:
-            if ids['id']==int(z[1]):
-               i=1
-        except:
-            pass
-        if i==1:
-           print('i=1')
-           users.update_one({'id':int(z[1])}, {'$push':{'referals':m.from_user.id}})
-           users.update_one({'id':m.from_user.id}, {'$set':{'inviter':int(z[1])}})
-           try:
-             bot.send_message(int(z[1]), 'По вашей ссылке зашёл пользователь '+m.from_user.first_name+'! По мере достижения им званий вы будете получать за него бонус - половину от его награды за звание.')
-           except:
-             pass
-      
-@bot.message_handler(commands=['go'])
-def goo(m):
-  try:
-    if m.chat.id in games:
-      if games[m.chat.id]['enablestart']==1 or m.from_user.id==441399484:
-        if len(games[m.chat.id]['bots'])>=2 or (games[m.chat.id]['mode']=='dungeon' and len(games[m.chat.id]['bots'])>=1):
-         if games[m.chat.id]['started']==0:
-           if (m.chat.id==-1001208357368 or m.chat.id==-1001172494515 or m.chat.id==-1001488903839) and m.from_user.id!=441399484:
-             bot.send_message(m.chat.id, 'В этом чате нельзя запустить игру раньше времени!')
-           else:
-             begingame(m.chat.id)
-             games[m.chat.id]['started']=1
-        else:
-            bot.send_message(m.chat.id, 'Недостаточно игроков!')
-      else:
-         bot.send_message(m.chat.id, 'Пока ещё нельзя начать игру!')
-  except:
-    pass
-    
-def starttimer(id):
-   if id in games:
-        if len(games[id]['bots'])>=2 or (games[id]['mode']=='dungeon' and len(games[id]['bots'])>=1):
-         if games[id]['started']==0:
-           begingame(id)
-           games[id]['started']=1
-        else:
-            bot.send_message(id, 'Прошло 5 минут, игра автоматически удалилась. Недостаточно игроков!')
-            del games[id]
-   
-@bot.message_handler(commands=['sliznuk'])
-def slizz(m):
-   if m.from_user.id==441399484:
-      try:
-        games[m.chat.id]['bots'].update(createrare(m.chat.id))
-      except:
-         pass
-   
-   
-@bot.message_handler(commands=['withoutautojoin'])
-def withoutauto(m):
-   # if m.chat.id==-1001208357368:#-229396706:
-     if m.chat.id not in games:# and m.from_user.id==441399484:
-        code=random.randint(1,10000)
-        games.update(creategame(m.chat.id, 0, code))
-        if m.chat.id==-1001172494515:
-            games[m.chat.id]['gmo']=0
-        t=threading.Timer(300, starttimer, args=[m.chat.id])
-        t.start()
-        games[m.chat.id]['timer']=t
-        t=threading.Timer(15,enablestart,args=[m.chat.id])
-        t.start()
-        kb=types.InlineKeyboardMarkup()
-        kb.add(types.InlineKeyboardButton(text='Присоединиться', url='telegram.me/cookiewarsbot?start='+str(m.chat.id)+'_'+str(code)))
-        bot.send_message(m.chat.id, 'Игра без автоприсоединений началась! Автостарт через 5 минут.\n\n', reply_markup=kb)
-        x=users.find({})
-        if m.chat.id==-1001208357368:
-            for idss in x:
-              if idss['id']!=0:
-                if idss['ping']==1:
-                   try:
-                      bot.send_message(idss['id'], 'В чате @cookiewarsru началась игра!') 
-                   except:
-                      pass
-                    
-@bot.message_handler(commands=['pvp'])
-def withoutauto(m):
-   # if m.chat.id==-1001208357368:#-229396706:
-     if m.chat.id not in games:# and m.from_user.id==441399484:
-        games.update(creategame(m.chat.id, 0))
-        games[m.chat.id]['pvp']=1
-        games[m.chat.id]['timee']=60
-        if m.chat.id==-1001172494515:
-            games[m.chat.id]['gmo']=0
-        t=threading.Timer(300, starttimer, args=[m.chat.id])
-        t.start()
-        games[m.chat.id]['timer']=t
-        t=threading.Timer(10,enablestart,args=[m.chat.id])
-        t.start()
-        kb=types.InlineKeyboardMarkup()
-        kb.add(types.InlineKeyboardButton(text='Присоединиться', url='telegram.me/cookiewarsbot?start='+str(m.chat.id)))
-        bot.send_message(m.chat.id, 'ПВП началось! Автостарт через 5 минут.\n\n', reply_markup=kb)    
-                    
-   
-@bot.message_handler(commands=['fastfinish'])
-def ff(m):
-   if m.from_user.id==441399484:
-     try:
-        games[m.chat.id]['timee']=2
-        bot.send_message(m.chat.id, 'Режим быстрой игры запущен!')
-     except:
-        pass
-   
-   
-                
-@bot.message_handler(commands=['apocalypse'])
-def apocalypse(m):
-   # if m.chat.id==-1001208357368:#-229396706:
-     if m.chat.id not in games:# and m.from_user.id==441399484:
-        code=random.randint(1,10000)
-        games.update(creategame(m.chat.id, 1, code))
-        t=threading.Timer(300, starttimer, args=[m.chat.id])
-        t.start()
-        games[m.chat.id]['timer']=t
-        t=threading.Timer(1,enablestart,args=[m.chat.id])
-        t.start()
-        kb=types.InlineKeyboardMarkup()
-        kb.add(types.InlineKeyboardButton(text='Умереть', url='telegram.me/cookiewarsbot?start='+str(m.chat.id)+'_'+str(code)))
-        bot.send_message(m.chat.id, 'Игра в режиме *АПОКАЛИПСИС* началась! Автостарт через 5 минут.\n\n', reply_markup=kb, parse_mode='markdown')
-        x=users.find({})
-        if m.chat.id==-1001208357368:
-         for idss in x:
-          if idss['id']!=0:
-            if idss['ping']==1:
-               try:
-                  bot.send_message(idss['id'], 'В чате @cookiewarsru началась игра!') 
-               except:
-                  pass  
-   
-def enablestart(id):
-   try:
-     games[id]['enablestart']=1
-   except:
-     pass
-   
-@bot.message_handler(commands=['begin'])
-def begin(m):
-   y=variables.find_one({'vars':'main'})
-   if y['enablegames']==1:                      
-     if m.chat.id not in games:
-        code=random.randint(1,10000)
-        games.update(creategame(m.chat.id,0, code))
-        t=threading.Timer(300, starttimer, args=[m.chat.id])
-        s='5 минут'
-        y=threading.Timer(60,enablestart,args=[m.chat.id])
-        if m.chat.id==-1001208357368 or m.chat.id==-1001172494515 or m.chat.id==-1001488903839:
-            t=threading.Timer(180, starttimer, args=[m.chat.id])
-            y=threading.Timer(1,enablestart,args=[m.chat.id])
-            s='3 минуты'
-        t.start()
-        games[m.chat.id]['timer']=t
-        y.start()
-        kb=types.InlineKeyboardMarkup()
-        kb.add(types.InlineKeyboardButton(text='Присоединиться', url='telegram.me/cookiewarsbot?start='+str(m.chat.id)+'_'+str(code)))
-        bot.send_message(m.chat.id, 'Игра началась! Автостарт через '+s+'.\n\n', reply_markup=kb)
-        x=users.find({})
-        if m.chat.id==-1001208357368:
-         text=''
-         for ids in x:
-          if ids['id']!=0:
-            if ids['enablejoin']==1 and ids['joinbots']>0 and ids['bot']['name']!=None:
-               games[m.chat.id]['bots'].update(createbott(ids['id'], ids['bot']))
-               games[m.chat.id]['ids'].append(ids['id'])
-               users.update_one({'id':ids['id']}, {'$inc':{'joinbots':-1}})
-               games[m.chat.id]['joinbotsreturn'].append(ids['id'])
-               try:
-                   text+=ids['name']+' (боец '+ids['bot']['name']+') присоединился! (🤖Автоджоин)\n'
-               except:
-                   pass
-         try:
-             bot.send_message(m.chat.id, text)
-         except:
-             bot.send_message(m.chat.id, 'Много текста!')
-         x=users.find({})
-         for idss in x:
-          if idss['id']!=0:
-            if idss['ping']==1:
-               try:
-                  bot.send_message(idss['id'], 'В чате @cookiewarsru началась игра!') 
-               except:
-                  pass
-               
-            
-        elif m.chat.id==-1001172494515:
-         text=''
-         games[m.chat.id]['gmo']=0
-         for ids in x:
-          if ids['id']!=0:
-            if ids['nomutantjoin']==1 and ids['joinbots']>0 and ids['bot']['name']!=None and ids['bot']['mutations']==[]:
-               games[m.chat.id]['bots'].update(createbott(ids['id'], ids['bot']))
-               games[m.chat.id]['ids'].append(ids['id'])
-               users.update_one({'id':ids['id']}, {'$inc':{'joinbots':-1}})
-               games[m.chat.id]['joinbotsreturn'].append(ids['id'])
-               try:
-                   text+=ids['name']+' (боец '+ids['bot']['name']+') присоединился! (🤖Автоджоин)\n'
-               except:
-                   pass
-         bot.send_message(m.chat.id, text)
-         x=users.find({})
-         for idss in x:
-          if idss['id']!=0:
-            if idss['pingnogmo']==1:
-               try:
-                  bot.send_message(idss['id'], 'В чате @cookiewars_no_gmo началась игра!') 
-               except:
-                  pass
-   else:
-        bot.send_message(m.chat.id, 'Проводятся технические работы! Приношу свои извинения за доставленные неудобства.')   
-   
-@bot.message_handler(commands=['withoutgmo'])
-def begin(m):
-   newchat=-1001172494515
-   y=variables.find_one({'vars':'main'})
-   if y['enablegames']==1:                      
- # if m.chat.id==-1001208357368:#-229396706:
-     if m.chat.id not in games:
-        code=random.randint(1,10000)
-        games.update(creategame(m.chat.id,0, code))
-        games[m.chat.id]['gmo']=0
-        t=threading.Timer(300, starttimer, args=[m.chat.id])
-        t.start()
-        games[m.chat.id]['timer']=t
-        t=threading.Timer(60,enablestart,args=[m.chat.id])
-        t.start()
-        kb=types.InlineKeyboardMarkup()
-        kb.add(types.InlineKeyboardButton(text='Присоединиться', url='telegram.me/cookiewarsbot?start='+str(m.chat.id)+'_'+str(code)))
-        bot.send_message(m.chat.id, 'Игра началась! Автостарт через 5 минут.\n\n', reply_markup=kb)
-        x=users.find({})
-        if m.chat.id==-1001208357368:
-         text=''
-         for ids in x:
-          if ids['id']!=0:
-            if ids['nomutantjoin']==1 and ids['joinbots']>0 and ids['bot']['name']!=None and ids['bot']['mutations']==[]:
-               games[m.chat.id]['bots'].update(createbott(ids['id'], ids['bot']))
-               games[m.chat.id]['ids'].append(ids['id'])
-               users.update_one({'id':ids['id']}, {'$inc':{'joinbots':-1}})
-               games[m.chat.id]['joinbotsreturn'].append(ids['id'])
-               try:
-                   text+=ids['name']+' (боец '+ids['bot']['name']+') присоединился! (🤖Автоджоин)\n'
-               except:
-                   pass
-         bot.send_message(m.chat.id, text)
-         x=users.find({})
-         for idss in x:
-          if idss['id']!=0:
-            if idss['ping']==1:
-               try:
-                  bot.send_message(idss['id'], 'В чате @cookiewarsru началась игра!') 
-               except:
-                  pass
-
-   else:
-        bot.send_message(m.chat.id, 'Проводятся технические работы! Приношу свои извинения за доставленные неудобства.') 
-        
-        
-        
-@bot.message_handler(commands=['dungeon'])
-def begindungeon(m):
-   newchat=-1001172494515
-   y=variables.find_one({'vars':'main'})                    
-   if m.chat.id not in games:
-        code=random.randint(1,10000)
-        games.update(creategame(m.chat.id,0, code))
-        games[m.chat.id]['mode']='dungeon'
-        t=threading.Timer(180, starttimer, args=[m.chat.id])
-        t.start()
-        games[m.chat.id]['timer']=t
-        t=threading.Timer(180,enablestart,args=[m.chat.id])
-        if m.chat.id==-1001208357368 or m.chat.id==-1001172494515 or m.chat.id==-1001488903839:
-            t=threading.Timer(1,enablestart,args=[m.chat.id])
-        t.start()
-        kb=types.InlineKeyboardMarkup()
-        kb.add(types.InlineKeyboardButton(text='Присоединиться', url='telegram.me/cookiewarsbot?start='+str(m.chat.id)+'_'+str(code)))
-        bot.send_message(m.chat.id, 'Подземелье открыто! Автостарт через 3 минуты.\n\n', reply_markup=kb)
-
-def medit(message_text,chat_id, message_id,reply_markup=None,parse_mode=None):
-    return bot.edit_message_text(chat_id=chat_id,message_id=message_id,text=message_text,reply_markup=reply_markup,
-                                 parse_mode=parse_mode)        
-        
-def modetoname(x):
-   if x=='meteors':
-      return 'Метеоритный дождь'
-   if x=='randomhp':
-      return 'Случайные хп на старте'
-   if x=='teamfight':
-      return 'Тимфайт'
-      
-  
-@bot.message_handler(commands=['chaosstats'])
-def chaosstats(m):
-   x=users.find_one({'id':m.from_user.id})
-   if x!=None:
-        try:
-            sredn=round((x['bot']['takenmeteordmg']/x['bot']['takenmeteors']),2)
-        except:
-            sredn=0
-        bot.send_message(m.chat.id, 'Игр в "Метеоритный дождь" сыграно: '+str(x['bot']['meteorraingames'])+'\n\n'+\
-                         'Получено метеоритов в ебало: '+str(x['bot']['takenmeteors'])+'\n\n'+\
-                         'Средний получаемый урон с метеорита: '+str(sredn))
-  
-
-def randomboss(chatid):
-    bosses=['pyro', 'hypnotist', 'seer', 'warrior', 'skeleton']
-    boss=random.choice(bosses)
-    if boss=='pyro':
-        b=createpyro(chatid)
-    if boss=='hypnotist':
-        b=createhypnotist(chatid)
-    if boss=='seer':
-        b=createseer(chatid)
-    if boss=='warrior':
-        b=createwarrior(chatid)
-    if boss=='skeleton':
-        b=createskeleton(chatid)
-    return b
-
-        
-def createpyro(chatid, id='dungeon'):
-    x=randomgen(chatid)
-    text='Пироманьяк'
-    strenght=1.3
-    hp=4
-    return createunit(id=id, drops=['ring_of_fire', 'magmaball'], weapon='flame',name=text,hp=hp,maxhp=hp,identeficator=x,damagelimit=6, strenght=strenght, skills=['pricel','berserk','bloodmage'])
-
-def createhypnotist(chatid, id='dungeon'):
-    x=randomgen(chatid)
-    text='Гипнотизёр'
-    strenght=1.5
-    hp=6
-    return createunit(id=id, drops=['eye_of_seeing', 'hypnogun'], weapon='saw',name=text,hp=hp,maxhp=hp,identeficator=x,damagelimit=8, strenght=strenght, skills=['gipnoz', 'liveful', 'metalarmor'])
-
-
-def createseer(chatid, id='dungeon'):
-    x=randomgen(chatid)
-    text='Провидец смерти'
-    strenght=2
-    hp=1
-    return createunit(id=id, drops=['stone_of_life', 'magic_essense'], weapon='kinzhal',name=text,hp=hp,maxhp=hp,identeficator=x,damagelimit=6, strenght=strenght, skills=['zeus', 'cazn', 'zombie'], oracle=5, skin=['oracle'])
-
-
-def createwarrior(chatid, id='dungeon'):
-    x=randomgen(chatid)
-    text='Воин'
-    strenght=1
-    hp=8
-    return createunit(id=id, drops=['helmet_of_the_strenght', 'magic_sword'], weapon='hand',name=text,hp=hp,maxhp=hp,identeficator=x,damagelimit=10, strenght=strenght)
-
-
-
-def createskeleton(chatid, id='dungeon'):
-    x=randomgen(chatid)
-    text='Скелет-маг'
-    strenght=2.3
-    hp=6
-    return createunit(id=id, drops=['magic_bone_wand', 'bonegun'], weapon='sword',name=text,hp=hp,maxhp=hp,identeficator=x,damagelimit=999, strenght=strenght, skills=['shieldgen', 'nindza', 'double', 'firemage', 'berserk'])
-
-
-def treasuretoname(x):
-    if x=='ring_of_fire':
-        return 'Кольцо огня'
-    if x=='magmaball':
-        return 'Сгусток магмы'
-    if x=='eye_of_seeing':
-        return 'Всевидящее око'
-    if x=='hypnogun':
-        return 'Гипнопушка'
-    if x=='stone_of_life':
-        return 'Камень жизни'
-    if x=='magic_essense':
-        return 'Магическая эссенция'
-    if x=='helmet_of_the_strenght':
-        return 'Шлем силы'
-    if x=='magic_sword':
-        return 'Зачарованный меч'
-    if x=='magic_bone_wand':
-        return 'Костяная волшебная палочка'
-    if x=='bonegun':
-        return 'Костяная пушка'
-
-
-def begingame(id):
- try:
-    if games[id]['started2']!=1:
-       choicelist=[]
-       for i in games[id]['bots']:
-         choicelist.append(games[id]['bots'][i])
-       try:
-         games[id]['timer'].cancel()
-         print('timer cancelled')
-       except:
-         pass
-       modes=['teamfight','meteors','teamfight']
-       if games[id]['apocalypse']==1:
-           games[id]['mode']=random.choice(modes)
-           n=modetoname(games[id]['mode'])
-           bot.send_message(id, 'В этот раз вас ждёт режим: "'+n+'"!')
-           if games[id]['mode']=='teamfight':
-               for i in games[id]['bots']:
-                  print(games[id]['bots'][i])
-               choicelist=[]
-               for i in games[id]['bots']:
-                   choicelist.append(games[id]['bots'][i])
-               leader1=random.choice(choicelist)
-               leader2=random.choice(choicelist)
-               while leader2['id']==leader1['id']:
-                 leader2=random.choice(choicelist)
-               i=random.randint(0,1)
-               for idsr in choicelist:
-                 if idsr['id']!=leader1['id'] and idsr['id']!=leader2['id']:
-                   if i==0:
-                       idsr['id']=leader1['id']
-                       i=1
-                   else:
-                       idsr['id']=leader2['id']
-                       i=0
-               team1=''
-               team2=''
-               for idsz in choicelist:
-                   if idsz['id']==leader1['id']:
-                       team1+=idsz['name']+'\n'
-                   else:
-                       team2+=idsz['name']+'\n'
-               bot.send_message(id, 'Команда 1:\n'+team1+'\nКоманда 2:\n'+team2)
-            
-       if games[id]['mode']=='dungeon':
-               choicelist=[]
-               for i in games[id]['bots']:
-                   choicelist.append(games[id]['bots'][i])
-               leader1=random.choice(choicelist)
-               for idsr in choicelist:
-                   idsr['id']=leader1['id']
-               team1=''
-               for idsz in choicelist:
-                   team1+=idsz['name']+'\n'
-               team2=''
-               pstrenght=len(games[id]['bots'])
-               for ids in games[id]['bots']:
-                   if games[id]['bots'][ids]['mutations']!=[]:
-                        pstrenght+=1
-               bstrenght=0
-               while bstrenght<=pstrenght:
-                    x=randomboss(id)
-                    games[id]['bots'].update(x)
-                    for ids in x:
-                        try:
-                            bstrenght+=x[ids]['strenght']
-                            team2+=x[ids]['name']+'\n'
-                        except:
-                            pass
-               for i in games[id]['bots']:
-                  if games[id]['bots'][i] not in choicelist:
-                    choicelist.append(games[id]['bots'][i])
-
-               bot.send_message(id, 'Команда игроков:\n'+team1+'\nКоманда боссов:\n'+team2)
-       
-       if id==-1001488903839:
-           games[id]['mode']='farm'
-       if id==-1001208357368 and random.randint(1,100)==1:
-         games[id]['bots'].update(createrare(id))
-         bot.send_message(id, 'На поле боя был замечен **редкий слизнюк**! Кто поймает его, тот получит 500❇/⚛!',parse_mode='markdown')
-         for ids in games[id]['bots']:
-            try:
-               bot.send_message(games[id]['bots'][ids]['id'], 'Редкий слизнюк был замечен на поле битвы! Заходите в чат @cookiewarsru, чтобы посмотреть, кто его поймает!')
-            except:
-               pass
-       spisok=['kinzhal','rock', 'hand', 'ak', 'saw']
-       for ids in choicelist:
-           ids['takenmeteors']=0
-           ids['takenmeteordmg']=0
-           ids['meteorraingames']=0  
-       createlist=[]
-       for ids in choicelist:
-           user=users.find_one({'id':ids['id']})
-           if 'deathwind' in ids['skills'] and id==-1001208357368:
-               if ids['gameswithdeathwind']<3:
-                   users.update_one({'id':ids['id']},{'$inc':{'bot.gameswithdeathwind':1}})
-               else:
-                   users.update_one({'id':ids['id']},{'$inc':{'bot.gameswithdeathwind':1}})
-                   x=random.randint(1,100)
-                   if x<=1:
-                       for idss in choicelist:
-                           if idss['id']!=ids['id']:
-                               idss['die']=1
-                       bot.send_message(id, 'Вихрь смерти убивает всех соперников бойца '+ids['name']+'!')
-                   if random.randint(1,100)<=1:
-                       ids['die']=1
-                       bot.send_message(id, 'Вихрь смерти убивает владельца способности - '+ids['name']+'!')
-                   users.update_one({'id':ids['id']},{'$set':{'bot.gameswithdeathwind':0}})
-           if ids['weapon']==None:
-               ids['weapon']='hand'
-           n=buffs(ids,id)
-           for elem in n:
-               createlist.append(elem)
-       text=''
-       text2=''
-       for ids3 in choicelist:
-        if ids3['id']!='dungeon':
-            try:
-               text+=ids3['name']+':\n'
-               allskin=[]
-               allskill=[]
-               i=0
-               for code in ids3['skills']:
-                 allskill.append(code)
-               for code in ids3['skin']:
-                 allskin.append(code)
-               for sk in allskill:
-                 if sk!='active':
-                     text+=skilltoname(sk)+'\n'
-               try:
-                   text+='Скин: '+skintoname(ids3['skin'][0])+'\n'
-               except:
-                   text+='Скин: отсутствует.\n'
-               text+='\n'
-            except Exception as e:
-             bot.send_message(441399484, traceback.format_exc())
-             text+='\n'
-       giveitems(games[id])
-       for ids in createlist:
-           rnd=randomgen(id)
-           games[id]['bots'].update(createdouble(id,ids))
-           text2+='🎭'+ids['name']+' призывает своего двойника! У каждого из них по '+str(ids['hp'])+' хп!\n'
-       techw=['bazuka','sword','flame']
-       text3=''
-       for ids in choicelist:
-           if ids['weapon'] in techw:
-               text3+='⁉'+ids['name']+' получает оружие: '+techwtoname(ids['weapon'])+'!\n'
-       u=0
-       u+=1
-       print(u)
-       try:
-           bot.send_message(id, 'Экипированные скиллы:\n\n'+text)
-       except:
-           pass
-       tt2=''
-       animals=['rhino','demon','pig']
-       for ids in games[id]['bots']:
-            if games[id]['bots'][ids]['weapon']=='magic':
-               animal=random.choice(animals)
-               games[id]['bots'][ids]['animal']=animal
-               animalname=animaltoname(animal)
-               tt2+='Волшебная палочка бойца '+games[id]['bots'][ids]['name']+' превращает его в случайное существо: '+animalname+'!\n\n'
-       try:
-         if tt2!='':
-           bot.send_message(id, tt2)
-         if text2!='':
-           bot.send_message(id, text2)
-         if text3!='':
-           bot.send_message(id, text3)
-       except:
-         pass
-       games[id]['started2']=1
-       t=threading.Timer(games[id]['timee'],battle,args=[id])
-       for ids in games[id]['bots']:
-         if 'playercontrol' in games[id]['bots'][ids]['effects']:
-            givekeyboard(id,games[id]['bots'][ids])
-       t.start()
-       games[id]['battletimer']=t
-    else:
-      pass
- except Exception as e:
-    print('Ошибка:\n', traceback.format_exc())
-    bot.send_message(441399484, traceback.format_exc())
-
-
-def buffs(ids,id):
-        user=users.find_one({'id':ids['id']})
-        createlist=[]
-        if 'werewolf' in ids['mutations']:
-            smile='🐺'
-            ids['dopname']='['+smile+']'+ids['name']
-            user=users.find_one({'id':ids['id']})
-            if 'werewolf1' in user['mutationlvls']:
-                ids['accuracy']+=10
-                
-        if 'electro' in ids['mutations']:
-            smile='🔌'
-            ids['name']='['+smile+']'+ids['name']
-            
-            if 'electro1' in user['mutationlvls']:
-                ids['hp']+=1
-                ids['maxhp']+=1
-        if 'paukovod' in ids['skills']:
-            ids['hp']-=2
-            ids['maxhp']-=2
-        if 'turret' in ids['skills']:
-            games[id]['turrets'].append(ids['id'])
-        if 'metalarmor' in ids['skills']:
-            ids['currentarmor']=1
-            ids['miss']-=8
-        if 'liveful' in ids['skills']:
-            ids['hp']+=2
-            ids['maxhp']+=2
-            ids['accuracy']-=20
-        if 'necromant' in ids['skills']:
-            ids['hp']-=2
-        if 'oldman' in ids['skin']:
-            ids['chance']+=0.2
-        if 'mage' in ids['skills']:
-            ids['weapon']='magic'
-        if 'secrettech' in ids['skills']:
-            ids['weapon']=random.choice(['bazuka','sword','flame'])
-        if 'magictitan' in ids['skills']:
-            ids['magicshield']=6
-        if 'dvuzhil' in ids['skills']:
-            ids['hp']+=0
-            ids['damagelimit']+=3
-        if 'medic' in ids['skills']:
-            ids['heal']=9
-        if 'pricel' in ids['skills']:
-            ids['accuracy']+=30+(30*ids['chance'])
-        if 'nindza' in ids['skills']:
-            ids['miss']+=20+(20*ids['chance'])
-        ids['maxhp']=ids['hp']
-        if 'robot' in ids['skin']:
-            ids['maxenergy']+=2
-        if 'double' in ids['skills']:
-            b=int(round(ids['hp']/2,0))
-            ids['hp']=b
-            ids['maxhp']=b
-            createlist.append(ids)
-        if games[id]['pvp']==1:
-            ids['effects'].append('playercontrol')
-        return createlist
-           
-
-def animaltoname(animal):
-    if animal=='rhino':
-        return 'Носорог'
-    elif animal=='demon':
-        return 'Демон'
-    elif animal=='pig':
-        return 'Свинья'
-
-def techwtoname(x):
-   if x=='bazuka':
-      return 'Базука'
-   if x=='sword':
-      return 'Лазерный меч'
-   if x=='flame':
-      return 'Огнемёт'
-   
-   
-def skintoname(x):
-   if x=='oracle':
-      return '🔮Оракул'
-   elif x=='robot':
-      return '🅿Робот'
-   elif x=='oldman':
-      return '👳‍♀️Мудрец'
-   
-def skilltoname(x):
-    if x=='shieldgen':
-        return '🛡Генератор щитов'
-    elif x=='medic':
-        return '⛑Медик'
-    elif x=='liveful':
-        return '💙Живучий'
-    elif x=='dvuzhil':
-        return '💪Стойкий'
-    elif x=='pricel':
-        return '🎯Прицел'
-    elif x=='cazn':
-        return '💥Ассасин'
-    elif x=='berserk':
-        return '😡Берсерк'
-    elif x=='zombie':
-        return '👹Зомби'
-    elif x=='gipnoz':
-        return '👁Гипнотизёр'
-    elif x=='paukovod':
-       return '🕷Пауковод'
-    elif x=='vampire':
-       return '😈Вампир'
-    elif x=='zeus':
-       return '🌩Зевс'
-    elif x=='nindza':
-       return '💨Ниндзя'
-    elif x=='bloodmage':
-       return '🔥Маг крови'
-    elif x=='double':
-       return '🎭Двойник'
-    elif x=='mage':
-       return '✨Колдун'
-    elif x=='magictitan':
-       return '🔵Магический титан'
-    elif x=='firemage':
-       return '🔥Повелитель огня'
-    elif x=='necromant':
-       return '🖤Некромант'
-    elif x=='turret':
-       return '🔺Инженер'
-    elif x=='metalarmor':
-       return '🔲Металлическая броня'
-    elif x=='electrocharge':
-       return '🔋Электрический снаряд'
-    elif x=='suit':
-       return '📡Отражающий костюм'
-    elif x=='secrettech':
-       return '⁉Секретные технологии'
-    elif x=='deathwind':
-       return 'Вихрь смерти'
-    elif x=='cookiegolem':
-        return '🍪Голем из печенья'
-    elif x=='cookiegun':
-        return '🍪Куки-зука'
-    elif x=='cookiecharge':
-        return '🍪Поедание голема'
-    elif x=='cookieclone':
-        return '🍪Клон из печенья'
-    elif x=='trap':
-        return '🍪💀Ловушка!!!'
-   
-
-def createbott(id, y):
-        return{id:y}
-
-def createuser(id, username, name):
-    botslots={'1':{},
-              '2':{},
-              '3':{}
-             }
-    return{'id':id,
-           'bot':createbot(id),
-           'username':username,
-           'name':name,
-           'cookie':0,
-           'dailycookie':0,
-           'dna':0,
-           'buildings':['1slot'],
-           'mutationlvls':[],
-           'searched':[],
-           'botslots':botslots,
-           'dnacreator':None,
-           'dnawaiting':0,
-           'cookiecoef':0.10,
-           'joinbots':0,
-           'enablejoin':0,
-           'nomutantjoin':0,
-           'currentjoinbots':0,
-           'dailybox':1,
-           'games':0,
-           'ping':0,
-           'pingnogmo':0,
-           'referals':[],
-           'inviter':None,
-           'prize1':0,
-           'prize2':0,
-           'prize3':0,
-           'prize4':0,
-           'prize5':0,
-           'prize6':0,
-           'prize7':0,
-           'prize8':0,
-           'prize9':0,
-           'prize10':0,
-           'prize11':0,
-          }
-    
-        
-def creategame(id, special, code=228):
-    return {id:{
-        'chatid':id,
-        'ids':[],
-        'bots':{},
-        'pvp':0,
-        'results':'',
-        'gmo':1,
-        'secondres':'',
-        'res':'',
-        'started':0,
-        'xod':1,
-        'started2':0,
-        'timer':None,
-        'summonlist':[],
-        'apocalypse':special,
-        'mode':None,
-        'adminconnected':0,
-        'randomdmg':0,
-        'joinbotsreturn':[],
-        'turrets':[],
-        'enablestart':0,
-        'timee':12,
-        'prizefond':0,
-        'battletimer':None,
-        'treasures':[],
-        'gamecode':code
-        
-             }
-           }
-  
-@bot.message_handler(commands=['light'])
-def connect(m):
-    if m.from_user.id==441399484:
-        x=m.text.split(' ')
-        try:
-            id=int(x[1])
-            i=2
-            text=''
-            while i<len(x):
-               text+=x[i]+' '
-               i+=1
-            for ids in games[-1001208357368]['bots']:
-                if games[-1001208357368]['bots'][ids]['id']==id and games[-1001208357368]['bots'][ids]['identeficator']==None:
-                    target=games[-1001208357368]['bots'][ids]
-            bot.send_message(-1001208357368, target['name']+' получает молнию в ебало, теряя ♥1 хп.\n'+text)
-            target['hp']-=1
-        except:
-            pass
-       
-def createbot(id):
-  return {'name': None,
-              'dopname':None,
-              'shockcd':0,
-              'weapon':'hand',
-              'msg':None,
-              'mutations':[],
-              'skills':[],
-              'team':None,
-              'effects':[],
-              'hp':4,
-              'maxhp':0,
-              'maxenergy':5,
-              'energy':5,
-              'items':[], 
-              'attack':0,
-              'yvorot':0,
-              'reload':0,
-              'skill':0,
-              'item':0,
-              'miss':0,
-              'shield':0,
-              'stun':0,
-              'takendmg':0,
-              'die':0,
-              'yvorotkd':0,
-              'id':id,
-              'blood':0,
-              'bought':[],
-              'accuracy':0,
-              'damagelimit':6,
-              'zombie':0,
-              'heal':0,
-              'shieldgen':0,
-              'skin':[],
-              'oracle':1,
-              'target':None,
-              'exp':0,
-              'rank':0,
-              'mainskill':[],
-              'mainitem':[],
-              'weapons':['hand'],
-              'gipnoz':0,
-              'bowcharge':0,
-              'currentarmor':0,
-              'armorturns':0,
-              'boundwith':None,
-              'boundtime':0,
-              'boundacted':0,
-              'animal':None,
-              'allrounddmg':0,
-              'identeficator':None,
-              'takenmeteors':0,
-              'takenmeteordmg':0,
-              'meteorraingames':0,
-              'dieturn':0,
-              'deffromgun':0,
-              'magicshield':0,
-              'magicshieldkd':0,
-              'firearmor':0,
-              'firearmorkd':0,
-              'fire':0,
-              'summonmonster':['hand',0],   #####  Оружие; ХП
-              'chance':0,            #### УВЕЛИЧЕНИЕ ШАНСА НА ПРИМЕНЕНИЕ АБИЛОК
-              'hit':0,                  ###ЕСЛИ ==1, ТО ТЫ ПОПАДАЕШЬ ПО ЦЕЛИ
-              'doptext':'',
-              'dopdmg':0,
-              'blight':0,
-              'gameswithdeathwind':0,
-              'reservenergy':0,
-              'realid':None
-}
-
-
-def adddna(user):
-    print(user)
-    users.update_one({'id':user['id']},{'$inc':{'dna':1}})
-    users.update_one({'id':user['id']},{'$set':{'dnacreator':None}})
-    if user['dnawaiting']==0:
-        bot.send_message(user['id'], 'Все 🧬ДНК были успешно произведены!')
-
-def dailybox():
-   t=threading.Timer(60, dailybox)
-   t.start()
-   x=time.ctime()
-   x=x.split(" ")
-   month=0
-   year=0
-   ind=0
-   num=0
-   for ids in x:
-      for idss in ids:
-         if idss==':':
-            tru=ids
-            ind=num
-      num+=1
-   day=x[ind-1]
-   month=x[1]
-   year=x[ind+1]
-   x=tru 
-   x=x.split(":")  
-   y=int(x[1])    # минуты
-   x=int(x[0])+3  # часы (+3, потому что heroku в Великобритании)
-   z=time.ctime()
-   z=z.split(' ')
-   u=users.find({})
-   for ids in u:
-       cuser=users.find_one({'id':ids['id']})
-       if ids['dnawaiting']>0 and ids['dnacreator']==None:
-           users.update_one({'id':ids['id']},{'$inc':{'dnawaiting':-1}})
-           users.update_one({'id':ids['id']},{'$set':{'dnacreator':time.ctime()}})
-       elif cuser['dnacreator']!=None:
-           settime=cuser['dnacreator']    # Тут вычисляется, когда была запущена генерация последнего ДНК.
-           a=settime.split(" ")
-           ind=0
-           num=0
-           for idss in a:
-              for idsss in idss:
-                 if idsss==':':
-                    trua=idss
-                    ind=num
-              num+=1
-           cday=a[ind-1]
-           cmonth=a[1]
-           cyear=a[ind+1]
-           a=trua
-           a=a.split(":")  
-           m=int(a[1])     # минуты
-           hs=int(a[0])+3  # часы (+3, потому что heroku в Великобритании)
-           
-           if x-hs==1:                    # Таймер генерации ДНК. В словарь игрока перед этим закидывается дата начала генерации.
-               if y - m >= 0:             # Здесь каждую минуту проверяется, не прошел ли час.
-                    adddna(cuser)
-           elif x-hs>1:
-               adddna(cuser)
-           elif cday!=day or cmonth!=month or cyear!=year:
-               adddna(cuser)
-            
-   party=0
-   if z[0]=='Sat' or z[0]=='Sun':
-      party=1
-   if x==24 and y==0:
-      users.update_many({}, {'$set':{'dailybox':1}})
-      users.update_many({}, {'$set':{'dailycookie':0}})
-   if x==14 and y==0 and party==1:
-      users.update_many({}, {'$inc':{'joinbots':1}})
-      beginmassbattle(-1001208357368)
-   if x==19 and y==0 and party==1:
-      users.update_many({}, {'$inc':{'joinbots':1}})
-      beginmassbattle(-1001208357368)
-  
-
- 
-def beginmassbattle(id):
-   y=variables.find_one({'vars':'main'})
-   if y['enablegames']==1:                      
-     if id not in games:
-        games.update(creategame(id,0))
-        t=threading.Timer(5, starttimer, args=[id])
-        t.start()
-        games[id]['timer']=t
-        kb=types.InlineKeyboardMarkup()
-        kb.add(types.InlineKeyboardButton(text='Присоединиться', url='telegram.me/cookiewarsbot?start='+str(id)))
-        bot.send_message(id, 'Игра началась! Автостарт через 5 секунд.\n\n', reply_markup=kb)
-        x=users.find({})
-        if id==-1001208357368:
-         text=''
-         for ids in x:
-          if ids['id']!=0:
-            if ids['joinbots']>0 and ids['bot']['name']!=None:
-               games[id]['bots'].update(createbott(ids['id'], ids['bot']))
-               games[id]['ids'].append(ids['id'])
-               users.update_one({'id':ids['id']}, {'$inc':{'joinbots':-1}})
-               text+=ids['name']+' (боец '+ids['bot']['name']+') присоединился! (🤖Автоджоин)\n'
-         try:
-             bot.send_message(id, text)
-         except:
-             bot.send_message(id, 'много текста!')
-         x=users.find({})
-         for idss in x:
-          if idss['id']!=0:
-            if idss['ping']==1:
-               try:
-                  bot.send_message(idss['id'], 'В чате @cookiewarsru началась игра!') 
-               except:
-                  pass
-               
-   else:
-        bot.send_message(id, 'Проводятся технические работы! Приношу свои извинения за доставленные неудобства.')
-    
-@bot.message_handler(commands=['boxreload'])   
-def boxreload(m):
-  if m.from_user.id==441399484:
-    users.update_many({}, {'$set':{'dailybox':1}})   
-    bot.send_message(m.chat.id, 'Дейлибоксы обновлены!')
-   
-@bot.message_handler(commands=['pay'])
-def allmesdonate(m):
- if m.from_user.id==m.chat.id:
-   x=users.find_one({'id':m.from_user.id})
-   if x!=None:
-    word=m.text.split(' ')
-    if len(word)==2:
-     try:
-       price=int(word[1])
-       price+=0
-       if price>=20:
-         pay.update_one({},{'$inc':{'x':1}})
-         pn=pay.find_one({})
-         pn=pn['x']
-         pay.update_one({},{'$push':{'donaters':createdonater(m.from_user.id,pn)}})
-         bot.send_message(m.chat.id,'Для совершения покупки поинтов, отправьте '+str(word[1])+' рубль(ей) на киви-кошелёк по логину:\n'+
-                        '`egor5q`\nС комментарием:\n`'+str(pn)+'`\n*Важно:* если сумма будет меньше указанной, или '+
-                          'комментарий не будет соответствовать указанному выше, платёж не пройдёт!\nНа ваш аккаунт придут поинты, в размере '+
-                        '(Сумма платежа)x20.',parse_mode='markdown')
-         comment=api.bill(comment=str(pn), price=price)
-         print(comment)
-       else:
-         bot.send_message(m.chat.id, 'Минимальная сумма платежа - 20 рублей!')
-     except:
-      pass
-    else:
-         bot.send_message(m.chat.id, 'Для доната используйте формат:\n/`pay сумма`',parse_mode='markdown')
-
-def createdonater(id,pn):
-   return{'id':id,
-         'comment':pn}
-      
-def payy(comment):
-   x=0
-   bar=api
-   while True and x<100:
-      if api.check(comment):
-         print('success')
-         id=None
-         z=None
-         a=donates.find_one({})
-         for ids in a['donaters']:
-           try:
-              z=bar[ids]
-              id=ids
-           except:
-              pass
-         if z!=None and id!=None:
-            c=int(bar[ids]['price']*20)
-            usr=users.find_one({'id':int(id)})
-            dtxt=''
-            if bar[ids]['price']>=150 and '2slot' not in usr['buildings']:
-                users.update_one({'id':int(id)},{'$push':{'buildings':'2slot'}})
-                dtxt+=';\n2й слот для бойца!'
-            elif bar[ids]['price']>=250 and '3slot' not in usr['buildings']:
-                users.update_one({'id':int(id)},{'$push':{'buildings':'3slot'}})
-                dtxt+=';\n3й слот для бойца!'
-            users.update_one({'id':int(id)},{'$inc':{'cookie':c}})
-            bot.send_message(int(id),'Ваш платёж прошёл успешно! Получено: '+str(c)+'⚛'+dtxt)
-            donates.update_one({},{'$pull':{'donaters':id}})      
-            api.stop()
-            api.start()
-            bot.send_message(441399484,'New payment!')
-            break
-         x+=1
-      time.sleep(6)
-   print(bar)
-   print('Ожидание платежа')
-   
-def cancelpay(id):
-   try:
-     x=donates.find_one({})
-     if str(id) in x['donaters']:
-       donates.update_one({},{'$pull':{'donaters':str(id)}})
-       bot.send_message(id,'Время ожидания вашего платежа истекло. Повторите попытку командой /pay.')
-   except:
-     pass
-   
-api=QApi(token=bearer,phone=mylogin)   
-@api.bind_echo()
-def foo(bar):
-      id=None
-      z=None
-      a=pay.find_one({})
-      i=0
-      for ids in a['donaters']:
-           print(ids)
-           print(z)
-           print(id)
-           try:
-             z=bar[str(ids['comment'])]
-             id=ids['id']
-             index=i
-             removal=ids
-           except:
-             pass
-           print(z)
-           print(id)
-           i+=1
-      if z!=None and id!=None:
-         c=int(z['price']*25)
-         usr=users.find_one({'id':int(id)})
-         dtxt=''
-         if z['price']>=129 and '2slot' not in usr['buildings']:
-             users.update_one({'id':int(id)},{'$push':{'buildings':'2slot'}})
-             dtxt+=';\n2й слот для бойца!'
-         elif z['price']>=219 and '3slot' not in usr['buildings']:
-             users.update_one({'id':int(id)},{'$push':{'buildings':'3slot'}})
-             dtxt+=';\n3й слот для бойца!'
-         if z['price']>=300:
-             dtxt+=';\nСмайлики для хп! Отпишите Пасюку, чтобы выбрать.'
-         if z['price']>=300:
-             dna=int(z['price']/150)
-             users.update_one({'id':int(id)},{'$inc':{'dna':dna}})
-             dtxt+=';\n'+str(dna)+' 🧬ДНК!'
-         users.update_one({'id':int(id)},{'$inc':{'cookie':c}})
-         pay.update_one({},{'$pull':{'donaters':removal}})
-         bot.send_message(int(id),'Ваш платёж прошёл успешно! Получено: '+str(c)+'⚛'+dtxt)     
-         bot.send_message(441399484,'New payment!')
-      print(bar)
-      
-api.start()
-
-if True:
-   dailybox()
-
-if True:
-   donates.update_one({},{'$set':{'donaters':[]}})
-   print('7777')
-   bot.send_message(-1001208357368, 'Бот был перезагружен!')
-   bot.send_message(-1001172494515, 'Бот был перезагружен!')
-   bot.polling(none_stop=True)
-
-"""
-list = code.split('\n')
