@@ -75,6 +75,8 @@ def roll(m):
         exec(codetoeval)
         bot.reply_to(m, codetoeval + '\n\nУспешно!')
     except Exception as e:
+        tts = '{}\n\n{}'.format(codetoeval, e)
+        print(tts)
         bot.reply_to(m, traceback.format_exc())
 @bot.message_handler(commands=['life'])
 def life(m):
