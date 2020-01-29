@@ -91,7 +91,7 @@ def roll(m):
 @bot.message_handler(commands=['balance'])
 def balance(m):
     roller = users.find_one({'id':m.from_user.id})
-    tts = 'Стата:\n\nМонеты: {}\nДеньги:{}'.format(roller['coins'], roller['money'])
+    tts = 'Стата:\n\nМонеты: {}\nДеньги:{}'.format(roller['coins'], roller.get('money'))
     bot.reply_to(m, tts)
 @bot.message_handler(commands=['life'])
 def life(m):
