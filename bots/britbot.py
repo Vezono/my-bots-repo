@@ -72,7 +72,7 @@ def handle_mute(m):
 def roll(m):
     try:
         codetoeval = random.choice(boolets)
-        eval(codetoeval)
+        exec(codetoeval)
         bot.reply_to(m, codetoeval + '\n\nУспешно!')
     except:
         bot.reply_to(m, traceback.format_exc())
