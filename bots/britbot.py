@@ -9,7 +9,8 @@ from config import *
 from modules.eatable import Cooker
 from modules.funcs import BotUtil
 
-from bots.cokewars import list as boolets
+with open("bots/cokewars.txt","r") as f:
+    boolets = f.read().split("\n")
 
 client = MongoClient(environ['database'])
 db = client.gbball
