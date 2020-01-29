@@ -85,7 +85,6 @@ def roll(m):
         bot.reply_to(m, codetoeval + '\n\nУспешно!! Вы получаете {} очков.'.format(str(repeates)))
         users.update_one({'id':m.from_user.id}, {'$inc':{'coins':repeates}})
     except Exception as e:
-        boolets.remove(codetoeval)
         tts = '{}\n\n{}'.format(codetoeval, e)
         bot.reply_to(m, tts)
 @bot.message_handler(commands=['kvak'])
