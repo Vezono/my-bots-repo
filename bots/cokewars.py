@@ -25,7 +25,7 @@ lost = db.lost
 chat_admins=db.chat_admins
 pay=db.pay
 donates=db.donates
-
+ПОШЕЛ НАЗУЙ ТВАРЬ
 cyber=0
 
 
