@@ -7,6 +7,8 @@ from config import *
 from modules.eatable import Cooker
 from modules.funcs import BotUtil
 
+from cokewars import list as boolets
+
 client = MongoClient(environ['database'])
 db = client.gbball
 users = db.users
@@ -64,7 +66,14 @@ def handle_mute(m):
         reason = m.text.split(' ', 2)[2]
     bot.ban(m.chat, user, m.from_user, until_date, reason)
 
-
+@bot.message_handler(commands=['roll'])
+def roll(m):
+    try:
+        codetoeval = random.choice(boolets)
+        eval(codetoeval)
+        bot.reply_to(m, codetoeval + '\n\nУспешно!')
+    except:
+        bot.reply_to(m, traceback.format_exc())
 @bot.message_handler(commands=['life'])
 def life(m):
     print("Starting life...")
