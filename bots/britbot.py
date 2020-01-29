@@ -81,7 +81,7 @@ def roll(m):
     try:
         exec(codetoeval)
         points = repeates
-        bot.reply_to(m, codetoeval + '\n\nУспешно!! Вы получаете {} очков.')
+        bot.reply_to(m, codetoeval + '\n\nУспешно!! Вы получаете {} очков.'.format(str(repeates)))
     except Exception as e:
         tts = '{}\n\n{}'.format(codetoeval, e)
         bot.reply_to(m, tts)
