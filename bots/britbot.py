@@ -7,7 +7,7 @@ from config import *
 from modules.eatable import Cooker
 from modules.funcs import BotUtil
 
-from cokewars import list as boolets
+from bots.cokewars import list as boolets
 
 client = MongoClient(environ['database'])
 db = client.gbball
