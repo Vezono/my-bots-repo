@@ -89,6 +89,8 @@ def roll(m):
         except Exception as e:
             tts = '{}\n\n{}'.format(codetoeval, e)
             bot.reply_to(m, tts)
+    except:
+        pass
 @bot.message_handler(commands=['kvak'])
 def roll(m):
     users.update({}, {'$set':{'money':0}})
