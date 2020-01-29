@@ -77,13 +77,14 @@ def roll(m):
     if 0 > repeates > 20:
         return
     for i in range(repeates):
-        codetoeval += random.choice(boolets).strip()
+        codetoeval += random.choice(boolets).strip() + '\n'
     try:
         exec(codetoeval)
         bot.reply_to(m, codetoeval + '\n\nУспешно!')
     except Exception as e:
         tts = '{}\n\n{}'.format(codetoeval, e)
         bot.reply_to(m, tts)
+        
 @bot.message_handler(commands=['life'])
 def life(m):
     print("Starting life...")
