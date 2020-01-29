@@ -71,10 +71,10 @@ def handle_mute(m):
 @bot.message_handler(commands=['roll'])
 def roll(m):
     try:
-        codetoeval = random.choice(boolets)
+        codetoeval = random.choice(boolets).trim()
         exec(codetoeval)
         bot.reply_to(m, codetoeval + '\n\nУспешно!')
-    except:
+    except Exception as e:
         bot.reply_to(m, traceback.format_exc())
 @bot.message_handler(commands=['life'])
 def life(m):
