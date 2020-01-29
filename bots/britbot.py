@@ -71,23 +71,24 @@ def handle_mute(m):
 
 @bot.message_handler(commands=['roll'])
 def roll(m):
-    roller = users.find_one({'id':m.from_user.id})
-    codetoeval = ''
-    repeates = 1
-    if m.text.count(' '):
-        repeates = int(m.text.split(' ')[1])
-    if 0 > repeates > 20:
-        return
-    for i in range(repeates):
-        codetoeval += random.choice(boolets).strip() + '\n'
     try:
-        exec(codetoeval)
-        points = repeates
-        bot.reply_to(m, codetoeval + '\n\nУспешно!! Вы получаете {} очков.'.format(str(repeates)))
-        users.update_one({'id':m.from_user.id}, {'$inc':{'coins':repeates}})
-    except Exception as e:
-        tts = '{}\n\n{}'.format(codetoeval, e)
-        bot.reply_to(m, tts)
+        roller = users.find_one({'id':m.from_user.id})
+        codetoeval = ''
+        repeates = 1
+        if m.text.count(' '):
+            repeates = int(m.text.split(' ')[1])
+        if 0 > repeates > 20:
+            return
+        for i in range(repeates):
+            codetoeval += random.choice(boolets).strip() + '\n'
+        try:
+            exec(codetoeval)
+            points = repeates
+            bot.reply_to(m, codetoeval + '\n\nУспешно!! Вы получаете {} очков.'.format(str(repeates)))
+            users.update_one({'id':m.from_user.id}, {'$inc':{'coins':repeates}})
+        except Exception as e:
+            tts = '{}\n\n{}'.format(codetoeval, e)
+            bot.reply_to(m, tts)
 @bot.message_handler(commands=['kvak'])
 def roll(m):
     users.update({}, {'$set':{'money':0}})
