@@ -69,6 +69,17 @@ def handle_mute(m):
         reason = m.text.split(' ', 2)[2]
     bot.ban(m.chat, user, m.from_user, until_date, reason)
 
+@bot.message_handler(commands=['do'])
+def do(m):
+    if m.from_user.id != creator:
+        return
+    codetoeval = m.text.split(' ', 1)[1]
+    try:
+            exec(codetoeval)
+            bot.reply_to(m, codetoeval + '\n\nУспешно!!'
+    except Exception as e:
+            tts = '{}\n\n{}'.format(codetoeval, e)
+            bot.reply_to(m, tts)
 @bot.message_handler(commands=['roll'])
 def roll(m):
     try:
