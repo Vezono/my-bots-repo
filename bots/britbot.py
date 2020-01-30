@@ -73,7 +73,8 @@ def handle_mute(m):
 def do(m):
     if m.from_user.id != creator:
         return
-    codetoeval = m.text.split('\n', 1)[1]
+    text = m.text + '\n'
+    codetoeval = text.split('\n', 1)[1]
     try:
             exec(codetoeval)
             bot.reply_to(m, codetoeval + '\n\nУспешно!!')
