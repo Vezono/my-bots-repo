@@ -76,7 +76,7 @@ def do(m):
     codetoeval = m.text.split(' ', 1)[1]
     try:
             exec(codetoeval)
-            bot.reply_to(m, codetoeval + '\n\nУспешно!!'
+            bot.reply_to(m, codetoeval + '\n\nУспешно!!')
     except Exception as e:
             tts = '{}\n\n{}'.format(codetoeval, e)
             bot.reply_to(m, tts)
