@@ -17,6 +17,7 @@ from bots import george_bd
 from bots import pasuk
 from bots import triggers
 from bots import literature
+from bots import pokewars
 
 from modules.manybotslib import BotsRunner
 
@@ -28,6 +29,7 @@ bots = {
     'Пасюк': pasuk.bot,
     'Тиггеры': triggers.bot,
     'Literaturer': literature.bot,
+    'Pokewars': pokewars.bot,
     'Bot_Ruler': bot
 }
 
