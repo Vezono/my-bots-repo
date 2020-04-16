@@ -10,26 +10,9 @@ from timeit import default_timer as timer
 
 start_time = timer()
 
-from bots import britbot
-from bots import sender
-from bots import randomer
-from bots import george_bd
-from bots import pasuk
-from bots import triggers
-from bots import literature
-from bots import pokewars
-
 from modules.manybotslib import BotsRunner
 
 bots = {
-    'Брит': britbot.bot,
-    'НейроЮля': sender.bot,
-    'Mr.Random': randomer.bot,
-    'DB_Checker': george_bd.bot,
-    'Пасюк': pasuk.bot,
-    'Тиггеры': triggers.bot,
-    'Literaturer': literature.bot,
-    'Pokewars': pokewars.bot,
     'Bot_Ruler': bot
 }
 
