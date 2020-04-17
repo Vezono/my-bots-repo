@@ -10,8 +10,7 @@ import threading
 from pymongo import MongoClient
 
 mine_token = os.environ['mine_token']
-mine_bot = telebot.TeleBot(mine_token)
-bot = mine_bot
+bot = telebot.TeleBot(mine_token)
 client=MongoClient(os.environ['database'])
 
 mine_users = client.farmer.users
@@ -24,7 +23,7 @@ recipes = ['furnance', 'cookedmeat', 'fountain', 'bread', 'fishingrod', 'fishham
            'autobur']
 x = 0
 
-@mine_bot.message_handler(commands=['update'])
+@bot.message_handler(commands=['update'])
 def upd(m):
     if m.from_user.id in vip:
         mine_users.update_many({}, {'$set': {'craftable.battery': 0}})
@@ -60,19 +59,19 @@ def recipetoname(x):
     return text
 
 
-@mine_bot.message_handler(commands=['sendm'])
+@bot.message_handler(commands=['sendm'])
 def sendmes(message):
     if message.from_user.id in vip:
         x = mine_users.find({})
         tex = message.text.split('/sendm')
         for one in x:
             try:
-                mine_bot.send_message(one['id'], tex[1])
+                bot.send_message(one['id'], tex[1])
             except:
                 pass
 
 
-@mine_bot.message_handler(commands=['food'])
+@bot.message_handler(commands=['food'])
 def sendmes(m):
     x = mine_users.find_one({'id': m.from_user.id})
     text = ''
@@ -80,54 +79,54 @@ def sendmes(m):
         text += 'Мясо (восполняет: 1🍗) (/eatmeat): ' + str(x['meat']) + '\n'
     if x['craftable']['cookedmeat'] > 0:
         text += 'Приготовленное мясо (восполняет: 5🍗) (/eatcookedmeat): ' + str(x['craftable']['cookedmeat']) + '\n'
-    mine_bot.send_message(m.chat.id, text)
+    bot.send_message(m.chat.id, text)
 
 
-@mine_bot.message_handler(commands=['eatmeat'])
+@bot.message_handler(commands=['eatmeat'])
 def eatm(m):
     x = mine_users.find_one({'id': m.from_user.id})
     if x['meat'] > 0:
         if x['hunger'] <= x['maxhunger'] - 1:
             mine_users.update_one({'id': m.from_user.id}, {'$inc': {'meat': -1}})
             mine_users.update_one({'id': m.from_user.id}, {'$inc': {'hunger': 1}})
-            mine_bot.send_message(m.chat.id, 'Вы съели Мясо и восстановили 1🍗!')
+            bot.send_message(m.chat.id, 'Вы съели Мясо и восстановили 1🍗!')
         else:
-            mine_bot.send_message(m.chat.id, 'Вы не достаточно голодны!')
+            bot.send_message(m.chat.id, 'Вы не достаточно голодны!')
     else:
-        mine_bot.send_message(m.chat.id, 'У вас нет этого!')
+        bot.send_message(m.chat.id, 'У вас нет этого!')
 
 
-@mine_bot.message_handler(commands=['eatcookedmeat'])
+@bot.message_handler(commands=['eatcookedmeat'])
 def eatcm(m):
     x = mine_users.find_one({'id': m.from_user.id})
     if x['craftable']['cookedmeat'] > 0:
         if x['hunger'] <= x['maxhunger'] - 5:
             mine_users.update_one({'id': m.from_user.id}, {'$inc': {'craftable.cookedmeat': -1}})
             mine_users.update_one({'id': m.from_user.id}, {'$inc': {'hunger': 5}})
-            mine_bot.send_message(m.chat.id, 'Вы съели Приготовленное мясо и восстановили 5🍗!')
+            bot.send_message(m.chat.id, 'Вы съели Приготовленное мясо и восстановили 5🍗!')
         else:
-            mine_bot.send_message(m.chat.id, 'Вы не достаточно голодны!')
+            bot.send_message(m.chat.id, 'Вы не достаточно голодны!')
     else:
-        mine_bot.send_message(m.chat.id, 'У вас нет этого!')
+        bot.send_message(m.chat.id, 'У вас нет этого!')
 
 
-@mine_bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['start'])
 def start(m):
     if mine_users.find_one({'id': m.from_user.id}) == None and m.chat.id == m.from_user.id:
         mine_users.insert_one(createuser(m.from_user.id, m.from_user.first_name))
         kb = types.ReplyKeyboardMarkup()
         kb.add(types.KeyboardButton('👷🏻Добыча'))
-        mine_bot.send_message(m.chat.id, '''Здраствуй, ты попал в игру "Minesurv"!
+        bot.send_message(m.chat.id, '''Здраствуй, ты попал в игру "Minesurv"!
 *Предыстория:*
 На земле появился вирус, превращающий людей в зомби, передающийся через укус. В скором времени почти всё
 население земли было заражено, и оставшимся в живых ничего не оставалось, кроме переселения на необитаемые острова.
 Так как все, кого вы знали, были заражены, вы в одиночку построили плот, взяли минимум необходимых вещей, и отправились в плавание.
 Через 3 дня плавания, в 5 часов утра, вы увидели берег какого-то острова. Первым делом, после высадки, вы решили, что нужно построить дом.
 Для этого нужно дерево. Чтобы начать добывать его, нажмите кнопку "👷Добыча", а затем - кнопку "🌲Лес".''',
-                              parse_mode='markdown', reply_markup=kb)
+                         parse_mode='markdown', reply_markup=kb)
 
 
-@mine_bot.message_handler(commands=['inventory'])
+@bot.message_handler(commands=['inventory'])
 def inventory(m):
     x = mine_users.find_one({'id': m.from_user.id})
     if x != None:
@@ -182,7 +181,7 @@ def inventory(m):
             text += 'Ведро: ' + str(x['craftable']['bucket']) + '\n'
         if text == '':
             text = 'Инвентарь пуст!'
-        mine_bot.send_message(m.chat.id, text)
+        bot.send_message(m.chat.id, text)
 
 
 def recipetocraft(x):
@@ -214,7 +213,7 @@ def recipetocraft(x):
     return text
 
 
-@mine_bot.message_handler(commands=['furnance'])
+@bot.message_handler(commands=['furnance'])
 def furnance(m):
     x = mine_users.find_one({'id': m.from_user.id})
     if 'furnance' in x['recipes']:
@@ -224,16 +223,16 @@ def furnance(m):
                 mine_users.update_one({'id': m.from_user.id}, {'$inc': {'wood': -10}})
                 mine_users.update_one({'id': m.from_user.id}, {'$inc': {'hunger': -30}})
                 mine_users.update_one({'id': m.from_user.id}, {'$inc': {'craftable.furnance': 1}})
-                mine_bot.send_message(m.chat.id, 'Вы успешно скрафтили Печь!')
+                bot.send_message(m.chat.id, 'Вы успешно скрафтили Печь!')
             else:
-                mine_bot.send_message(m.chat.id, 'Недостаточно ресурсов!')
+                bot.send_message(m.chat.id, 'Недостаточно ресурсов!')
         else:
-            mine_bot.send_message(m.chat.id, 'У вас уже есть Печь!')
+            bot.send_message(m.chat.id, 'У вас уже есть Печь!')
     else:
-        mine_bot.send_message(m.chat.id, 'У вас нет этого рецепта!')
+        bot.send_message(m.chat.id, 'У вас нет этого рецепта!')
 
 
-@mine_bot.message_handler(commands=['meat'])
+@bot.message_handler(commands=['meat'])
 def meat(m):
     x = mine_users.find_one({'id': m.from_user.id})
     if 'cookedmeat' in x['recipes']:
@@ -242,16 +241,16 @@ def meat(m):
                 mine_users.update_one({'id': m.from_user.id}, {'$inc': {'coal': -1}})
                 mine_users.update_one({'id': m.from_user.id}, {'$inc': {'meat': -1}})
                 mine_users.update_one({'id': m.from_user.id}, {'$inc': {'craftable.cookedmeat': 1}})
-                mine_bot.send_message(m.chat.id, 'Вы успешно скрафтили Приготовленное мясо!')
+                bot.send_message(m.chat.id, 'Вы успешно скрафтили Приготовленное мясо!')
             else:
-                mine_bot.send_message(m.chat.id, 'Недостаточно ресурсов!')
+                bot.send_message(m.chat.id, 'Недостаточно ресурсов!')
         else:
-            mine_bot.send_message(m.chat.id, 'Для крафта вам нужно: Печь.')
+            bot.send_message(m.chat.id, 'Для крафта вам нужно: Печь.')
     else:
-        mine_bot.send_message(m.chat.id, 'У вас нет этого рецепта!')
+        bot.send_message(m.chat.id, 'У вас нет этого рецепта!')
 
 
-@mine_bot.message_handler(commands=['bucket'])
+@bot.message_handler(commands=['bucket'])
 def meat(m):
     x = mine_users.find_one({'id': m.from_user.id})
     if 'bucket' in x['recipes']:
@@ -261,16 +260,16 @@ def meat(m):
                 mine_users.update_one({'id': m.from_user.id}, {'$inc': {'iron': -25}})
                 mine_users.update_one({'id': m.from_user.id}, {'$inc': {'hunger': -5}})
                 mine_users.update_one({'id': m.from_user.id}, {'$inc': {'craftable.bucket': 1}})
-                mine_bot.send_message(m.chat.id, 'Вы успешно скрафтили Ведро!')
+                bot.send_message(m.chat.id, 'Вы успешно скрафтили Ведро!')
             else:
-                mine_bot.send_message(m.chat.id, 'Недостаточно ресурсов!')
+                bot.send_message(m.chat.id, 'Недостаточно ресурсов!')
         else:
-            mine_bot.send_message(m.chat.id, 'Для крафта вам нужно: Печь.')
+            bot.send_message(m.chat.id, 'Для крафта вам нужно: Печь.')
     else:
-        mine_bot.send_message(m.chat.id, 'У вас нет этого рецепта!')
+        bot.send_message(m.chat.id, 'У вас нет этого рецепта!')
 
 
-@mine_bot.message_handler(commands=['hoe'])
+@bot.message_handler(commands=['hoe'])
 def hoe(m):
     x = mine_users.find_one({'id': m.from_user.id})
     if 'hoe' in x['recipes']:
@@ -279,14 +278,14 @@ def hoe(m):
             mine_users.update_one({'id': m.from_user.id}, {'$inc': {'rock': -25}})
             mine_users.update_one({'id': m.from_user.id}, {'$inc': {'hunger': -10}})
             mine_users.update_one({'id': m.from_user.id}, {'$inc': {'craftable.hoe': 1}})
-            mine_bot.send_message(m.chat.id, 'Вы успешно скрафтили Мотыгу!')
+            bot.send_message(m.chat.id, 'Вы успешно скрафтили Мотыгу!')
         else:
-            mine_bot.send_message(m.chat.id, 'Недостаточно ресурсов!')
+            bot.send_message(m.chat.id, 'Недостаточно ресурсов!')
     else:
-        mine_bot.send_message(m.chat.id, 'У вас нет этого рецепта!')
+        bot.send_message(m.chat.id, 'У вас нет этого рецепта!')
 
 
-@mine_bot.message_handler(commands=['farm'])
+@bot.message_handler(commands=['farm'])
 def meat(m):
     x = mine_users.find_one({'id': m.from_user.id})
     if 'farm' in x['recipes']:
@@ -298,16 +297,16 @@ def meat(m):
                 mine_users.update_one({'id': m.from_user.id}, {'$inc': {'hunger': -70}})
                 mine_users.update_one({'id': m.from_user.id}, {'$inc': {'craftable.hoe': -1}})
                 mine_users.update_one({'id': m.from_user.id}, {'$push': {'buildings': 'farm'}})
-                mine_bot.send_message(m.chat.id, 'Вы успешно построили Ферму!')
+                bot.send_message(m.chat.id, 'Вы успешно построили Ферму!')
             else:
-                mine_bot.send_message(m.chat.id, 'Недостаточно ресурсов!')
+                bot.send_message(m.chat.id, 'Недостаточно ресурсов!')
         else:
-            mine_bot.send_message(m.chat.id, 'У вас уже есть это!')
+            bot.send_message(m.chat.id, 'У вас уже есть это!')
     else:
-        mine_bot.send_message(m.chat.id, 'У вас нет этого рецепта!')
+        bot.send_message(m.chat.id, 'У вас нет этого рецепта!')
 
 
-@mine_bot.message_handler(commands=['fountain'])
+@bot.message_handler(commands=['fountain'])
 def meat(m):
     x = mine_users.find_one({'id': m.from_user.id})
     if 'fountain' in x['recipes']:
@@ -318,16 +317,16 @@ def meat(m):
                 mine_users.update_one({'id': m.from_user.id}, {'$inc': {'hunger': -50}})
                 mine_users.update_one({'id': m.from_user.id}, {'$inc': {'craftable.bucket': -1}})
                 mine_users.update_one({'id': m.from_user.id}, {'$push': {'buildings': 'fountain'}})
-                mine_bot.send_message(m.chat.id, 'Вы успешно построили Колодец!')
+                bot.send_message(m.chat.id, 'Вы успешно построили Колодец!')
             else:
-                mine_bot.send_message(m.chat.id, 'Недостаточно ресурсов!')
+                bot.send_message(m.chat.id, 'Недостаточно ресурсов!')
         else:
-            mine_bot.send_message(m.chat.id, 'У вас уже есть это!')
+            bot.send_message(m.chat.id, 'У вас уже есть это!')
     else:
-        mine_bot.send_message(m.chat.id, 'У вас нет этого рецепта!')
+        bot.send_message(m.chat.id, 'У вас нет этого рецепта!')
 
 
-@mine_bot.message_handler(commands=['woodsword'])
+@bot.message_handler(commands=['woodsword'])
 def wsword(m):
     x = mine_users.find_one({'id': m.from_user.id})
     if 'woodsword' in x['recipes']:
@@ -335,16 +334,16 @@ def wsword(m):
             mine_users.update_one({'id': m.from_user.id}, {'$inc': {'wood': -40}})
             mine_users.update_one({'id': m.from_user.id}, {'$inc': {'hunger': -15}})
             mine_users.update_one({'id': m.from_user.id}, {'$inc': {'craftable.woodsword': 1}})
-            mine_bot.send_message(m.chat.id, 'Вы успешно скрафтили Деревянный меч!')
+            bot.send_message(m.chat.id, 'Вы успешно скрафтили Деревянный меч!')
         else:
-            mine_bot.send_message(m.chat.id, 'Недостаточно ресурсов!')
+            bot.send_message(m.chat.id, 'Недостаточно ресурсов!')
     else:
-        mine_bot.send_message(m.chat.id, 'У вас нет этого рецепта!')
+        bot.send_message(m.chat.id, 'У вас нет этого рецепта!')
 
 
-@mine_bot.message_handler(commands=['help'])
+@bot.message_handler(commands=['help'])
 def help(m):
-    mine_bot.send_message(m.chat.id, '*Что обозначают значки ⚪️,🔵,🔴,🔶 около добытых ресурсов?*\n' +
+    bot.send_message(m.chat.id, '*Что обозначают значки ⚪️,🔵,🔴,🔶 около добытых ресурсов?*\n' +
                           'Обозначают они редкость материалов:\n' +
                           '⚪️ - обычные;\n' +
                           '🔵 - редкие;\n' +
@@ -352,7 +351,7 @@ def help(m):
                           '🔶 - легендарные.', parse_mode='markdown')
 
 
-@mine_bot.message_handler(commands=['hunt'])
+@bot.message_handler(commands=['hunt'])
 def huntt(m):
     x = mine_users.find_one({'id': m.from_user.id})
     if x['huntingto'] != None and x['hunting'] == 0:
@@ -369,10 +368,10 @@ def huntt(m):
             mine_users.update_one({'id': x['id']}, {'$set': {'huntwin': 1}})
         else:
             pass
-        mine_bot.send_message(m.chat.id, 'Вы решили напасть. Ожидайте результатов...')
+        bot.send_message(m.chat.id, 'Вы решили напасть. Ожидайте результатов...')
 
 
-@mine_bot.message_handler(content_types=['text'])
+@bot.message_handler(content_types=['text'])
 def text(m):
     if m.from_user.id == m.chat.id:
         x = mine_users.find_one({'id': m.from_user.id})
@@ -381,25 +380,25 @@ def text(m):
                 if m.text == '👷🏻Добыча':
                     kb = types.ReplyKeyboardMarkup()
                     kb.add(types.KeyboardButton('🌲Лес'))
-                    mine_bot.send_message(m.chat.id, 'Куда вы хотите направиться?', reply_markup=kb)
+                    bot.send_message(m.chat.id, 'Куда вы хотите направиться?', reply_markup=kb)
                 elif m.text == '🌲Лес' and x['tforest'] == 0:
                     mine_users.update_one({'id': m.from_user.id}, {'$set': {'tforest': 1}})
-                    mine_bot.send_message(m.chat.id,
+                    bot.send_message(m.chat.id,
                                      'Вы отправились в лес. Вернётесь через минуту (Минута вашего времени = 15 минут жизни на острове).')
                     t = threading.Timer(60, tforest, args=[m.from_user.id])
                     t.start()
                 elif m.text == '🔨Постройка':
                     kb = types.ReplyKeyboardMarkup()
                     kb.add(types.KeyboardButton('⛺️Дом'))
-                    mine_bot.send_message(m.chat.id, 'Что вы хотите построить?', reply_markup=kb)
+                    bot.send_message(m.chat.id, 'Что вы хотите построить?', reply_markup=kb)
                 elif m.text == '⛺️Дом' and x['thouse'] == 0:
                     mine_users.update_one({'id': m.from_user.id}, {'$set': {'thouse': 1}})
-                    mine_bot.send_message(m.chat.id, 'Вы отправились строить дом. Вернётесь через 2 минуты.')
+                    bot.send_message(m.chat.id, 'Вы отправились строить дом. Вернётесь через 2 минуты.')
                     t = threading.Timer(120, thouse, args=[m.from_user.id])
                     t.start()
             else:
                 if m.text == '❓Обо мне':
-                    mine_bot.send_message(m.chat.id, 'Привет, ' + x['name'] + '!\n' +
+                    bot.send_message(m.chat.id, 'Привет, ' + x['name'] + '!\n' +
                                      'Голод: ' + str(x['hunger']) + '/' + str(x['maxhunger']) + '🍗\n' +
                                      'Уровень: ' + str(x['level']) + '\n' +
                                      'Опыт: ' + str(x['exp']) + '\n' +
@@ -414,15 +413,15 @@ def text(m):
                     if 'fountain' in x['buildings']:
                         kb.add('💧Колодец')
                     kb.add(types.KeyboardButton('↩️Назад'))
-                    mine_bot.send_message(m.chat.id, 'Куда хотите отправиться?', reply_markup=kb)
+                    bot.send_message(m.chat.id, 'Куда хотите отправиться?', reply_markup=kb)
 
                 elif m.text == '⛺️Дом':
                     kb = types.ReplyKeyboardMarkup()
                     kb.add(types.KeyboardButton('⚒Крафт'))
                     kb.add(types.KeyboardButton('↩️Назад'))
-                    mine_bot.send_message(m.chat.id,
+                    bot.send_message(m.chat.id,
                                      'Дома вы можете крафтить полезные вещи и строить дополнительные строения.',
-                                          reply_markup=kb)
+                                     reply_markup=kb)
 
                 elif m.text == '⚒Крафт':
                     x = mine_users.find_one({'id': m.from_user.id})
@@ -431,13 +430,13 @@ def text(m):
                         text += recipetocraft(ids)
                     if text == 'Список того, что вы можете скрафтить:\n':
                         text = 'У вас пока что нет рецептов. Получить их можно, добывая ресурсы в любой локации.'
-                    mine_bot.send_message(m.chat.id, text, parse_mode='markdown')
+                    bot.send_message(m.chat.id, text, parse_mode='markdown')
 
                 elif m.text == '🌲Лес':
                     x = mine_users.find_one({'id': m.from_user.id})
                     if x['farming'] == 0:
                         mine_users.update_one({'id': m.from_user.id}, {'$set': {'farming': 1}})
-                        mine_bot.send_message(m.chat.id, 'Вы отправились в лес. Вернётесь через 5 минут.')
+                        bot.send_message(m.chat.id, 'Вы отправились в лес. Вернётесь через 5 минут.')
                         battle = random.randint(1, 100)
                         ids = mine_users.find({'id': {'$ne': m.from_user.id}})
                         idss = []
@@ -451,7 +450,7 @@ def text(m):
                                 mine_users.update_one({'id': user['id']}, {'$set': {'huntingto': m.from_user.id}})
                                 try:
                                     if m.from_user.id not in vip:
-                                        mine_bot.send_message(user['id'],
+                                        bot.send_message(user['id'],
                                                          'Вы заметили ' + m.from_user.first_name + ', добывающего ресурсы около вашего дома! Чтобы попробовать ограбить его, нажмите /hunt.')
                                 except:
                                     print('oshibka')
@@ -461,13 +460,13 @@ def text(m):
                             t = threading.Timer(300, forest, args=[m.from_user.id])
                             t.start()
                     else:
-                        mine_bot.send_message(m.chat.id, 'Вы уже заняты добычей ресурсов, попробуйте позже.')
+                        bot.send_message(m.chat.id, 'Вы уже заняты добычей ресурсов, попробуйте позже.')
 
                 elif m.text == '🕳Пещера':
                     x = mine_users.find_one({'id': m.from_user.id})
                     if x['farming'] == 0:
                         mine_users.update_one({'id': m.from_user.id}, {'$set': {'farming': 1}})
-                        mine_bot.send_message(m.chat.id, 'Вы отправились в пещеру. Вернётесь через 5 минут.')
+                        bot.send_message(m.chat.id, 'Вы отправились в пещеру. Вернётесь через 5 минут.')
                         battle = random.randint(1, 100)
                         ids = mine_users.find({'id': {'$ne': m.from_user.id}})
                         idss = []
@@ -481,7 +480,7 @@ def text(m):
                                 mine_users.update_one({'id': user['id']}, {'$set': {'huntingto': m.from_user.id}})
                                 try:
                                     if m.from_user.id not in vip:
-                                        mine_bot.send_message(user['id'],
+                                        bot.send_message(user['id'],
                                                          'Вы заметили ' + m.from_user.first_name + ', добывающего ресурсы около вашего дома! Чтобы попробовать ограбить его, нажмите /hunt.')
                                 except:
                                     print('oshibka')
@@ -492,13 +491,13 @@ def text(m):
                             t.start()
 
                     else:
-                        mine_bot.send_message(m.chat.id, 'Вы уже заняты добычей ресурсов, попробуйте позже.')
+                        bot.send_message(m.chat.id, 'Вы уже заняты добычей ресурсов, попробуйте позже.')
 
                 elif m.text == '🐖Охота':
                     x = mine_users.find_one({'id': m.from_user.id})
                     if x['farming'] == 0:
                         mine_users.update_one({'id': m.from_user.id}, {'$set': {'farming': 1}})
-                        mine_bot.send_message(m.chat.id, 'Вы отправились на охоту. Вернётесь через 5 минут.')
+                        bot.send_message(m.chat.id, 'Вы отправились на охоту. Вернётесь через 5 минут.')
                         battle = random.randint(1, 100)
                         ids = mine_users.find({'id': {'$ne': m.from_user.id}})
                         idss = []
@@ -512,7 +511,7 @@ def text(m):
                                 mine_users.update_one({'id': user['id']}, {'$set': {'huntingto': m.from_user.id}})
                                 try:
                                     if m.from_user.id not in vip:
-                                        mine_bot.send_message(user['id'],
+                                        bot.send_message(user['id'],
                                                          'Вы заметили ' + m.from_user.first_name + ', добывающего ресурсы около вашего дома! Чтобы попробовать ограбить его, нажмите /hunt.')
                                 except:
                                     print('oshibka')
@@ -523,27 +522,27 @@ def text(m):
                             t.start()
 
                     else:
-                        mine_bot.send_message(m.chat.id, 'Вы уже заняты добычей ресурсов, попробуйте позже.')
+                        bot.send_message(m.chat.id, 'Вы уже заняты добычей ресурсов, попробуйте позже.')
 
                 elif m.text == '💧Колодец':
                     x = mine_users.find_one({'id': m.from_user.id})
                     if x['farming'] == 0:
                         if 'fountain' in x['buildings']:
                             mine_users.update_one({'id': m.from_user.id}, {'$set': {'farming': 1}})
-                            mine_bot.send_message(m.chat.id, 'Вы отправились к колодцу. Вернётесь через 3 минуты.')
+                            bot.send_message(m.chat.id, 'Вы отправились к колодцу. Вернётесь через 3 минуты.')
                             if m.from_user.id in vip:
                                 water(m.from_user.id)
                             else:
                                 t = threading.Timer(300, water, args=[m.from_user.id])
                                 t.start()
                         else:
-                            mine_bot.send_message(m.chat.id, 'У вас нет колодца!')
+                            bot.send_message(m.chat.id, 'У вас нет колодца!')
                     else:
-                        mine_bot.send_message(m.chat.id, 'Вы уже заняты добычей ресурсов, попробуйте позже.')
+                        bot.send_message(m.chat.id, 'Вы уже заняты добычей ресурсов, попробуйте позже.')
 
                 elif m.text.lower() == 'тест':
                     if m.from_user.id in vip:
-                        mine_bot.send_message(m.chat.id, 'Вы отправились в пещеру. Вернётесь через 3 секунды.')
+                        bot.send_message(m.chat.id, 'Вы отправились в пещеру. Вернётесь через 3 секунды.')
                         mine_users.update_one({'id': m.from_user.id}, {'$set': {'farming': 1}})
                         t = threading.Timer(3, cave, args=[m.from_user.id])
                         t.start()
@@ -554,16 +553,16 @@ def text(m):
                         kb.add('Посадить семена')
                         kb.add('Животные')
                         kb.add('↩️Назад')
-                        mine_bot.send_message(m.chat.id, 'Вы на своей ферме! Выберите действие.', reply_markup=kb)
+                        bot.send_message(m.chat.id, 'Вы на своей ферме! Выберите действие.', reply_markup=kb)
                     else:
-                        mine_bot.send_message(m.chat.id, 'У вас нет фермы!')
+                        bot.send_message(m.chat.id, 'У вас нет фермы!')
 
 
                 elif m.text == 'Посадить семена' and m.from_user.id == m.chat.id:
                     if 'farm' in x['buildings']:
                         kb = types.ReplyKeyboardMarkup()
-                        mine_bot.send_message(m.chat.id, 'Отправьте количество семян, которое хотите посадить',
-                                              reply_markup=kb)
+                        bot.send_message(m.chat.id, 'Отправьте количество семян, которое хотите посадить',
+                                         reply_markup=kb)
                         mine_users.update_one({'id': x['id']}, {'$set': {'seeding': 1}})
                         t = threading.Timer(30, seed0, args=[m.from_user.id])
                         t.start()
@@ -575,7 +574,7 @@ def text(m):
                     if 'farm' in x['buildings']:
                         kb.add('🐔Ферма')
                     kb.add('❓Обо мне')
-                    mine_bot.send_message(m.chat.id, 'Добро пожаловать домой!', reply_markup=kb)
+                    bot.send_message(m.chat.id, 'Добро пожаловать домой!', reply_markup=kb)
 
                 else:
                     if x['seeding'] == 1:
@@ -585,19 +584,19 @@ def text(m):
                                 if x['seeds'] >= z and z > 0:
                                     if x['water'] > 0:
                                         mine_users.update_one({'id': m.from_user.id}, {'$set': {'farming': 1}})
-                                        mine_bot.send_message(m.chat.id,
+                                        bot.send_message(m.chat.id,
                                                          'Вы отправились сажать семtеа. Вернётесь через 3 минуты.')
                                         t = threading.Timer(180, seeding, args=[m.from_user.id, z])
                                         t.start()
                                     else:
-                                        mine_bot.send_message(m.chat.id, 'Для этого вам не хватает 1 (Вода)! (требуется: 1)')
+                                        bot.send_message(m.chat.id, 'Для этого вам не хватает 1 (Вода)! (требуется: 1)')
                                 else:
-                                    mine_bot.send_message(m.chat.id,
+                                    bot.send_message(m.chat.id,
                                                      'У вас недостаточно семян, или вы указали отрицательное число.')
                             except:
                                 pass
                         else:
-                            mine_bot.send_message(m.chat.id, 'Вы уже заняты добычей ресурсов.')
+                            bot.send_message(m.chat.id, 'Вы уже заняты добычей ресурсов.')
 
 
 def seed0(id):
@@ -608,7 +607,7 @@ def seeding(id, x):
     mine_users.update_one({'id': id}, {'$inc': {'seeds': -x}})
     mine_users.update_one({'id': id}, {'$inc': {'wheat': x}})
     mine_users.update_one({'id': id}, {'$inc': {'water': -1}})
-    mine_bot.send_message(id, 'Вы вырастили и собрали ' + str(x) + ' пшена! Потрачено: 1 (Вода).')
+    bot.send_message(id, 'Вы вырастили и собрали ' + str(x) + ' пшена! Потрачено: 1 (Вода).')
     mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
 
 
@@ -621,7 +620,7 @@ def water(id):
     mine_users.update_one({'id': id}, {'$inc': {'water': water}})
     mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
     try:
-        mine_bot.send_message(id, text + recources)
+        bot.send_message(id, text + recources)
     except:
         pass
 
@@ -693,29 +692,29 @@ def forest(id):
         y = mine_users.find_one({'id': x['huntedby']})
         if y['hunting'] == 1:
             if y['huntwin'] == 1:
-                mine_bot.send_message(x['id'], 'Когда вы возвращались из леса, на вас напал ' + y[
+                bot.send_message(x['id'], 'Когда вы возвращались из леса, на вас напал ' + y[
                     'name'] + '!\n.............\nОн оказался сильнее, и всю добычу пришлось отдать.')
-                mine_bot.send_message(y['id'], 'Когда ' + x[
+                bot.send_message(y['id'], 'Когда ' + x[
                     'name'] + ' возвращался из леса, вы напали на него из засады.\n.............\nВы победили, и забрали всю его добычу себе!')
                 mine_users.update_one({'id': y['id']}, {'$inc': {'wood': gwood}})
                 mine_users.update_one({'id': y['id']}, {'$inc': {'meat': gmeat}})
                 mine_users.update_one({'id': y['id']}, {'$inc': {'rock': grock}})
                 mine_users.update_one({'id': y['id']}, {'$inc': {'seeds': gseeds}})
                 mine_users.update_one({'id': y['id']}, {'$inc': {'cow': gcow}})
-                mine_bot.send_message(y['id'], 'Полученные ресурсы:\n' + recources)
-                mine_bot.send_message(id, 'Ресурсы, которые у вас отняли:\n' + recources)
+                bot.send_message(y['id'], 'Полученные ресурсы:\n' + recources)
+                bot.send_message(id, 'Ресурсы, которые у вас отняли:\n' + recources)
             else:
-                mine_bot.send_message(x['id'], 'Когда вы возвращались из леса, на вас напал ' + y[
+                bot.send_message(x['id'], 'Когда вы возвращались из леса, на вас напал ' + y[
                     'name'] + '!\n.............\nВы одержали победу! Враг уходит ни с чем.')
-                mine_bot.send_message(y['id'], 'Когда ' + x[
+                bot.send_message(y['id'], 'Когда ' + x[
                     'name'] + ' возвращался из леса, вы напали на него из засады.\n.............\nВраг оказался слишком сильным, и вам пришлось отступить.')
                 mine_users.update_one({'id': id}, {'$inc': {'wood': gwood}})
                 mine_users.update_one({'id': id}, {'$inc': {'meat': gmeat}})
                 mine_users.update_one({'id': id}, {'$inc': {'rock': grock}})
                 mine_users.update_one({'id': id}, {'$inc': {'seeds': gseeds}})
                 mine_users.update_one({'id': id}, {'$inc': {'cow': gcow}})
-                mine_bot.send_message(x['id'], 'Ваши добытые ресурсы:\n' + recources)
-                mine_bot.send_message(y['id'], 'Ресурсы, которые нёс враг:\n' + recources)
+                bot.send_message(x['id'], 'Ваши добытые ресурсы:\n' + recources)
+                bot.send_message(y['id'], 'Ресурсы, которые нёс враг:\n' + recources)
             mine_users.update_one({'id': id}, {'$set': {'huntedby': None}})
             mine_users.update_one({'id': y['id']}, {'$set': {'huntingto': None}})
             mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
@@ -731,11 +730,11 @@ def forest(id):
             mine_users.update_one({'id': y['id']}, {'$set': {'hunting': 0}})
             mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
             try:
-                mine_bot.send_message(id, text + recources)
+                bot.send_message(id, text + recources)
             except:
                 pass
             try:
-                mine_bot.send_message(y['id'], 'Вы решили не атаковать, и цель ушла с ресурсами.')
+                bot.send_message(y['id'], 'Вы решили не атаковать, и цель ушла с ресурсами.')
             except:
                 pass
     else:
@@ -746,7 +745,7 @@ def forest(id):
         mine_users.update_one({'id': id}, {'$inc': {'cow': gcow}})
         mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
         try:
-            mine_bot.send_message(id, text + recources)
+            bot.send_message(id, text + recources)
         except:
             pass
 
@@ -814,28 +813,28 @@ def hunt(id):
         y = mine_users.find_one({'id': x['huntedby']})
         if y['hunting'] == 1:
             if y['huntwin'] == 1:
-                mine_bot.send_message(x['id'], 'Когда вы возвращались с охоты, на вас напал ' + y[
+                bot.send_message(x['id'], 'Когда вы возвращались с охоты, на вас напал ' + y[
                     'name'] + '!\n.............\nОн оказался сильнее, и всю добычу пришлось отдать.')
-                mine_bot.send_message(y['id'], 'Когда ' + x[
+                bot.send_message(y['id'], 'Когда ' + x[
                     'name'] + ' возвращался с охоты, вы напали на него из засады.\n.............\nВы победили, и забрали всю его добычу себе!')
                 mine_users.update_one({'id': y['id']}, {'$inc': {'meat': gmeat}})
                 mine_users.update_one({'id': y['id']}, {'$inc': {'fish': gfish}})
                 mine_users.update_one({'id': y['id']}, {'$inc': {'egg': geggs}})
                 mine_users.update_one({'id': y['id']}, {'$inc': {'mushroom': gmushroom}})
-                mine_bot.send_message(y['id'], 'Полученные ресурсы:\n' + recources)
-                mine_bot.send_message(id, 'Ресурсы, которые у вас отняли:\n' + recources)
+                bot.send_message(y['id'], 'Полученные ресурсы:\n' + recources)
+                bot.send_message(id, 'Ресурсы, которые у вас отняли:\n' + recources)
             else:
-                mine_bot.send_message(x['id'], 'Когда вы возвращались с охоты, на вас напал ' + y[
+                bot.send_message(x['id'], 'Когда вы возвращались с охоты, на вас напал ' + y[
                     'name'] + '!\n.............\nВы одержали победу! Враг уходит ни с чем.')
-                mine_bot.send_message(y['id'], 'Когда ' + x[
+                bot.send_message(y['id'], 'Когда ' + x[
                     'name'] + ' возвращался с охоты, вы напали на него из засады.\n.............\nВраг оказался слишком сильным, и вам пришлось отступить.')
                 mine_users.update_one({'id': id}, {'$inc': {'meat': gmeat}})
                 mine_users.update_one({'id': id}, {'$inc': {'fish': gfish}})
                 mine_users.update_one({'id': id}, {'$inc': {'egg': geggs}})
                 mine_users.update_one({'id': id}, {'$inc': {'mushroom': gmushroom}})
                 mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
-                mine_bot.send_message(x['id'], 'Ваши добытые ресурсы:\n' + recources)
-                mine_bot.send_message(y['id'], 'Ресурсы, которые нёс враг:\n' + recources)
+                bot.send_message(x['id'], 'Ваши добытые ресурсы:\n' + recources)
+                bot.send_message(y['id'], 'Ресурсы, которые нёс враг:\n' + recources)
             mine_users.update_one({'id': id}, {'$set': {'huntedby': None}})
             mine_users.update_one({'id': y['id']}, {'$set': {'huntingto': None}})
             mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
@@ -851,11 +850,11 @@ def hunt(id):
             mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
             mine_users.update_one({'id': y['id']}, {'$set': {'hunting': 0}})
             try:
-                mine_bot.send_message(id, text + recources)
+                bot.send_message(id, text + recources)
             except:
                 pass
             try:
-                mine_bot.send_message(y['id'], 'Вы решили не атаковать, и цель ушла с ресурсами.')
+                bot.send_message(y['id'], 'Вы решили не атаковать, и цель ушла с ресурсами.')
             except:
                 pass
     else:
@@ -865,7 +864,7 @@ def hunt(id):
         mine_users.update_one({'id': id}, {'$inc': {'mushroom': gmushroom}})
         mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
         try:
-            mine_bot.send_message(id, text + recources)
+            bot.send_message(id, text + recources)
         except:
             pass
 
@@ -956,9 +955,9 @@ def cave(id):
         y = mine_users.find_one({'id': x['huntedby']})
         if y['hunting'] == 1:
             if y['huntwin'] == 1:
-                mine_bot.send_message(x['id'], 'Когда вы возвращались из пещеры, на вас напал ' + y[
+                bot.send_message(x['id'], 'Когда вы возвращались из пещеры, на вас напал ' + y[
                     'name'] + '!\n.............\nОн оказался сильнее, и всю добычу пришлось отдать.')
-                mine_bot.send_message(y['id'], 'Когда ' + x[
+                bot.send_message(y['id'], 'Когда ' + x[
                     'name'] + ' возвращался из пещеры, вы напали на него из засады.\n.............\nВы победили, и забрали всю его добычу себе!')
                 mine_users.update_one({'id': y['id']}, {'$inc': {'rock': grock}})
                 mine_users.update_one({'id': y['id']}, {'$inc': {'coal': gcoal}})
@@ -967,12 +966,12 @@ def cave(id):
                 mine_users.update_one({'id': y['id']}, {'$inc': {'diamond': gdiamond}})
                 mine_users.update_one({'id': y['id']}, {'$inc': {'ruby': gruby}})
                 mine_users.update_one({'id': y['id']}, {'$set': {'farming': 0}})
-                mine_bot.send_message(y['id'], 'Полученные ресурсы:\n' + recources)
-                mine_bot.send_message(id, 'Ресурсы, которые у вас отняли:\n' + recources)
+                bot.send_message(y['id'], 'Полученные ресурсы:\n' + recources)
+                bot.send_message(id, 'Ресурсы, которые у вас отняли:\n' + recources)
             else:
-                mine_bot.send_message(x['id'], 'Когда вы возвращались из пещеры, на вас напал ' + y[
+                bot.send_message(x['id'], 'Когда вы возвращались из пещеры, на вас напал ' + y[
                     'name'] + '!\n.............\nВы одержали победу! Враг уходит ни с чем.')
-                mine_bot.send_message(y['id'], 'Когда ' + x[
+                bot.send_message(y['id'], 'Когда ' + x[
                     'name'] + ' возвращался из пещеры, вы напали на него из засады.\n.............\nВраг оказался слишком сильным, и вам пришлось отступить.')
                 mine_users.update_one({'id': id}, {'$inc': {'rock': grock}})
                 mine_users.update_one({'id': id}, {'$inc': {'coal': gcoal}})
@@ -981,8 +980,8 @@ def cave(id):
                 mine_users.update_one({'id': id}, {'$inc': {'diamond': gdiamond}})
                 mine_users.update_one({'id': id}, {'$inc': {'ruby': gruby}})
                 mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
-                mine_bot.send_message(x['id'], 'Ваши добытые ресурсы:\n' + recources)
-                mine_bot.send_message(y['id'], 'Ресурсы, которые нёс враг:\n' + recources)
+                bot.send_message(x['id'], 'Ваши добытые ресурсы:\n' + recources)
+                bot.send_message(y['id'], 'Ресурсы, которые нёс враг:\n' + recources)
             mine_users.update_one({'id': id}, {'$set': {'huntedby': None}})
             mine_users.update_one({'id': y['id']}, {'$set': {'huntingto': None}})
             mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
@@ -999,8 +998,8 @@ def cave(id):
             mine_users.update_one({'id': y['id']}, {'$set': {'huntingto': None}})
             mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
             mine_users.update_one({'id': y['id']}, {'$set': {'hunting': 0}})
-            mine_bot.send_message(id, text + recources)
-            mine_bot.send_message(y['id'], 'Вы решили не атаковать, и цель ушла с ресурсами.')
+            bot.send_message(id, text + recources)
+            bot.send_message(y['id'], 'Вы решили не атаковать, и цель ушла с ресурсами.')
 
     else:
 
@@ -1011,7 +1010,7 @@ def cave(id):
         mine_users.update_one({'id': id}, {'$inc': {'diamond': gdiamond}})
         mine_users.update_one({'id': id}, {'$inc': {'ruby': gruby}})
         mine_users.update_one({'id': id}, {'$set': {'farming': 0}})
-        mine_bot.send_message(id, text + recources)
+        bot.send_message(id, text + recources)
        
     ddd = 0
     mobs = ['Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда','Червя-камнееда', 'ОДИЧАВШИХ МЕНХЕРУ И ДВАЧТЯН']
@@ -1045,17 +1044,17 @@ def cave(id):
                 text2 += 'Ваш деревянный меч сломался!'
         else:
             text2 = 'Враг был силён, и вам пришлось отступить.'
-        mine_bot.send_message(id, text + text2)
+        bot.send_message(id, text + text2)
 
 
 def tforest(id):
     kb = types.ReplyKeyboardMarkup()
     kb.add(types.KeyboardButton('🔨Постройка'))
     mine_users.update_one({'id': id}, {'$set': {'wood': 0}})
-    mine_bot.send_message(id,
+    bot.send_message(id,
                          'Прошло пол часа. С помощью топора, который вы взяли с собой в путь, вы добыли 1000 ед. дерева -' +
                          ' Этого должно хватить на постройку дома. Чтобы начать постройку, нажмите кнопку "🔨Постройка", и выберите пункт "⛺️Дом".',
-                              reply_markup=kb)
+                     reply_markup=kb)
 
 
 def thouse(id):
@@ -1063,7 +1062,7 @@ def thouse(id):
     kb.add('Добыча')
     kb.add('Дом')
     kb.add('Обо мне')
-    mine_bot.send_message(id,
+    bot.send_message(id,
                          'Поздравляю! Вы построили себе дом! Здесь вы сможете спастись от дикой природы и от холода.' +
                          ' Дальше выживать придётся самостоятельно. Но осторожнее: добывая ресурсы, вы можете встретить других игроков, и если' +
                          ' они будут сильнее вас - добычу придётся отдать.', reply_markup=kb)

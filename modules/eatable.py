@@ -6,11 +6,10 @@ class Cooker:
 
     def __init__(self, bot):
         self.__bot = bot
-        self.__bot_helper = BotUtil(self.__bot)
 
-    def tea(self, tea, to_user, from_user, chat, message):
-        from_user_link = self.__bot_helper.get_link(to_user.first_name, to_user.id)
-        to_user_link = self.__bot_helper.get_link(from_user.first_name, from_user.id)
+    def tea(self, tea, to_user, from_user, chat):
+        from_user_link = self.__bot.get_link(to_user.first_name, to_user.id)
+        to_user_link = self.__bot.get_link(from_user.first_name, from_user.id)
         kb = types.InlineKeyboardMarkup()
         row1 = list()
         row2 = list()
@@ -25,16 +24,18 @@ class Cooker:
             kb = None
         else:
             tts = '{} приготовил чай "{}" для вас, {}!'.format(from_user_link, tea, to_user_link)
-        self.__bot_helper.reply(chat.id, tts, message, reply_markup=kb, parse_mode='HTML')
+        self.__bot.send_message(chat.id, tts, reply_markup=kb, parse_mode='HTML')
 
     def cook(self, message, from_user, to_user, chat, meal):
-        tts = from_user.first_name + ' приготовил(а) пользователю ' + to_user.first_name + ' ' + meal + '!'
+        from_user_link = self.__bot.get_link(to_user.first_name, to_user.id)
+        to_user_link = self.__bot.get_link(from_user.first_name, from_user.id)
+        tts = '{} приготовил(а) пользователю {} {}!'.format(to_user_link, from_user_link, meal)
         kb = types.InlineKeyboardMarkup(3)
         buttons1 = [types.InlineKeyboardButton(text='Съесть', callback_data='eat ' + meal),
                     types.InlineKeyboardButton(text='Оставить', callback_data='stay ' + meal),
                     types.InlineKeyboardButton(text='Выбросить', callback_data='trash ' + meal)]
         kb.add(*buttons1)
-        self.__bot_helper.reply(chat.id, tts, message, reply_markup=kb)
+        self.__bot.reply(chat.id, tts, message, reply_markup=kb, parse_mode='HTML')
 
     def __rus(self, text):
         try:

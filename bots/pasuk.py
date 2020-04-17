@@ -9,7 +9,7 @@ warnings.filterwarnings('ignore')
 import nltk
 from nltk.stem import WordNetLemmatizer
 
-nltk.download('popular', quiet=True)  # for downloading packages
+#nltk.download('popular', quiet=True)  # for downloading packages
 
 from telebot import TeleBot
 
@@ -118,9 +118,6 @@ def infof(m):
     tts = tts.format(pver, str(count_of_symbols), str(all_words))
 
 
-@pasuk.message_handler(commands=['status'])
-def status(m):
-    pasuk.reply_to(m, runner.get_status())
 
 
 @pasuk.message_handler(commands=["talk"])
@@ -240,7 +237,6 @@ def google(m):
     text = ''
     i = 1
     for item in items:
-        print(item)
         link = item.find('h3', {'class': 'r'}).find('a').get('href')[7:]
         txt = item.find('h3', {'class': 'r'}).find('a').text
         try:

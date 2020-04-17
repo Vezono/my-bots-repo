@@ -69,6 +69,7 @@ def handle_mute(m):
         reason = m.text.split(' ', 2)[2]
     bot.ban(m.chat, user, m.from_user, until_date, reason)
 
+
 @bot.message_handler(commands=['do'])
 def do(m):
     if m.from_user.id != creator:
@@ -81,6 +82,8 @@ def do(m):
     except Exception as e:
             tts = '{}\n\n{}'.format(codetoeval, e)
             bot.reply_to(m, tts)
+
+
 @bot.message_handler(commands=['roll'])
 def roll(m):
     try:
@@ -103,14 +106,20 @@ def roll(m):
             bot.reply_to(m, tts)
     except:
         pass
+
+
 @bot.message_handler(commands=['kvak'])
 def roll(m):
     users.update({}, {'$set':{'money':0}})
+
+
 @bot.message_handler(commands=['balance'])
 def balance(m):
     roller = users.find_one({'id':m.from_user.id})
     tts = 'Стата:\n\nМонеты: {}\nДеньги:{}'.format(roller['coins'], roller.get('money'))
     bot.reply_to(m, tts)
+
+
 @bot.message_handler(commands=['life'])
 def life(m):
     print("Starting life...")
@@ -189,29 +198,6 @@ def cupdate(m):
     bot.send_message(m.chat.id, tts, parse_mode='HTML')
 
 
-@bot.message_handler(commands=['tea'])
-def ftea(m):
-    print('Завариваем чай...')
-
-    if not m.reply_to_message:
-        if not m.text.count(' '):
-            tea = 'обычный'
-        else:
-            tea = m.text.split(' ', 1)[1]
-        tts = '{} заварил себе чай "{}"!'.format(m.from_user.first_name, tea)
-        bot.send_message(m.chat.id, tts)
-        bot.delete_message(m.chat.id, m.message_id)
-        return
-
-    from_user = m.from_user
-    to_user = m.reply_to_message.from_user
-    if m.text.count(' ') == 0:
-        tea = 'обычный'
-    else:
-        tea = m.text.split(' ', 1)[1].replace("<", "&lt;")
-    cooker.tea(tea, from_user, to_user, m.chat, m.reply_to_message.message_id)
-
-
 @bot.message_handler(commands=['start'])
 def start(m):
     if m.chat.type == 'private':
@@ -224,59 +210,6 @@ def start(m):
             users.insert_one(createuser(m.from_user.first_name, m.from_user.id))
     bot.send_message(m.chat.id, 'Привет. Добро пожаловать. Снова.')
 
-
-@bot.message_handler(commands=['cook'])
-def eat(m):
-    if not m.text.count(' '):
-        bot.send_message(m.chat.id, 'Вы забыли указать, что именно вы хотите приготовить!')
-        return
-    meal = m.text.lower().split(' ', 1)[1]
-    if m.reply_to_message:
-        cooker.cook(m.reply_to_message.message_id, m.from_user, m.reply_to_message.from_user, m.chat, meal)
-    else:
-        bot.send_message(m.chat.id, m.from_user.first_name + ' сьел(а) ' + meal + '!')
-
-
-@bot.callback_query_handler(lambda c: True)
-def callback_handler(c):
-    call = c
-    if 'eat' in c.data or 'trash' in c.data or 'stay' in c.data:
-        calldata = c.data
-        attribut = calldata.split()[0]
-        userid = call.message.reply_to_message.from_user.id
-        meal = calldata.split()[1]
-        user_name = call.message.reply_to_message.from_user.first_name
-        mid = call.message.message_id
-        if userid == call.from_user.id:
-            if attribut == 'eat':
-                tts = call.from_user.first_name + ' с апетитом сьел(а) блюдо "' + meal + '" от пользователя ' + user_name + '!'
-            elif attribut == 'stay':
-                tts = call.from_user.first_name + ' решил(а) не есть блюдо "' + meal + '" от пользователя ' + user_name + '!'
-            elif attribut == 'trash':
-                tts = call.from_user.first_name + ' выбросил(а) блюдо "' + meal + '" от пользователя ' + user_name + '!'
-            bot.edit_message(tts, call.message.chat.id, mid, reply_markup=None)
-        else:
-            bot.answer_callback_query(call.id, 'Это не ваше меню!')
-        return
-
-    action = c.data.split(' ')[0]
-    to_user = c.message.reply_to_message.from_user.first_name
-    tea = c.message.text.split('"')[1]
-    if to_user == c.from_user.first_name:
-        if action == 'drink':
-            tts = 'Вы выпили чай "{}", {}!'.format(tea, to_user)
-        elif action == 'reject':
-            tts = 'Вы отказались от чая "{}", {}!'.format(tea, to_user)
-        elif action == 'throw':
-            tts = 'Вы вылили в унитаз чай "{}", {}!!'.format(tea, to_user)
-        elif action == 'Да':
-            tts = 'Вы выпили чай "{}", {}!! Спасибо!!!'.format(tea, to_user)
-        elif action == 'Нет':
-            tts = 'Простите, {}.'.format(to_user)
-    else:
-        bot.answer_callback_query(call.id, 'Это не ваше меню!')
-        return
-    bot.edit_message_text(tts, c.message.chat.id, c.message.message_id)
 
 
 def createuser(name, id):

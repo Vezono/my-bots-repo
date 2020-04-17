@@ -1,5 +1,4 @@
 import os
-'''
 import telebot
 from telebot import types
 from manybotslib import BotsRunner
@@ -127,4 +126,3 @@ runner.add_bot("Chrome", chrome)
 runner.set_main_bot(bios)
 print('Ostan works!')
 runner.run()
-'''
