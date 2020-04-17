@@ -85,21 +85,35 @@ class MongoHelper:
     def give_res(self, chat_id, user, resource, count):
         game = self.find_game(chat_id)
         players = game['players']
-        if not players[str(user['id'])]['res'].get(resource):
-            players[str(user['id'])]['res'][resource] = 0
-        players[str(user['id'])]['res'][resource] += count
+        try:
+            if not players[str(user['id'])]['res'].get(resource):
+                players[str(user['id'])]['res'][resource] = 0
+            players[str(user['id'])]['res'][resource] += count
+        except TypeError:
+            if not players[str(user.id)]['res'].get(resource):
+                players[str(user.id)]['res'][resource] = 0
+            players[str(user.id)]['res'][resource] += count
         self.__games.update_one({'id': chat_id}, {'$set': {'players': players}})
 
     def give_growth(self, chat_id, user, resource, count, reason):
         game = self.find_game(chat_id)
         players = game['players']
-        if not players[str(user['id'])]['res'].get(resource):
-            players[str(user['id'])]['res'][resource] = 0
-        if not players[str(user['id'])]['growth'].get(resource):
-            players[str(user['id'])]['growth'][resource] = 0
-        players[str(user['id'])]['growth'][resource] += count
-        # farm_commit = {'res': resource, 'count': count, 'reason': reason}
-        # players[str(user['id'])]['farms'].append(farm_commit)
+        try:
+            if not players[str(user['id'])]['res'].get(resource):
+                players[str(user['id'])]['res'][resource] = 0
+            if not players[str(user['id'])]['growth'].get(resource):
+                players[str(user['id'])]['growth'][resource] = 0
+            players[str(user['id'])]['growth'][resource] += count
+            # farm_commit = {'res': resource, 'count': count, 'reason': reason}
+            # players[str(user['id'])]['farms'].append(farm_commit)
+        except TypeError:
+            if not players[str(user.id)]['res'].get(resource):
+                players[str(user.id)]['res'][resource] = 0
+            if not players[str(user.id)]['growth'].get(resource):
+                players[str(user.id)]['growth'][resource] = 0
+            players[str(user.id)]['growth'][resource] += count
+            # farm_commit = {'res': resource, 'count': count, 'reason': reason}
+            # players[str(user['id'])]['farms'].append(farm_commit)
         self.__games.update_one({'id': chat_id}, {'$set': {'players': players}})
 
     def next_turn(self, chat_id):

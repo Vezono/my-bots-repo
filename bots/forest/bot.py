@@ -1,12 +1,21 @@
 import config
 from modules.funcs import BotUtil
 from bots.forest.mongohelper import MongoHelper
+from PIL import Image
 
 bot = BotUtil(config.environ['forest'], config.creator)
 
 from pymongo import MongoClient
 
 db_helper = MongoHelper(MongoClient(config.environ['database']))
+
+map_forest = 'AgACAgIAAx0CU77lswABAUPsXpmqr5jJdY8SUFdCKAHAuF71_fIAAp2vMRvymdFINKQjF7th2cB3R8sOAAQBAAMCAAN5AAOzlwQAARgE'
+
+
+@bot.message_handler(commands=['map'])
+def map_handler(m):
+    #im = Image.open("res/forest_map.jpg")
+    bot.send_photo(m.chat.id, 'AgACAgIAAx0CU77lswABAUPsXpmqr5jJdY8SUFdCKAHAuF71_fIAAp2vMRvymdFINKQjF7th2cB3R8sOAAQBAAMCAAN5AAOzlwQAARgE')
 
 
 @bot.message_handler(commands=['fhelp'])
@@ -229,9 +238,6 @@ def me_handler(m):
         return
     user = m.from_user
     if m.reply_to_message:
-        if not user.id == game['admin']:
-            bot.reply_to(m, 'Может только админ.')
-            return
         user = m.reply_to_message.from_user
     if not game['players'].get(str(user.id)):
         bot.reply_to(m, 'Вы или юзер еще не присоединились.')
@@ -241,7 +247,7 @@ def me_handler(m):
 Имя: {}
 Айди: {}
 Стая: {}   
-Прирост:
+Прирост в деньи :
 {}
 Ресурсы:
 """
@@ -288,7 +294,7 @@ def give_res_handler(m):
     except ValueError:
         bot.reply_to(m, 'как я тебе {} {} выдам блять???!'.format(m.text.split(' ')[1], m.text.split(' ')[2]))
         return
-    bot.reply_to(m, 'Прирост выдан')
+    bot.reply_to(m, 'Ресурс выдан')
 
 
 @bot.message_handler(commands=['give_growth'])
@@ -335,7 +341,8 @@ def rus(text):
     rus_names = {
         'food': '🍓Еда',
         'water': '💧Вода',
-        'materials': '🧱Материалы'
+        'materials': '🧱Материалы',
+        'od': '📍Очки действий'
 
     }
     if not rus_names.get(text):
