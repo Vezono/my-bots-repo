@@ -18,6 +18,7 @@ from bots import chatbot
 from bots import pasuk
 from bots import triggers
 from bots.forest import bot as forest
+from bots import bpl
 
 bots = {
     'Повар': cooker.bot,
@@ -26,6 +27,7 @@ bots = {
     'Пасюк': pasuk.bot,
     'Триггеры': triggers.bot,
     'Лес': forest.bot,
+    'BPL': bpl.bot,
     'Bot_Ruler': bot
 }
 

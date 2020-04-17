@@ -9,12 +9,17 @@ from pymongo import MongoClient
 db_helper = MongoHelper(MongoClient(config.environ['database']))
 
 map_forest = 'AgACAgIAAx0CU77lswABAUPsXpmqr5jJdY8SUFdCKAHAuF71_fIAAp2vMRvymdFINKQjF7th2cB3R8sOAAQBAAMCAAN5AAOzlwQAARgE'
+tech_map = 'AgACAgIAAx0CU77lswABAT6XXpmzRORLFwecDeEyv_BR39Y5fKUAAoyuMRvcILhIgUwbYqUuahcIeMEPAAQBAAMCAAN5AAMGuwYAARgE'
 
 
 @bot.message_handler(commands=['map'])
 def map_handler(m):
-    # im = Image.open("res/forest_map.jpg")
-    bot.send_photo(m.chat.id, 'AgACAgIAAx0CU77lswABAUPsXpmqr5jJdY8SUFdCKAHAuF71_fIAAp2vMRvymdFINKQjF7th2cB3R8sOAAQBAAMCAAN5AAOzlwQAARgE')
+    bot.send_photo(m.chat.id, map_forest)
+
+
+@bot.message_handler(commands=['tech'])
+def tech_handler(m):
+    bot.send_photo(m.chat.id, tech_map)
 
 
 @bot.message_handler(commands=['fhelp'])

@@ -1,5 +1,3 @@
-import os
-
 # environ = os.environ
 
 environ = {
@@ -10,6 +8,7 @@ environ = {
     'pasuk': '976911963:AAFzMGQBIlKruwL9HUVzy2Bsc4XjW0bYK2I',
     'god': '616926239:AAG4j5if1vFODOdcqeM9ID8PFCfRyu95kaM',
     'forest': '1149367015:AAF-Uy_-2JMYhUDYZCPndAtNAUv-NsvXvq4',
+    'bpl': '1053004444:AAFYNzvNL4heCKJNvAm1vDBW5yrTPEDL5DM',
     'database': 'mongodb://gbball:onionland@database-shard-00-00-fcfmt.gcp.mongodb.net:27017,'
                 'database-shard-00-01-fcfmt.gcp.mongodb.net:27017,'
                 'database-shard-00-02-fcfmt.gcp.mongodb.net:27017/test?ssl=true&replicaSet=database-shard-0'
