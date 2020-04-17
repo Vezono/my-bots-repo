@@ -7,4 +7,5 @@ sklearn
 dnspython
 pillow
 opencv-python
-.cv2
+numpy
+matplotlib
