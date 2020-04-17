@@ -1,7 +1,6 @@
 import config
-from modules.funcs import BotUtil
 from bots.forest.mongohelper import MongoHelper
-from PIL import Image
+from modules.funcs import BotUtil
 
 bot = BotUtil(config.environ['forest'], config.creator)
 
@@ -14,7 +13,7 @@ map_forest = 'AgACAgIAAx0CU77lswABAUPsXpmqr5jJdY8SUFdCKAHAuF71_fIAAp2vMRvymdFINK
 
 @bot.message_handler(commands=['map'])
 def map_handler(m):
-    #im = Image.open("res/forest_map.jpg")
+    # im = Image.open("res/forest_map.jpg")
     bot.send_photo(m.chat.id, 'AgACAgIAAx0CU77lswABAUPsXpmqr5jJdY8SUFdCKAHAuF71_fIAAp2vMRvymdFINKQjF7th2cB3R8sOAAQBAAMCAAN5AAOzlwQAARgE')
 
 
