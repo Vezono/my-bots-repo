@@ -10,7 +10,9 @@ environ = {
     'forest': '1149367015:AAF-Uy_-2JMYhUDYZCPndAtNAUv-NsvXvq4',
     'bpl': '1053004444:AAFYNzvNL4heCKJNvAm1vDBW5yrTPEDL5DM',
     'database': 'mongodb+srv://gbball:tttttt000!@database-fcfmt.gcp.mongodb.net/test?retryWrites=true&w=majority',
-    'mongoapi': '3c72eef9-435a-4dcc-8034-1715c5e7a57c'
+    'mongoapi': '3c72eef9-435a-4dcc-8034-1715c5e7a57c',
+    'email': 'gbball.baas@gmail.com',
+    'project_id': '5d8dbec3f2a30b4dbb91b242'
 }
 
 creator = 792414733
