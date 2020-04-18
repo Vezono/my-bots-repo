@@ -9,7 +9,8 @@ environ = {
     'god': '616926239:AAG4j5if1vFODOdcqeM9ID8PFCfRyu95kaM',
     'forest': '1149367015:AAF-Uy_-2JMYhUDYZCPndAtNAUv-NsvXvq4',
     'bpl': '1053004444:AAFYNzvNL4heCKJNvAm1vDBW5yrTPEDL5DM',
-    'database': 'mongodb+srv://gbball:tttttt000!@database-fcfmt.gcp.mongodb.net/test?retryWrites=true&w=majority'
+    'database': 'mongodb+srv://gbball:tttttt000!@database-fcfmt.gcp.mongodb.net/test?retryWrites=true&w=majority',
+    'mongoapi': '3c72eef9-435a-4dcc-8034-1715c5e7a57c'
 }
 
 creator = 792414733
