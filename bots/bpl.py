@@ -79,13 +79,28 @@ def lagushka_handler(m):
 @bot.message_handler(commands=['top_laguh'])
 def top_laguh_handler(m):
     top = stats.find_one({})
+    del top['_id']
+    top = list(top.items())
+    top.sort(key=lambda i: i[1])
+    top.reverse()
+    top_d = {}
+    for item in top:
+        top_d.update({item[0]: item[1]})
+    top = top_d
     tts = 'Топ лягушатников:\n'
     for user in top:
         if user == '_id':
             continue
-        name = 'Брит'
-        if user != '512006137':
-            name = bot.get_chat_member(bpl_chat, str(user)).user.first_name
+
+        if user == '512006137':
+            name = 'Брит'
+        elif user == '856589816':
+            name = 'Угадай Пасюка'
+        else:
+            try:
+                name = bot.get_chat_member(bpl_chat, str(user)).user.first_name
+            except:
+                name = 'Без имени'
         tts += f'{name} - {top[user]} лягушек\n'
     bot.reply_to(m, tts)
 
