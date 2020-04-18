@@ -83,7 +83,9 @@ def top_laguh_handler(m):
     for user in top:
         if user == '_id':
             continue
-        name = bot.get_chat_member(bpl_chat, str(user)).user.first_name
+        name = 'Удаленный акк'
+        if user != '0':
+            name = bot.get_chat_member(bpl_chat, str(user)).user.first_name
         tts += f'{name} - {top[user]} лягушек\n'
     bot.reply_to(m, tts)
 
