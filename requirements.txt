@@ -9,4 +9,3 @@ pillow
 opencv-python
 numpy
 matplotlib
-telebot
