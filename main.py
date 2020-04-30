@@ -75,6 +75,15 @@ def reboot(m):
     app.restart()
 
 
+@bot.message_handler(commands=['logs'])
+def reboot(m):
+    count = 20
+    if m.text.count(' '):
+        count = int(m.text.split()[1])
+    logs = app.get_log(lines=count)
+    print(logs)
+
+
 runner = BotsRunner(admins=[config.creator], retries=3, show_traceback=True)
 runner.add_bots(bots)
 runner.set_main_bot(bot, 'status')
