@@ -48,10 +48,10 @@ def ret_os(m):
 def setup_bots(m):
     if not m.from_user.id == config.creator:
         return
-    kb = types.InlineKeyboardMarkup()
+    tts = 'Ваши боты:'
     for botrun in list(bots.keys()):
-        kb.add(types.InlineKeyboardButton(text=botrun, callback_data=botrun))
-    bot.send_message(m.chat.id, 'Ваши боты:', reply_markup=kb)
+        tts += '\n' + botrun
+    bot.send_message(m.chat.id, 'Ваши боты:')
 
 
 @bot.callback_query_handler(func=lambda call: True)
