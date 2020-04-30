@@ -12,7 +12,7 @@ start_time = timer()
 
 from modules.heroku import Heroku
 
-app = Heroku().app
+app = Heroku(bot).app
 
 from modules.manybotslib import BotsRunner
 
