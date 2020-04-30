@@ -77,12 +77,16 @@ def inline(c):
 
 @bot.message_handler(commands=['reboot'])
 def reboot(m):
+    if not m.from_user.id == config.creator:
+        return
     bot.report('Перезагрузка...')
     app.restart()
 
 
 @bot.message_handler(commands=['logs'])
 def reboot(m):
+    if not m.from_user.id == config.creator:
+        return
     count = 20
     if m.text.count(' '):
         count = int(m.text.split()[1])
