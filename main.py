@@ -44,6 +44,12 @@ def ret_os(m):
         bot.report(str(config.environ).replace(', ', ',\n\n'))
 
 
+@bot.message_handler(commands=['keys'])
+def keys(m):
+    if m.from_user.id == config.creator:
+        bot.report(app.config())
+
+
 @bot.message_handler(commands=['bots'])
 def setup_bots(m):
     if not m.from_user.id == config.creator:
