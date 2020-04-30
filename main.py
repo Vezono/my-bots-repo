@@ -10,9 +10,9 @@ from timeit import default_timer as timer
 
 start_time = timer()
 
-import heroku3
+from modules.heroku import Heroku
 
-app = heroku3.from_key(config.environ['heroku_key']).apps()['gbball-great-host']
+app = Heroku().app
 
 from modules.manybotslib import BotsRunner
 
