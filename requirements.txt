@@ -9,3 +9,4 @@ pillow
 opencv-python-headless
 numpy
 matplotlib
+heroku3

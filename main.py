@@ -10,6 +10,10 @@ from timeit import default_timer as timer
 
 start_time = timer()
 
+import heroku3
+
+app = heroku3.from_key(config.environ['heroku_key']).apps()['gbball-great-host']
+
 from modules.manybotslib import BotsRunner
 
 from bots import cooker
@@ -63,6 +67,12 @@ def inline(c):
     task = c.data.split(' ')[1]
     if task == 'status':
         bot.report(runner.get_status()[botname])
+
+
+@bot.message_handler(commands=['reboot'])
+def reboot(m):
+    bot.report('Перезагрузка...')
+    app.restart()
 
 
 runner = BotsRunner(admins=[config.creator], retries=3, show_traceback=True)
