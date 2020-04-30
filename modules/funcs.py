@@ -1,5 +1,7 @@
-from telebot import TeleBot
 import time
+
+from telebot import TeleBot
+
 
 class BotUtil(TeleBot):
 
@@ -88,7 +90,8 @@ class BotUtil(TeleBot):
         self.bot.kick_chat_member(chat.id, user.id, until_date=until_date)
         self.bot.send_message(chat.id, tts, parse_mode="HTML")
 
-    def report(self, text):
+    def report(self, text, quiet=False):
         if self.__creator:
-            print(text)
+            if not quiet:
+                print(text)
             return self.bot.send_message(self.__creator, text)
