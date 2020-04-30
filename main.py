@@ -91,9 +91,9 @@ def reboot(m):
     if m.text.count(' '):
         count = int(m.text.split()[1])
     logs = ''
-    for log in app.get_log(lines=count).split('\n')
-        logs += log[33:]
-    bot.report(logs)
+    for log in app.get_log(lines=count).split('\n'):
+        logs += '\n' + log[33:]
+    bot.reply_to(m, logs)
 
 
 runner = BotsRunner(admins=[config.creator], retries=3, show_traceback=True)
