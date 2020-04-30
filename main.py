@@ -90,7 +90,9 @@ def reboot(m):
     count = 20
     if m.text.count(' '):
         count = int(m.text.split()[1])
-    logs = app.get_log(lines=count)
+    logs = ''
+    for log in app.get_log(lines=count).split('\n')
+        logs += log[33:]
     bot.report(logs)
 
 
