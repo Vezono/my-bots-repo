@@ -81,7 +81,7 @@ def reboot(m):
     if m.text.count(' '):
         count = int(m.text.split()[1])
     logs = app.get_log(lines=count)
-    print(logs)
+    bot.report(logs)
 
 
 runner = BotsRunner(admins=[config.creator], retries=3, show_traceback=True)
