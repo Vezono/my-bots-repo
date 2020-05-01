@@ -16,19 +16,14 @@ app = Heroku(bot).app
 
 from modules.manybotslib import BotsRunner
 
-import subprocess
-
-files = str(subprocess.run(['ls', './bots'], capture_output=True).stdout)
-files = files[2:][:-1].replace('\\n', ' ').split()
-files.remove('__pycache__')
-files.remove('forest')
-print(files)
-
-for file in files:
-    file = file[:-3]
-    exec(f'from bots import {file}')
-
+from bots import cooker
+from bots import randomer
+from bots import chatbot
+from bots import pasuk
+from bots import triggers
 from bots.forest import bot as forest
+from bots import bpl
+from bots import georges_db
 
 bots = {
     'Повар': cooker.bot,
