@@ -102,6 +102,7 @@ def ggiveall(m):
 @bot.message_handler(commands=['allpokes'])
 def allpokes(m):
     tts = ''
+    del pokemons['_id']
     for pokek in pokemons.keys():
         tts += 'Имя: ' + pokemons[pokek]['name'] + '\nКод: ' + pokek + '\nКрутость: ' + str(
             pokemons[pokek]['cool']) + '\n\n'
