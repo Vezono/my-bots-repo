@@ -1,3 +1,5 @@
+import sys
+
 from telebot import types
 
 import config
@@ -81,6 +83,14 @@ def reboot(m):
         return
     bot.report('Перезагрузка...')
     app.restart()
+
+
+@bot.message_handler(commands=['off'])
+def reboot(m):
+    if not m.from_user.id == config.creator:
+        return
+    bot.report('Выключение...')
+    sys.exit()
 
 
 @bot.message_handler(commands=['logs'])
