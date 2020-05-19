@@ -67,7 +67,7 @@ def pisya_handler(m):
     mid = random.choice(goats_mid)
     end = random.choice(goats_end)
     goat = mid.format(end)
-    if end == 'козе' and mid != 'не смог дернуть писю {}😭' and False:
+    if end == 'козе' and mid != 'не смог дернуть писю {}😭':
         koza.update_one(user, {'$inc': {'goat': 1}})
     tts = f'{m.from_user.first_name} {goat}!'
     bot.send_message(m.chat.id, tts)
