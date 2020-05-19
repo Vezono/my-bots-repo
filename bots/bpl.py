@@ -12,6 +12,7 @@ from pymongo import MongoClient
 
 db = MongoClient(config.environ['database'])
 stats = db.bpl.stats
+koza = db.bpl.koza
 bpl_chat = -1001405019571
 checking = False
 laguhs = ['CAACAgIAAx0CU77lswABAURBXpnKMeC0YVdPq31zvXmeFN7H0xYAAgkAA_0jtDKK2a659YfNGBgE',
@@ -39,6 +40,16 @@ def cheking_handler(m):
     bot.reply_to(m, f'чекинг теперь {checking}')
 
 
+@bot.message_handler(commands=['me'])
+def me_handler(m):
+    user = koza.find_one({})
+    if not user:
+        koza.insert_one({'id': m.from_user.id, 'goat': 0})
+        user = koza.find_one({})
+    tts = f'Ваши козы:\nОбычная коза: {user["goat"]}'
+    bot.reply_to(m, tts)
+
+
 @bot.message_handler(commands=['laguh'])
 def laguh_handler(m):
     reply_to = None
@@ -49,7 +60,15 @@ def laguh_handler(m):
 
 @bot.message_handler(commands=['pisya'])
 def pisya_handler(m):
-    goat = random.choice(goats_mid).format(random.choice(goats_end))
+    user = koza.find_one({})
+    if not user:
+        koza.insert_one({'id': m.from_user.id, 'goat': 0})
+        return
+    mid = random.choice(goats_mid)
+    end = random.choice(goats_end)
+    goat = mid.format(end)
+    if end == 'козе' and mid != 'не смог дернуть писю {}😭' and False:
+        koza.update_one(user, {'$inc': {'goat': 1}})
     tts = f'{m.from_user.first_name} {goat}!'
     bot.send_message(m.chat.id, tts)
 

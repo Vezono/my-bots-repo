@@ -10,3 +10,4 @@ opencv-python-headless
 numpy
 matplotlib
 heroku3
+yandex-music
