@@ -24,7 +24,6 @@ from bots import triggers
 from bots.forest import bot as forest
 from bots import bpl
 from bots import georges_db
-from bots import pokewars
 
 bots = {
     'Повар': cooker.bot,
@@ -35,7 +34,6 @@ bots = {
     'Лес': forest.bot,
     'BPL': bpl.bot,
     'Georges_DB': georges_db.bot,
-    'Pokewars': pokewars.bot,
     'Bot_Ruler': bot
 }
 
