@@ -70,8 +70,8 @@ def sperma_handler(m):
     user = get_kozovod(m.from_user.id)
     goats = user['goat']
     print(user['kd'])
-    minus_milk = -goats * random.randint(1, 100)
-    minus_KOZA = -random.randint(0, 1)*user['exp']/ 1000
+    minus_milk = -goats * random.randint(1, 100)*user['exp']/ 1000
+    minus_KOZA = -random.randint(0, 1)
     if user['kd'] == 5:
         koza.update_one(user, {'$inc': {'milk': minus_milk, 'kd': -5, 'goat': -minus_KOZA}})
         bot.reply_to(m, f'Вы передрочили своим козам и потеряли {-minus_milk} спермы. Также у вас '
