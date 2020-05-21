@@ -23,6 +23,7 @@ goats_mid = ['не смог дернуть писю {}😭', 'дернул пи�
 goats_end = ['Гоше', 'козе', 'Бриту', 'Пасюку', 'Полунину', 'МНЕ', 'ослу', 'Шмэку', 'лягушке']
 koza.update_many({}, {'$set': {'kd': 0}})
 
+
 @bot.message_handler(commands=['help'])
 def help_handler(m):
     bot.send_message(m.chat.id, """Я типичный бплщик, привет!
@@ -43,7 +44,7 @@ def cheking_handler(m):
 @bot.message_handler(commands=['me'])
 def me_handler(m):
     user = get_kozovod(m.from_user.id)
-    tts = f'Ваши козы:\n🐐Обычная коза: {user["goat"]}\n💧Сперма козы: {user["milk"]}\nОпыт: {user["exp"]}'
+    tts = f'Ваши козы:\n🐐Обычная коза: {user["goat"]}\n💧Сперма козы: {user["milk"]}\n🥇Опыт: {user["exp"]}'
     bot.reply_to(m, tts)
 
 
@@ -60,7 +61,7 @@ def drink_handler(m):
     user = get_kozovod(m.from_user.id)
     exp = user['goat'] * 20 + user['milk']
     koza.update_one(user, {'$set': {'goat': 0, 'kd': 0, 'milk': 0}})
-    koza.update_one(user, {'$inc': {'exp': exp}})
+    koza.update_one({'id': user['id']}, {'$inc': {'exp': exp}})
     bot.reply_to(m, f'ВЫПИЛИ ВСЮ СПЕРМУ НАХУЙ И ВЫЕБАЛИ ВСЕХ КОЗ ТАК ЧТО СДОХЛИ НАХУЙ. Получено {exp} опыта.')
 
 
@@ -70,25 +71,28 @@ def sperma_handler(m):
     goats = user['goat']
     print(user['kd'])
     minus_milk = -goats * random.randint(1, 100)
-    minus_KOZA = -random.randint(10000, 1309013)
+    minus_KOZA = -random.randint(0, 1)
     if user['kd'] == 5:
         koza.update_one(user, {'$inc': {'milk': minus_milk, 'kd': -5, 'goat': -minus_KOZA}})
         bot.reply_to(m, f'Вы передрочили своим козам и потеряли {-minus_milk} спермы. Также у вас '
                         f'умерла {-minus_KOZA} коза.')
         return
-    koza.update_one(user, {'$inc': {'milk': goats * 20 * user['exp'] / 100, 'kd': 1}})
-    bot.reply_to(m, f'Вы подергали писюны своим козам и получили {goats * 20} стаканов козьей спермы!')
+    koza.update_one(user, {'$inc': {'milk': goats * 20 * (user['exp'] + 1) / 100, 'kd': 1}})
+    bot.send_message(m.chat.id,
+                     f'Вы подергали писюны своим козам и получили {goats * 20 * (user["exp"] + 1) / 100} стаканов козьей спермы!')
 
 
 @bot.message_handler(commands=['pisya'])
 def pisya_handler(m):
+    tts = ''
     user = get_kozovod(m.from_user.id)
     mid = random.choice(goats_mid)
     end = random.choice(goats_end)
     goat = mid.format(end)
     if end == 'козе' and mid != 'не смог дернуть писю {}😭':
         koza.update_one(user, {'$inc': {'goat': 1}})
-    tts = f'{m.from_user.first_name} {goat}!'
+        tts += ' 🐐ВЫ ПОЛУЧИЛИ КАЗУ!!!'
+    tts = f'{m.from_user.first_name} {goat}!' + tts
     bot.send_message(m.chat.id, tts)
 
 
@@ -147,7 +151,7 @@ def top_laguh_handler(m):
 def get_kozovod(user_id):
     user = koza.find_one({'id': user_id})
     if not user:
-        koza.insert_one({'id': user_id, 'goat': 0, 'milk': 0, 'kd': 0})
+        koza.insert_one({'id': user_id, 'goat': 0, 'milk': 0, 'kd': 0, 'exp': 0})
         user = koza.find_one({})
     return user
 

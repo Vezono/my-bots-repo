@@ -11,6 +11,7 @@ environ = {
     'bpl': '1053004444:AAFYNzvNL4heCKJNvAm1vDBW5yrTPEDL5DM',
     'georges_db': '1017113506:AAFPTkBxF-VFhbVEyAwZ-J2C8kHMDh4IshE',
     'pokewars': '812609111:AAFZf1zj1H6ualqx4ZD7gFm6RPW1p3ZBpg8',
+    'sedbot': '1190421692:AAFZMmMyfPo3rEibWHTjhEHOtjthR6Am3fE',
     'database': 'mongodb+srv://gbball:tttttt000!@database-fcfmt.gcp.mongodb.net/test?retryWrites=true&w=majority',
     'mongoapi': '3c72eef9-435a-4dcc-8034-1715c5e7a57c',
     'email': 'gbball.baas@gmail.com',
