@@ -21,7 +21,7 @@ laguhs = ['CAACAgIAAx0CU77lswABAURBXpnKMeC0YVdPq31zvXmeFN7H0xYAAgkAA_0jtDKK2a659
 goats_mid = ['не смог дернуть писю {}😭', 'дернул писю {}', 'оторвал писю {}', 'пощекотал писю {}', 'подрочил писю {}',
              'отсосал писю {}', 'откусил писю {}', 'сьел писю {}', 'УКРАЛ писю {}']
 goats_end = ['Гоше', 'козе', 'Бриту', 'Пасюку', 'Полунину', 'МНЕ', 'ослу', 'Шмэку', 'лягушке']
-
+koza.update_many({}, {'$set': {'kd': 0}})
 
 @bot.message_handler(commands=['help'])
 def help_handler(m):
@@ -42,11 +42,8 @@ def cheking_handler(m):
 
 @bot.message_handler(commands=['me'])
 def me_handler(m):
-    user = koza.find_one({})
-    if not user:
-        koza.insert_one({'id': m.from_user.id, 'goat': 0})
-        user = koza.find_one({})
-    tts = f'Ваши козы:\nОбычная коза: {user["goat"]}'
+    user = get_kozovod(m.from_user.id)
+    tts = f'Ваши козы:\n🐐Обычная коза: {user["goat"]}\n💧Сперма козы: {user["milk"]}\nОпыт: {user["exp"]}'
     bot.reply_to(m, tts)
 
 
@@ -58,12 +55,34 @@ def laguh_handler(m):
     bot.send_sticker(m.chat.id, laguhs[0], reply_to_message_id=reply_to)
 
 
+@bot.message_handler(commands=['drink'])
+def drink_handler(m):
+    user = get_kozovod(m.from_user.id)
+    exp = user['goat'] * 20 + user['milk']
+    koza.update_one(user, {'$set': {'goat': 0, 'kd': 0, 'milk': 0}})
+    koza.update_one(user, {'$inc': {'exp': exp}})
+    bot.reply_to(m, f'ВЫПИЛИ ВСЮ СПЕРМУ НАХУЙ И ВЫЕБАЛИ ВСЕХ КОЗ ТАК ЧТО СДОХЛИ НАХУЙ. Получено {exp} опыта.')
+
+
+@bot.message_handler(commands=['sperma'])
+def sperma_handler(m):
+    user = get_kozovod(m.from_user.id)
+    goats = user['goat']
+    print(user['kd'])
+    minus_milk = -goats * random.randint(1, 100)
+    minus_KOZA = -random.randint(10000, 1309013)
+    if user['kd'] == 5:
+        koza.update_one(user, {'$inc': {'milk': minus_milk, 'kd': -5, 'goat': -minus_KOZA}})
+        bot.reply_to(m, f'Вы передрочили своим козам и потеряли {-minus_milk} спермы. Также у вас '
+                        f'умерла {-minus_KOZA} коза.')
+        return
+    koza.update_one(user, {'$inc': {'milk': goats * 20 * user['exp'] / 100, 'kd': 1}})
+    bot.reply_to(m, f'Вы подергали писюны своим козам и получили {goats * 20} стаканов козьей спермы!')
+
+
 @bot.message_handler(commands=['pisya'])
 def pisya_handler(m):
-    user = koza.find_one({})
-    if not user:
-        koza.insert_one({'id': m.from_user.id, 'goat': 0})
-        return
+    user = get_kozovod(m.from_user.id)
     mid = random.choice(goats_mid)
     end = random.choice(goats_end)
     goat = mid.format(end)
@@ -123,6 +142,14 @@ def top_laguh_handler(m):
                 name = 'Без имени'
         tts += f'{name} - {top[user]} лягушек\n'
     bot.reply_to(m, tts)
+
+
+def get_kozovod(user_id):
+    user = koza.find_one({'id': user_id})
+    if not user:
+        koza.insert_one({'id': user_id, 'goat': 0, 'milk': 0, 'kd': 0})
+        user = koza.find_one({})
+    return user
 
 
 # Функция вычисления хэша
