@@ -11,4 +11,3 @@ numpy
 matplotlib
 heroku3
 yandex-music
-b0mb3r
