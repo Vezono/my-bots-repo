@@ -65,21 +65,20 @@ def callback_handler(c):
         else:
             bot.answer_callback_query(c.id, 'Это не ваше меню!')
         return
-
     tea = c.message.text.split('"')[1]
-    if to_user == c.from_user:
+    if to_user.id == c.from_user.id:
         if action == 'drink':
-            tts = f'Вы выпили чай "{tea}", {to_user}!'
+            tts = f'Вы выпили чай "{tea}", {to_link}!'
         elif action == 'reject':
-            tts = f'Вы отказались от чая "{tea}", {to_user}!'
+            tts = f'Вы отказались от чая "{tea}", {to_link}!'
         elif action == 'throw':
-            tts = f'Вы вылили в унитаз чай "{tea}", {to_user}!!'
+            tts = f'Вы вылили в унитаз чай "{tea}", {to_link}!!'
         elif action == 'Да':
-            tts = f'Вы выпили чай "{tea}", {to_user}!! Спасибо!!!'
+            tts = f'Вы выпили чай "{tea}", {to_link}!! Спасибо!!!'
         elif action == 'Нет':
-            tts = f'Простите, {to_user}.'
+            tts = f'Простите, {to_link}.'
     else:
-        bot.answer_callback_query(c.id, 'Это не ваше меню!')
+        bot.answer_callback_query(c.id, 'Это не ваш чай!')
         return
     bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, parse_mode='HTML')
 
