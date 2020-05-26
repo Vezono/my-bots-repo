@@ -1,6 +1,9 @@
-from modules.funcs import BotUtil
 from telebot import types
 import config
+from telebot import types
+
+import config
+
 
 class Cooker:
 
@@ -14,9 +17,9 @@ class Cooker:
         row1 = list()
         row2 = list()
         for i in ['drink', 'reject']:
-            row1.append(types.InlineKeyboardButton(self.__rus(i), callback_data='{} {}'.format(i, to_user.first_name)))
+            row1.append(types.InlineKeyboardButton(self.__rus(i), callback_data='{} {}'.format(i, str(to_user.id))))
         for i in ['throw']:
-            row2.append(types.InlineKeyboardButton(self.__rus(i), callback_data='{} {}'.format(i, to_user.first_name)))
+            row2.append(types.InlineKeyboardButton(self.__rus(i), callback_data='{} {}'.format(i, str(to_user.id))))
         kb.add(*row1)
         kb.add(*row2)
         if to_user.id == self.__bot.get_me().id:

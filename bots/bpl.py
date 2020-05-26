@@ -70,16 +70,17 @@ def sperma_handler(m):
     user = get_kozovod(m.from_user.id)
     goats = user['goat']
     print(user['kd'])
-    minus_milk = -goats * random.randint(1, 100)
-    minus_KOZA = -random.randint(0, 1)
+    minus_milk = int(-goats * random.randint(1, 100))
+    minus_KOZA = int(-random.randint(0, 1))
     if user['kd'] == 5:
         koza.update_one(user, {'$inc': {'milk': minus_milk, 'kd': -5, 'goat': -minus_KOZA}})
         bot.reply_to(m, f'Вы передрочили своим козам и потеряли {-minus_milk} спермы. Также у вас '
                         f'умерла {-minus_KOZA} коза.')
         return
-    koza.update_one(user, {'$inc': {'milk': goats * 20 * (user['exp'] + 1) / 100, 'kd': 1}})
+    koza.update_one(user, {'$inc': {'milk': int(goats * 20 * (user['exp'] + 1) / 100), 'kd': 1}})
     bot.send_message(m.chat.id,
-                     f'Вы подергали писюны своим козам и получили {goats * 20 * (user["exp"] + 1) / 100} стаканов козьей спермы!')
+                     f'Вы подергали писюны своим козам и получили {int(goats * 20 * (user["exp"] + 1) / 100)} стаканов'
+                     f' козьей спермы!')
 
 
 @bot.message_handler(commands=['pisya'])

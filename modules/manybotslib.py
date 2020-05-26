@@ -68,7 +68,7 @@ class BotsRunner:
             self.__main_bot.send_message(
                 adm,
                 "♻️ Рестарт бота " + str(botname) +
-                ". Осталось " + local_retries + " падений до необходимости рестарта приложения"
+                ". Осталось " + str(local_retries) + " падений до необходимости рестарта приложения"
             )
 
     def __poll(self, botname):
