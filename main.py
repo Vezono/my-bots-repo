@@ -29,6 +29,7 @@ if True:
     from bots import georges_db
     from bots import sedbot
     from bots import attorney
+    from bots.magicwars import bot as magicwars
 
 bots = {
     'Повар': cooker.bot,
@@ -41,6 +42,7 @@ bots = {
     'Georges_DB': georges_db.bot,
     'SedBot': sedbot.bot,
     'Court': attorney.bot,
+    'MagicWars': magicwars.bot,
     'Bot_Ruler': bot
 }
 
