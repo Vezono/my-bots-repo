@@ -59,45 +59,30 @@ def start_game_handler(m):
     battle.next_turn()
 
 
-@bot.message_handler(commands=['cast'])
+@bot.message_handler()
 def cast_handler(m):
     battle = get_game(m.chat.id)
     if not battle:
-        bot.reply_to(m, 'Игра не создана. Создайте с помощью /battle.')
         return
     if not m.reply_to_message:
-        bot.reply_to(m, 'Вы не указали на кого кастовать.')
         return
-    if not m.text.count(' '):
-        bot.reply_to(m, 'Вы не указали заклинание. /cast <заклинание>')
-    joined_users = [user.user_id for user in battle.magicians]
-    if m.reply_to_message.from_user.id not in joined_users:
-        bot.reply_to(m, 'Он не играет.')
+    if m.reply_to_message.from_user.id not in [user.user_id for user in battle.magicians]:
         return
     magician = None
     enemy = None
+
     for user in battle.magicians:
         if user.user_id == m.reply_to_message.from_user.id:
             enemy = user
         if user.user_id == m.from_user.id:
             magician = user
+
     if magician.casted:
-        bot.reply_to(m, 'Вы уже кастовали в этом ходу!')
         return
 
-    cast = m.text.split(' ')
-    cast.remove(m.text.split(' ')[0])
-    for part in cast:
-        if part not in constants.elements:
-            cast.remove(part)
-            continue
-    if len(cast) > 4:
-        bot.reply_to(m, 'Нельзя призывать более четырех элементов!')
-        return
-    cast.sort()
-    for combo in constants.combos:
-        if constants.combos[combo] == cast:
-            cast = [combo]
+    cast = [m.text.lower()]
+    if m.text.count(' '):
+        cast = m.text.lower().split(' ')
     bot.reply_to(m, magician.cast(enemy, cast))
 
 

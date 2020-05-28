@@ -12,6 +12,7 @@ class Game:
         self.chat_id = chat_id
         self.magicians = list()
         self.turn = 0
+        self.speed = 30
         self.exists = True
 
     def join(self, user_id):
@@ -41,21 +42,12 @@ class Game:
                 continue
             tts += f'\n\n{magician.name}:\n'
             tts += f'❤️ХП: {magician.xp}'
-            for baff in magician.baffs:
-                if not baff.durating:
-                    magician.states[baff.type[0]][baff.type[1]] -= baff.value
-                    continue
-                baff.durating -= 1
-                if baff.type[0] != 'xp':
-                    magician.states[baff.type[0]][baff.type[1]] += baff.value
-                else:
-                    magician.xp += baff.value
-                tts += f'Баффы:'
-                tts += f'\n    Баффы: {baff.value} {baff.type[0]}_of_{baff.type[1]} на {baff.durating} ходов.'
+            if not self.turn % 5:
+                magician.kd_multiplier = 1
             magician.casted = False
         bot.send_message(self.chat_id, tts)
         self.turn += 1
-        time.sleep(30)
+        time.sleep(self.speed)
         self.next_turn()
 
 
@@ -65,20 +57,51 @@ class Magician:
         self.name = user_name
         self.xp = 700
         self.max_xp = self.xp
-        self.baffs = list()
         self.casted = False
         self.states = {
             'defence': {
                 element: False for element in constants.elements
             }
         }
+        self.kd = {
+            element: 0 for element in constants.elements
+        }
+        self.kd_multiplier = 1
 
-    def cast(self, enemy, cast):
+    def cast(self, enemy, old_cast):
+        cast = list()
+        for element in old_cast:
+            if element not in constants.elements:
+                if self.init_element(element):
+                    cast.append(self.init_element(element))
+                continue
+            cast.append(element)
+
+        for element in cast:
+            self.kd[element] += 1
+            if self.kd[element] > (5 / self.kd_multiplier):
+                self.kd[element] = 0
+                cast.remove(element)
+
+        if 0 > len(cast):
+            return
+        elif len(cast) > 4:
+            random.shuffle(cast)
+            cast = [cast[i] for i in range(4)]
+        cast.sort()
+
+        for combo in constants.combos:
+            if constants.combos[combo] == cast:
+                cast = [combo]
         all_damage = 0
         for element in cast:
             all_damage += constants.damages[element]
-        tts = f'{self.name} кастанул "{" ".join([constants.rus(element) for element in cast])}"'
-        if all_damage > 0:
+        tts = f'{self.name} кастанул "{" ".join(old_cast)}"'
+
+        if all_damage == 0:
+            all_damage += random.randint(1, 20)
+            tts += f' на {enemy.name} и нанес {all_damage} урона!'
+        elif all_damage > 0:
             tts += f' на {enemy.name} и нанес {all_damage} урона!'
         else:
             tts += f' на {enemy.name} и отхилил на {-all_damage} единиц!'
@@ -88,9 +111,16 @@ class Magician:
         self.casted = True
         return tts
 
-
-class Baff:
-    def __init__(self, durating, baff_type, value):
-        self.durating = durating
-        self.type = baff_type
-        self.value = value
+    @staticmethod
+    def init_element(element):
+        finded = False
+        for char_element in constants.chars:
+            for char in constants.chars[char_element]:
+                if char in element:
+                    finded = True
+                    break
+            if finded:
+                break
+        if not finded:
+            return
+        return char_element

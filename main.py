@@ -113,7 +113,7 @@ def reboot(m):
     bot.reply_to(m, logs)
 
 
-runner = BotsRunner(admins=[config.creator], retries=3, show_traceback=True)
+runner = BotsRunner(admins=[config.creator], show_traceback=True)
 runner.add_bots(bots)
 runner.set_main_bot(bot, 'status')
 bot.report('Готово! Боты запущены и готовы к работе.\nВремени использовано: {} секунд.'.format(timer() - start_time))
