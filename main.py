@@ -14,7 +14,7 @@ start_time = timer()
 
 from modules.heroku import Heroku
 
-app = Heroku(bot).app
+app = Heroku().app
 
 from modules.manybotslib import BotsRunner
 
@@ -48,19 +48,19 @@ bots = {
 
 
 @bot.message_handler(commands=['os'])
-def ret_os(m):
+def get_os(m):
     if m.from_user.id == config.creator:
         bot.report(str(config.environ).replace(', ', ',\n\n'))
 
 
 @bot.message_handler(commands=['keys'])
-def keys(m):
+def get_keys(m):
     if m.from_user.id == config.creator:
-        bot.report(app.config())
+        bot.report(config.environ)
 
 
 @bot.message_handler(commands=['deploy_keys'])
-def keys(m):
+def deploy_keys(m):
     if m.from_user.id != config.creator:
         return
     keys = app.config()
