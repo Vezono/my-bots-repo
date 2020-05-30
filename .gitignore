@@ -4,4 +4,5 @@ __pycache__
 bots/__pycache__
 modules/__pycache__
 tokens.py
-/old_bots/
+old_bots/
+
