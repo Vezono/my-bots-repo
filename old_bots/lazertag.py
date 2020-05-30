@@ -1,10 +1,12 @@
 import os
-import telebot
 import random
 import threading
-from telebot import types
-from pymongo import MongoClient
 import traceback
+
+import telebot
+from pymongo import MongoClient
+from telebot import types
+
 from modules.manybotslib import BotsRunner
 
 token = os.environ['lazertag']
@@ -53,7 +55,7 @@ def preparegame(m):
             if ids['id']==m.chat.id:
                 yes=1
                 game=ids
-        t=threading.Timer(300,cancelgame,args=[game])
+        t = threading.Timer(300, cancelgame, args=[game])
         t.start()
         game['canceltimer']=t
     else:
