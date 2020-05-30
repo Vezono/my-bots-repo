@@ -1,7 +1,7 @@
-from modules.funcs import BotUtil
-import config
-
 from pymongo import MongoClient
+
+import config
+from modules.funcs import BotUtil
 
 bot = BotUtil(config.environ['twinkle'], config.creator)
 

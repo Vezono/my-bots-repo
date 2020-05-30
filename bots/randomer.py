@@ -6,7 +6,7 @@ from telebot import types
 
 import config
 
-with open("old_bots/cokewars.txt", "r") as f:
+with open("unactive_bots/cokewars.txt", "r") as f:
     boolets = f.read().split("\n")
 
 token = config.environ['randomer']

@@ -1,11 +1,11 @@
-import config as os
-import telebot
-from modules.manybotslib import BotsRunner
 import random
 import threading
-from telebot import types
-from pymongo import MongoClient
 
+import telebot
+from pymongo import MongoClient
+from telebot import types
+
+import config as os
 
 notclick = 0
 

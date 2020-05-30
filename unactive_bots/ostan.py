@@ -1,13 +1,10 @@
-import os
-import telebot
-from telebot import types
-from manybotslib import BotsRunner
-
-import time
 import random
 import threading
-import traceback
-from pymongo import MongoClient
+import time
+
+import telebot
+from manybotslib import BotsRunner
+from telebot import types
 
 chat_id = -1001254345528
 welcome = 'AgADAgADa6sxG6ky6UnD6ibB5We5in9DhA8ABGxMw_lBUHY_u68DAAEC'
