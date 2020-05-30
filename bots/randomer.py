@@ -1,14 +1,40 @@
-import config
-import telebot
 import random
 import threading
+
+import telebot
 from telebot import types
+
+import config
+
+with open("old_bots/cokewars.txt", "r") as f:
+    boolets = f.read().split("\n")
 
 token = config.environ['randomer']
 bot = telebot.TeleBot(token)
 creator = config.creator
 admins = [creator]
 games = {}
+
+
+@bot.message_handler(commands=['roll'])
+def roll(m):
+    try:
+        codetoeval = ''
+        repeates = 1
+        if m.text.count(' '):
+            repeates = int(m.text.split(' ')[1])
+        if 0 > repeates > 20:
+            return
+        for i in range(repeates):
+            codetoeval += random.choice(boolets).strip() + '\n'
+        try:
+            exec(codetoeval)
+            bot.reply_to(m, codetoeval + '\n\nУспешно!!')
+        except Exception as e:
+            tts = 'Code:\n{}\n\nErrors:\n{}'.format(codetoeval, e)
+            bot.reply_to(m, tts)
+    except:
+        pass
 
 
 def effect(target='all', amount=0):
@@ -119,6 +145,7 @@ def coldovattjoen(m):
             bot.send_message(m.chat.id, m.from_user.first_name + ' присоединился!')
     except:
         bot.send_message(m.chat.id, 'Тут еще нет игры ебать.')
+
 
 @bot.message_handler(commands=['gogogo'])
 def coldovattstart(m):
