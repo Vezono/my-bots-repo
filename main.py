@@ -59,6 +59,16 @@ def keys(m):
         bot.report(app.config())
 
 
+@bot.message_handler(commands=['deploy_keys'])
+def keys(m):
+    if m.from_user.id != config.creator:
+        return
+    keys = app.config()
+    for key in config.environ:
+        keys[key] = config.environ[key]
+    bot.report('Конфиги синхронизированы.')
+
+
 @bot.message_handler(commands=['bots'])
 def setup_bots(m):
     if not m.from_user.id == config.creator:

@@ -49,7 +49,7 @@ class BotsRunner:
     def run(self):
         for botname in self.__bots:
             if not self.__bots_status[botname]:
-                Thread(target=self.__poll, args=[botname]).start()
+                Thread(target=self.__poll, args=[botname], name=botname).start()
 
     def __warn_about_fail(self, botname):
         if self.__main_bot is None:
