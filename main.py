@@ -22,7 +22,7 @@ if True:
     from bots import cooker
     from bots import randomer
     from bots import chatbot
-    from bots import pasuk
+    #from bots import pasuk
     from bots import triggers
     from bots.forest import bot as forest
     from bots import bpl
@@ -35,7 +35,7 @@ bots = {
     'Повар': cooker.bot,
     'Рандоман': randomer.bot,
     'Чабот': chatbot.bot,
-    'Пасюк': pasuk.bot,
+    #'Пасюк': pasuk.bot,
     'Триггеры': triggers.bot,
     'Лес': forest.bot,
     'BPL': bpl.bot,
