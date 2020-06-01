@@ -10,18 +10,18 @@ if 'DYNO' in config.environ:
     heroku = True
     bot.report('Heroku initialization...')
 else:
-    bot.report('Local initialization, offing heroku dyno...')
+    bot.report('Local initialization...')
 
 from timeit import default_timer as timer
 start_time = timer()
 
 from modules.heroku import Heroku
 app = Heroku().app
-if not heroku:
-    for dyno in app.dynos():
-        dyno.kill()
+
 from modules.manybotslib import BotsRunner
 if True:
+    from bots import cooker
+    from bots import randomer
     from bots import chatbot
     from bots import pasuk
     from bots import triggers
@@ -29,11 +29,10 @@ if True:
     from bots import bpl
     from bots import georges_db
     from bots import sedbot
-    from bots import attorney
     from bots.magicwars import bot as magicwars
 bots = {
-    # 'Повар': cooker.bot,
-    # 'Рандоман': randomer.bot,
+    'Повар': cooker.bot,
+    'Рандоман': randomer.bot,
     'Чабот': chatbot.bot,
     'Пасюк': pasuk.bot,
     'Триггеры': triggers.bot,
@@ -41,7 +40,6 @@ bots = {
     'BPL': bpl.bot,
     'Georges_DB': georges_db.bot,
     'SedBot': sedbot.bot,
-    'Court': attorney.bot,
     'MagicWars': magicwars.bot,
     'Bot_Ruler': bot
 }
@@ -72,8 +70,9 @@ def deploy_on_heroku(m):
         return
     if not m.text.count(' '):
         bot.reply_to(m, 'Write the commit message!')
+        return
     commit_message = m.text.split(' ', 1)[1]
-    cmd = ['git', 'commit', '-m', f'"{commit_message}"']
+    cmd = ['git', 'commit', '-a', '-m', f'"{commit_message}"']
     p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=False)
     out, err = p.communicate()
     out = out.decode()
