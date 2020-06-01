@@ -46,4 +46,9 @@ def handler(m):
         text += '/'
     elif text.count('/') != 3:
         return
-    bot.reply_to(m.reply_to_message, py_sed(m.text, m.reply_to_message.text))
+    try:
+        text = py_sed(m.text, m.reply_to_message.text)
+    except:
+        bot.reply_to(m, 'Ошибка. Обратитесь к @gbball за помощью.')
+        return
+    bot.reply_to(m.reply_to_message, text)

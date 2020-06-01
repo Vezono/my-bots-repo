@@ -9,15 +9,12 @@ bot = BotUtil(config.environ['mainbot'], config.creator)
 bot.report('Инициализация...')
 
 from timeit import default_timer as timer
-
 start_time = timer()
 
 from modules.heroku import Heroku
-
 app = Heroku().app
 
 from modules.manybotslib import BotsRunner
-
 if True:
     from bots import chatbot
     from bots import pasuk
@@ -28,7 +25,6 @@ if True:
     from bots import sedbot
     from bots import attorney
     from bots.magicwars import bot as magicwars
-
 bots = {
     # 'Повар': cooker.bot,
     # 'Рандоман': randomer.bot,
@@ -48,13 +44,7 @@ bots = {
 @bot.message_handler(commands=['os'])
 def get_os(m):
     if m.from_user.id == config.creator:
-        bot.report(str(config.environ).replace(', ', ',\n\n'))
-
-
-@bot.message_handler(commands=['keys'])
-def get_keys(m):
-    if m.from_user.id == config.creator:
-        bot.report(config.environ)
+        bot.report(str(app.config()).replace(', ', ',\n\n'))
 
 
 @bot.message_handler(commands=['deploy_keys'])

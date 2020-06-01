@@ -108,7 +108,8 @@ def lagushka_handler(m):
             fd.write(chunk)
     hash1 = CalcImageHash("res/jaba.jpg")
     hash2 = CalcImageHash("res/jaba_compare.jpg")
-    os.remove('res/jaba_compare.jpg')
+    if os.path.exists('res/jaba_compare.jpg'):
+        os.remove('res/jaba_compare.jpg')
     diff = CompareHash(hash1, hash2)
     if diff == 0:
         try:

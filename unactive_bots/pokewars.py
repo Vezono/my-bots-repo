@@ -26,8 +26,7 @@ client = MongoClient(os.environ['database'])
 db = client.pokewars
 users = db.users
 chats = db.chats
- 
-    
+
 basepokes = ['dildak', 'loshod', 'penis', 'zaluper', 'zhopa', 'sidot']
 
 elita = ['pikachu', 'pedro', 'bulbazaur', 'psyduck', 'moxnatka', 'charmander', 'diglet', 'golem', 'sidot', 'traxer',
@@ -38,10 +37,11 @@ elita = ['pikachu', 'pedro', 'bulbazaur', 'psyduck', 'moxnatka', 'charmander', '
 
 elitaweak = ['moxnatka', 'diglet', 'traxer', 'penis', 'gandonio', 'egg', 'sizor', 'ebusobak', 'ultrapoke']
 
-  
-eng = [' ', 'a', 'b', 'v', 'g', 'd', 'e', 'e', 'zh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'f', 'kh', 'ts', 'ch', 'sh', 'shch', 'j', 'u', 'j', 'e', 'yu', 'ya']
+eng = [' ', 'a', 'b', 'v', 'g', 'd', 'e', 'e', 'zh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u',
+       'f', 'kh', 'ts', 'ch', 'sh', 'shch', 'j', 'u', 'j', 'e', 'yu', 'ya']
 
-rus = [' ', 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я'] 
+rus = [' ', 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у',
+       'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я']
 
 symbollist = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
               'v', 'w', 'x', 'y', 'z',
@@ -50,27 +50,34 @@ symbollist = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', '
               '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 pokemons = {}
 pokemonlist = []
+
+
 def medit(message_text, chat_id, message_id, reply_markup=None, parse_mode='Markdown'):
     return bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=message_text, reply_markup=reply_markup,
                                  parse_mode=parse_mode)
 
+
 @bot.message_handler(commands=['eval'])
 def evol(m):
-    if m.from_user.id == brit_id:  
+    if m.from_user.id == brit_id:
         txt = m.text.split(' ', 1)
         eval(txt[1])
         bot.reply_to(m, 'done')
+
+
 @bot.message_handler(commands=['reboot'])
 def creboot(m):
-    if m.from_user.id == brit_id:  
-        reboot()        
-        
+    if m.from_user.id == brit_id:
+        reboot()
+
+
 @bot.message_handler(commands=['giveall'])
 def giveall(m):
-  if m.from_user.id in vip:
-      for x in pokemonlist:
-        users.update_one({'id':m.reply_to_message.from_user.id}, {'$set':{'pokemons.'+x:createpoke(x, 0)}})
-      bot.send_message(m.chat.id, 'Готово, скотина.', parse_mode='markdown')
+    if m.from_user.id in vip:
+        for x in pokemonlist:
+            users.update_one({'id': m.reply_to_message.from_user.id}, {'$set': {'pokemons.' + x: createpoke(x, 0)}})
+        bot.send_message(m.chat.id, 'Готово, скотина.', parse_mode='markdown')
+
 
 @bot.message_handler(commands=['burnpokemon'])
 def burnpok(m):
@@ -82,32 +89,26 @@ def burnpok(m):
     commit = burnpoke(name, cool)
     db.pokemons.insert_one(commit)
     bot.send_message(m.chat.id, 'Покемон создан!')
-    
+
+
 @bot.message_handler(commands=['ggiveall'])
 def ggiveall(m):
-  if m.from_user.id in vip:
-      for x in pokemonlist:
-        users.update_one({'id':m.reply_to_message.from_user.id}, {'$set':{'pokemons.'+x:createpoke(x, 1)}})
-      bot.send_message(m.chat.id, 'Готово, золотая скотина.', parse_mode='markdown')        
+    if m.from_user.id in vip:
+        for x in pokemonlist:
+            users.update_one({'id': m.reply_to_message.from_user.id}, {'$set': {'pokemons.' + x: createpoke(x, 1)}})
+        bot.send_message(m.chat.id, 'Готово, золотая скотина.', parse_mode='markdown')
+
+
 @bot.message_handler(commands=['allpokes'])
 def allpokes(m):
-  tts=''
-  for pokek in pokemons.keys():
-    tts+='Имя: ' + pokemons[pokek]['name'] + '\nКод: ' + pokek + '\nКрутость: ' + str(pokemons[pokek]['cool']) + '\n\n'
-  bot.send_message(m.from_user.id, tts)
-  bot.send_message(m.chat.id, 'Отправил в лс!')          
-@bot.message_handler(commands=['update'])
-def spammm(m):
-    if m.from_user.id == brit_id:
-        users = users.find({})
-        for user in users:
-            for pokemon in user['pokemons']:
-                try:
-                    pokemon_golden = ids['pokemons'][pokemon]['golden']
-                except:
-                    users.update_one({'id': user['id']}, {'$unset': {'pokemons.' + pokemon: 1}})
-        bot.reply_to(m, 'Насколько я понял, все незолотые покемоны удалены у всех.')
- 
+    tts = ''
+    del pokemons['_id']
+    for pokek in pokemons.keys():
+        tts += 'Имя: ' + pokemons[pokek]['name'] + '\nКод: ' + pokek + '\nКрутость: ' + str(
+            pokemons[pokek]['cool']) + '\n\n'
+    bot.send_message(m.from_user.id, tts)
+    bot.send_message(m.chat.id, 'Отправил в лс!')
+
 
 @bot.message_handler(commands=['stats'])
 def statssss(m):
@@ -121,16 +122,20 @@ def statssss(m):
                          reply_markup=kb)
     else:
         bot.send_message(m.chat.id, 'Вы еще не зарегистрированы в боте. Пожалуйста, отправте сообщение, НЕ КОМАНДУ.')
+
+
 @bot.message_handler(commands=['mongols'])
 def mongols(m):
     bot.reply_to(m, '/mongol - вызвать монголов на бой.')
+
+
 @bot.message_handler(commands=['mongol'])
 def tatar(m):
-    chat = chats.find_one({'id':m.chat.id})
+    chat = chats.find_one({'id': m.chat.id})
     if m.from_user.id not in vip or chat['mongol']:
         bot.reply_to(m, 'Вы уже сегодня бросали вызов монголам..')
         return
-    chats.update_one({'id':m.chat.id}, {'$set':{'mongol':1}})
+    chats.update_one({'id': m.chat.id}, {'$set': {'mongol': 1}})
 
     bot.reply_to(m, 'МОНГОЛЫ ПРИНИМАЮТ ВАШ ВЫЗОВ.')
 
@@ -139,22 +144,22 @@ def tatar(m):
         if random.choice([True, False]) or not len(fighters):
             fighters.append(user)
 
-    army = random.randint(50, 100)        
+    army = random.randint(50, 100)
     bot.send_message(m.chat.id, 'Итак. Армия состоит из ' + str(army) + ' монгольских воинов.')
     tts = 'В набеге учавствуют все покемоны таких хозяев:'
-    
+
     names = fighters
     for user in names:
         ahref = '\n<a href="tg://user?id={}">{}</a>'.format(user['id'], user['name'])
-        tts += ahref 
+        tts += ahref
     bot.send_message(m.chat.id, tts, parse_mode='HTML')
-    
+
     pokes_fight = []
     pokes_handlers = fighters
     for user in pokes_handlers:
         for pokemon in user['pokemons']:
             pokes_fight.append(pokemon)
-            
+
     while army != 0:
         if pokes_fight:
             for user in fighters:
@@ -162,23 +167,28 @@ def tatar(m):
                     if fpokemon not in pokes_fight:
                         continue
                     if random.choice([True, False]):
-                        tts = '⚔️ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\n' + user['pokemons'][fpokemon]['name'] +  ' защитил честь своего хозяина '   + user['name'] + '! Он сразил татарского воина!\nВоинов осталось: {}\nПокемонов осталось: {}'
+                        tts = '⚔️ӨӨРИЙГӨӨ ЭРҮҮЛ МЭНД ХҮРГЭЕ!\nЭНЭ БҮХ КЕСТОГИЙН АВТОМАШИН!\n\n' + \
+                              user['pokemons'][fpokemon]['name'] + ' защитил честь своего хозяина ' + user[
+                                  'name'] + '! Он сразил татарского воина!\nВоинов осталось: {}\nПокемонов осталось: {}'
                         army -= 1
                         tts = tts.format(str(army), str(len(pokes_fight)))
                         bot.send_message(m.chat.id, tts)
                     else:
-                        tts = '🔴Хахаха! ТИЙМЭЭ та ПИТИЧИЙН УРГАНЫ БОЛОМЖТОЙ!\n\n' + user['pokemons'][fpokemon]['name'] + ' огорчил своего своего хозяина ' + user['name'] + '! Он ранен и выходит из боя.\nВоинов осталось: {}\nПокемонов осталось: {}'
+                        tts = '🔴Хахаха! ТИЙМЭЭ та ПИТИЧИЙН УРГАНЫ БОЛОМЖТОЙ!\n\n' + user['pokemons'][fpokemon][
+                            'name'] + ' огорчил своего своего хозяина ' + user[
+                                  'name'] + '! Он ранен и выходит из боя.\nВоинов осталось: {}\nПокемонов осталось: {}'
                         pokes_fight.remove(fpokemon)
                         tts = tts.format(str(army), str(len(pokes_fight)))
                         bot.send_message(m.chat.id, tts)
         else:
             bot.send_message(m.chat.id, 'Вы проиграли. Ни один покемон не может продолжать битву.')
             return
-    users_to_gold = fighters    
+    users_to_gold = fighters
     for user in users_to_gold:
-        users.update_one({'id', user['id']}, {'$inc':{'gold':50000}})
-    bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')   
-    
+        users.update_one({'id', user['id']}, {'$inc': {'gold': 50000}})
+    bot.send_message(m.chatid, 'ВЫ ПОВЕРГЛИ МОНГОЛОВ! УРА УРА УРА! Получено 50000 голды на каждого хозяина.')
+
+
 def huntt(id, hunters):
     user = users.find_one({'id': id})
     if user:
@@ -221,7 +231,7 @@ def huntt(id, hunters):
             bot.send_message(id, tts)
             users.update_one({'id': id}, {'$inc': {'money': earned}})
 
-            
+
 @bot.message_handler(commands=['huntall'])
 def chuntall(m):
     if m.from_user.id not in ban:
@@ -236,25 +246,27 @@ def chuntall(m):
                         hunters.append(pokemon)
                 if hunters:
                     threading.Timer(1800, huntt, args=[m.from_user.id, hunters]).start()
-                    bot.send_message(m.chat.id, 'Вы отправили всех готовых покемонов на охоту. Вернутся через 30 минут.')
+                    bot.send_message(m.chat.id,
+                                     'Вы отправили всех готовых покемонов на охоту. Вернутся через 30 минут.')
                 else:
                     bot.send_message(m.chat.id, 'Все покемоны уже на охоте!')
+
 
 @bot.message_handler(commands=['testhuntall'])
 def huntallll(m):
     if m.from_user.id == brit_id:
         user = users.find_one({'id': m.from_user.id})
         if user:
-                hunters = []
-                for pokemon in user['pokemons']:
-                    if not user['pokemons'][pokemon]['hunting']:
-                        users.update_one({'id': m.from_user.id}, {'$set': {'pokemons.' + pokemon + '.hunting': 1}})
-                        hunters.append(pokemon)
-                if hunters:
-                    threading.Timer(10, huntt, args=[m.from_user.id, hunters]).start()
-                    bot.send_message(m.chat.id, 'Вы отправили всех готовых покемонов на охоту. Вернутся через 10 секунд.')
-                else:
-                    bot.send_message(m.chat.id, 'Все покемоны уже на охоте!')
+            hunters = []
+            for pokemon in user['pokemons']:
+                if not user['pokemons'][pokemon]['hunting']:
+                    users.update_one({'id': m.from_user.id}, {'$set': {'pokemons.' + pokemon + '.hunting': 1}})
+                    hunters.append(pokemon)
+            if hunters:
+                threading.Timer(10, huntt, args=[m.from_user.id, hunters]).start()
+                bot.send_message(m.chat.id, 'Вы отправили всех готовых покемонов на охоту. Вернутся через 10 секунд.')
+            else:
+                bot.send_message(m.chat.id, 'Все покемоны уже на охоте!')
 
 
 @bot.message_handler(commands=['gold'])
@@ -289,10 +301,12 @@ def gextra(m):
         kb = types.InlineKeyboardMarkup()
         kb.add(types.InlineKeyboardButton(text='Поймать', callback_data=pokemon + poke))
         me = bot.send_message(m.chat.id,
-                             'Обнаружен *' + gold + '*покемон ' + pokemons[poke]['name'] + '! Его крутость: ' + str(
-                                 pokemons[poke]['cool']) + '. Жмите кнопку ниже, чтобы попытаться поймать.',
-                             reply_markup=kb, parse_mode='markdown')
+                              'Обнаружен *' + gold + '*покемон ' + pokemons[poke]['name'] + '! Его крутость: ' + str(
+                                  pokemons[poke]['cool']) + '. Жмите кнопку ниже, чтобы попытаться поймать.',
+                              reply_markup=kb, parse_mode='markdown')
         bot.pin_chat_message(me.chat.id, me.message_id, disable_notification=True)
+
+
 @bot.message_handler(commands=['extra'])
 def extra(m):
     if m.from_user.id == brit_id:
@@ -317,10 +331,12 @@ def extra(m):
         kb = types.InlineKeyboardMarkup()
         kb.add(types.InlineKeyboardButton(text='Поймать', callback_data=pokemon + poke))
         me = bot.send_message(m.chat.id,
-                             'Обнаружен *' + gold + '*покемон ' + pokemons[poke]['name'] + '! Его крутость: ' + str(
-                                 pokemons[poke]['cool']) + '. Жмите кнопку ниже, чтобы попытаться поймать.',
-                             reply_markup=kb, parse_mode='markdown')
+                              'Обнаружен *' + gold + '*покемон ' + pokemons[poke]['name'] + '! Его крутость: ' + str(
+                                  pokemons[poke]['cool']) + '. Жмите кнопку ниже, чтобы попытаться поймать.',
+                              reply_markup=kb, parse_mode='markdown')
         bot.pin_chat_message(me.chat.id, me.message_id, disable_notification=True)
+
+
 @bot.message_handler(commands=['hunt'])
 def hunt(m):
     if m.from_user.id not in ban:
@@ -398,10 +414,6 @@ def unbannn(id):
         print('UNBAN!')
     except:
         pass
-
-
-
-
 
 
 @bot.message_handler(commands=['upgrade'])
@@ -562,6 +574,7 @@ def givegoldd(m):
     except:
         pass
 
+
 @bot.message_handler(commands=['ggold'])
 def givegolddd(m):
     if m.from_user.id == brit_id:
@@ -578,16 +591,13 @@ def givegolddd(m):
                 y = users.find_one({'id': m.from_user.id})
                 if y != None:
                     users.update_one({'id': m.reply_to_message.from_user.id}, {'$inc': {'money': gold}})
-                    bot.send_message(m.chat.id, 'Выдано ' + str(gold) + ' золота игроку ' + m.reply_to_message.from_user.first_name + '!',
-                                         parse_mode='markdown')
+                    bot.send_message(m.chat.id, 'Выдано ' + str(
+                        gold) + ' золота игроку ' + m.reply_to_message.from_user.first_name + '!',
+                                     parse_mode='markdown')
                 else:
                     bot.send_message(m.chat.id, 'Ошибка!')
     except:
         pass
-
-
-
-
 
 
 @bot.message_handler(commands=['top'])
@@ -641,9 +651,6 @@ def upchance(m):
             bot.send_message(m.chat.id, 'Вы потратили ' + str(z) + ' золота. Шанс поймать покемона увеличен на 10%.')
         else:
             bot.send_message(m.chat.id, 'Не хватает золота (нужно ' + str(z) + ').')
-
-
-
 
 
 @bot.message_handler(commands=['summon'])
@@ -711,7 +718,7 @@ def dailypoke(id):
     i = 0
     for ids in pokemons:
         i += 1
-    pokechance = 95 / (i+1 * 0.06)
+    pokechance = 95 / (i + 1 * 0.06)
     come = []
     for ids in pokemonlist:
         chance = pokechance / (pokemons[ids]['cool'] * 0.01)
@@ -741,32 +748,32 @@ def runpoke(mid, cid):
 def mypokes(m):
     if m.reply_to_message == None:
         if m.from_user.id not in ban:
-            x=banns(m.from_user.id, m.chat.id, m.from_user.first_name)
-        if x==0:
-            x=users.find_one({'id':m.from_user.id})
+            x = banns(m.from_user.id, m.chat.id, m.from_user.first_name)
+        if x == 0:
+            x = users.find_one({'id': m.from_user.id})
             if x:
-                text=''
+                text = ''
             for ids in x['pokemons']:
-                if x['pokemons'][ids]['golden']==1:
-                    text+='*Золотой* '
-                text+=x['pokemons'][ids]['name']+' - крутость: '+str(x['pokemons'][ids]['cool'])+'\n'
-            bot.send_message(m.chat.id, 'Ваши покемоны:\n\n'+text,parse_mode='markdown')
+                if x['pokemons'][ids]['golden'] == 1:
+                    text += '*Золотой* '
+                text += x['pokemons'][ids]['name'] + ' - крутость: ' + str(x['pokemons'][ids]['cool']) + '\n'
+            bot.send_message(m.chat.id, 'Ваши покемоны:\n\n' + text, parse_mode='markdown')
         else:
-                bot.send_message(m.chat.id, 'Сначала напишите в чат что-нибудь (не команду!).')
+            bot.send_message(m.chat.id, 'Сначала напишите в чат что-нибудь (не команду!).')
     elif m.reply_to_message.from_user.id not in vip:
         if m.reply_to_message.from_user.id not in ban:
-            x=banns(m.reply_to_message.from_user.id, m.chat.id, m.reply_to_message.from_user.first_name)
-        if x==0:
-            x=users.find_one({'id':m.reply_to_message.from_user.id})
+            x = banns(m.reply_to_message.from_user.id, m.chat.id, m.reply_to_message.from_user.first_name)
+        if x == 0:
+            x = users.find_one({'id': m.reply_to_message.from_user.id})
             if x:
-                text=''
+                text = ''
             for ids in x['pokemons']:
-                if x['pokemons'][ids]['golden']==1:
-                    text+='*Золотой* '
-                text+=x['pokemons'][ids]['name']+' - крутость: '+str(x['pokemons'][ids]['cool'])+'\n'
-            bot.send_message(m.chat.id, 'Его покемоны:\n\n'+text,parse_mode='markdown')
+                if x['pokemons'][ids]['golden'] == 1:
+                    text += '*Золотой* '
+                text += x['pokemons'][ids]['name'] + ' - крутость: ' + str(x['pokemons'][ids]['cool']) + '\n'
+            bot.send_message(m.chat.id, 'Его покемоны:\n\n' + text, parse_mode='markdown')
         else:
-                bot.send_message(m.chat.id, 'Пусть сначала напишет в чат что-нибудь (не команду!).')   
+            bot.send_message(m.chat.id, 'Пусть сначала напишет в чат что-нибудь (не команду!).')
     else:
         bot.send_message(m.chat.id, 'Нельзя смотреть админских покесов!!!')
 
@@ -879,7 +886,7 @@ def inline(call):
             else:
                 bot.answer_callback_query(call.id, 'Это не ваше меню!')
 
-        
+
         elif 'upgrade' in call.data:
             text = call.data.split(' ')
             if int(text[0]) == call.from_user.id:
@@ -922,7 +929,6 @@ def inline(call):
                     else:
                         medit('Недостаточно золота (нужно ' + str(cost) + ').', call.message.chat.id,
                               call.message.message_id)
-                
 
 
 def unban(id):
@@ -971,6 +977,7 @@ def createpoke(pokemon, gold):
             'hunting': 0
             }
 
+
 def burnpoke(name, cool):
     return {'name': name.capitalize(),
             'code': transliterate(name),
@@ -1007,23 +1014,25 @@ def transliterate(text):
                 ruposition = i
                 break
         tts += eng[ruposition]
-    return tts 
-                
-          
-   
+    return tts
+
+
 def reboot():
     for user in users.find({}):
         for pokemon in user['pokemons']:
             if user['pokemons'][pokemon]['hunting']:
                 huntt(user['id'], [pokemon])
     for chat in chats.find({}):
-        chats.update_one({'id': chat['id']}, {'$set': {'mongol': 0}})       
+        chats.update_one({'id': chat['id']}, {'$set': {'mongol': 0}})
     threading.Timer(1, dailypoke, args=[-1001406099393]).start()
     global pokemons
     global pokemonlist
     pokemons = {}
     for pokemon in db.pokemons.find({}):
         pokemons.update(pokemon)
-    pokemonlist = list(pokemons.keys())  
-    bot.send_message(-1001406099393, 'Бот был перезагружен! Все покемоны вернулись с охоты (с голдой кста), и можно снова вызвать монголов.')    
+    pokemonlist = list(pokemons.keys())
+    bot.send_message(-1001406099393,
+                     'Бот был перезагружен! Все покемоны вернулись с охоты (с голдой кста), и можно снова вызвать монголов.')
+
+
 reboot()
