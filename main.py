@@ -81,7 +81,6 @@ def deploy_on_heroku(m):
         bot.reply_to(m, out)
     if err:
         bot.reply_to(m, err)
-        return
     cmd = ['git', 'push']
     p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=False)
     out, err = p.communicate()
