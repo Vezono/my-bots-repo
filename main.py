@@ -6,7 +6,7 @@ from modules.funcs import BotUtil
 
 bot = BotUtil(config.environ['mainbot'], config.creator)
 heroku = False
-if 'DYNO' in str(config.environ):
+if 'DYNO' in config.environ:
     heroku = True
     bot.report('Heroku initialization...')
 else:
