@@ -1,12 +1,13 @@
-import sys
-
-from telebot import types
+from subprocess import Popen, PIPE
 
 import config
 from modules.funcs import BotUtil
 
 bot = BotUtil(config.environ['mainbot'], config.creator)
-bot.report('Инициализация...')
+if 'dyno' in config.environ:
+    bot.report('Heroku initialization...')
+else:
+    bot.report('Local initialization...')
 
 from timeit import default_timer as timer
 start_time = timer()
@@ -47,6 +48,31 @@ def get_os(m):
         bot.report(str(app.config()).replace(', ', ',\n\n'))
 
 
+@bot.message_handler(commands=['dynos'])
+def get_dynos(m):
+    if m.from_user.id == config.creator:
+        bot.report(str(app.dynos()).replace(', ', ',\n\n'))
+
+
+@bot.message_handler(commands=['deploy'])
+def deploy_on_heroku(m):
+    if 'dyno' in config.environ:
+        bot.reply_to(m, 'Why are you trying to deploy from heroku on heroku?')
+        return
+    if not m.text.count(' '):
+        bot.reply_to(m, 'Write the commit message!')
+    commit_message = m.text.split(' ', 1)[1]
+    cmd = ['git', 'commit', '-m', f'"{commit_message}"']
+    p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=False)
+    out, err = p.communicate()
+    out = out.decode()
+    err = err.decode()
+    if err:
+        bot.reply_to(m, err)
+    if out:
+        bot.reply_to(m, out)
+
+
 @bot.message_handler(commands=['deploy_keys'])
 def deploy_keys(m):
     if m.from_user.id != config.creator:
@@ -67,35 +93,12 @@ def setup_bots(m):
     bot.send_message(m.chat.id, 'Ваши боты:')
 
 
-@bot.callback_query_handler(func=lambda call: True)
-def inline(c):
-    botname = c.data.split(' ')[0]
-    if not c.data.count(' '):
-        tts = 'Настройка бота {}.'.format(botname)
-        kb = types.InlineKeyboardMarkup()
-        for func in ['status']:
-            kb.add(types.InlineKeyboardButton(text=func, callback_data=botname+' '+func))
-        bot.edit_message(chat_id=c.from_user.id, message_id=c.message.message_id, message_text=tts, reply_markup=kb)
-        return
-    task = c.data.split(' ')[1]
-    if task == 'status':
-        bot.report(runner.get_status()[botname])
-
-
 @bot.message_handler(commands=['reboot'])
 def reboot(m):
     if not m.from_user.id == config.creator:
         return
     bot.report('Перезагрузка...')
     app.restart()
-
-
-@bot.message_handler(commands=['off'])
-def reboot(m):
-    if not m.from_user.id == config.creator:
-        return
-    bot.report('Выключение...')
-    sys.exit()
 
 
 @bot.message_handler(commands=['logs'])
