@@ -1,20 +1,25 @@
+import sys
 from subprocess import Popen, PIPE
 
 import config
 from modules.funcs import BotUtil
 
 bot = BotUtil(config.environ['mainbot'], config.creator)
-if 'dyno' in config.environ:
+heroku = False
+if 'DYNO' in str(config.environ):
+    heroku = True
     bot.report('Heroku initialization...')
 else:
-    bot.report('Local initialization...')
+    bot.report('Local initialization, offing heroku dyno...')
 
 from timeit import default_timer as timer
 start_time = timer()
 
 from modules.heroku import Heroku
 app = Heroku().app
-
+if not heroku:
+    for dyno in app.dynos():
+        dyno.kill()
 from modules.manybotslib import BotsRunner
 if True:
     from bots import chatbot
@@ -62,7 +67,7 @@ def get_dynos(m):
 
 @bot.message_handler(commands=['deploy'])
 def deploy_on_heroku(m):
-    if 'dyno' in config.environ:
+    if heroku:
         bot.reply_to(m, 'Why are you trying to deploy from heroku on heroku?')
         return
     if not m.text.count(' '):
@@ -73,10 +78,22 @@ def deploy_on_heroku(m):
     out, err = p.communicate()
     out = out.decode()
     err = err.decode()
-    if err:
-        bot.reply_to(m, err)
     if out:
         bot.reply_to(m, out)
+    if err:
+        bot.reply_to(m, err)
+        return
+    cmd = ['git', 'push']
+    p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=False)
+    out, err = p.communicate()
+    out = out.decode()
+    err = err.decode()
+    if out:
+        bot.reply_to(m, out)
+    if err:
+        bot.reply_to(m, err)
+    app.restart()
+    sys.exit()
 
 
 @bot.message_handler(commands=['deploy_keys'])
@@ -87,16 +104,6 @@ def deploy_keys(m):
     for key in config.environ:
         keys[key] = config.environ[key]
     bot.report('Конфиги синхронизированы.')
-
-
-@bot.message_handler(commands=['bots'])
-def setup_bots(m):
-    if not m.from_user.id == config.creator:
-        return
-    tts = 'Ваши боты:'
-    for botrun in list(bots.keys()):
-        tts += '\n' + botrun
-    bot.send_message(m.chat.id, 'Ваши боты:')
 
 
 @bot.message_handler(commands=['reboot'])
