@@ -45,7 +45,13 @@ bots = {
 @bot.message_handler(commands=['os'])
 def get_os(m):
     if m.from_user.id == config.creator:
-        bot.report(str(app.config()).replace(', ', ',\n\n'))
+        bot.report(str(app.config()).replace(', ', ',\n\n'), True)
+
+
+@bot.message_handler(commands=['keys'])
+def get_keys(m):
+    if m.from_user.id == config.creator:
+        bot.report(str(config.environ).replace(', ', ',\n\n'), True)
 
 
 @bot.message_handler(commands=['dynos'])
