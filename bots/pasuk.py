@@ -28,16 +28,11 @@ client = MongoClient(os.environ['database'])
 db = client.loshadkin
 phrases = db.phrases
 converted = db.converted
-lophrase = [phrases.find_one({})[ids] for ids in phrases.find_one({}) if phrases.find_one({})[ids]]
-lophrase.remove(lophrase[0])
+# lophrase = [phrases.find_one({})[ids] for ids in phrases.find_one({}) if phrases.find_one({})[ids]]
+# lophrase.remove(lophrase[0])
+lophrase = ['Тест']
 bot = pasuk
 alpha = False
-raw = ''
-word_tokens = []
-for sent in lophrase:
-    for word in sent:
-        word_tokens.append(word)
-raw = raw.lower()
 
 
 def LemTokens(tokens):
@@ -70,8 +65,8 @@ def getresponse():
 @pasuk.message_handler(commands=['count_of_phrases'])
 def count_of_phrases(m):
     global lophrase
-    lophrase = [phrases.find_one({})[phrase] for phrase in phrases.find_one({})]
-    lophrase.remove(lophrase[0])
+    # lophrase = [phrases.find_one({})[phrase] for phrase in phrases.find_one({})]
+    # lophrase.remove(lophrase[0])
     pasuk.reply_to(m, str(len(lophrase)))
 
 
@@ -79,16 +74,30 @@ def count_of_phrases(m):
 def count_of_phrases(m):
     if m.from_user.id != os.creator:
         return
-    all_phrases = [index for index in phrases.find_one({}) if index.isdigit()]
-    normal_phrases = [index for index in phrases.find_one({}) if index not in all_phrases]
-    phrases_to_convert = [phrases.find_one({})[index] for index in all_phrases + normal_phrases
-                          if phrases.find_one({})[index]]
+    bot.reply_to(m, 'Процесс начат...')
+    dict_phrases = phrases.find_one({})
+    bot.reply_to(m, f'Количество срок для иницализации: {len(dict_phrases)}')
+    all_phrases = [index for index in dict_phrases if index.isdigit()]
+    normal_phrases = [index for index in dict_phrases if index not in all_phrases]
+    phrases_to_convert = list()
+    for index in all_phrases + normal_phrases:
+        if index == '_id':
+            continue
+        phrase = dict_phrases[index]
+        if phrase:
+            phrases_to_convert.append(phrase)
+    bot.reply_to(m, 'Списки иницализированы...')
     bot.reply_to(m, f'Фраз для конвертации: {len(phrases_to_convert)}. Начинаю конвертацию...')
+    commit = {'$set': {}}
     for phrase in phrases_to_convert:
-        converted.update_one({}, {phrase.replace('.', ''): phrase})
+        if not phrase or not phrase.replace('.', ''):
+            continue
+        commit['$set'].update({phrase.replace('.', ''): phrase})
+    converted.update_one({}, commit)
     bot.reply_to(m, 'Конвертировано! Проверяю результат...')
-    converted_phrases = [converted.find_one({})[phrase] for phrase in converted.find_one({})]
-    bot.reply_to(m, f'Результат: {len(converted_phrases)}')
+    converted_dict = converted.find_one({})
+    converted_phrases = [converted[phrase] for phrase in converted_dict]
+    bot.reply_to(m, f'Результат: {len(converted_phrases)} нормальных фраз в бд!')
 
 
 @pasuk.message_handler(commands=['getm'])
@@ -126,18 +135,18 @@ def texthandler(m):
         return
     sended = False
     random.shuffle(lophrase)
-    if not alpha:
-        for phrase in lophrase:
-            if phrase:
-                for word in phrase.split(' '):
-                    text = m.text.lower()
-                    text = text.replace('я', 'ты').replace('ты', 'я')
-                    if word.lower() in text.split(' ') and not sended:
-                        bot.reply_to(m, phrase)
-                        sended = True
-    else:
-        tts = getresponse().capitalize()
-        bot.reply_to(m, tts)
+    for phrase in lophrase:
+        if sended:
+            break
+        if not phrase:
+            break
+        for word in phrase.split(' '):
+            text = m.text.lower()
+            text = text.replace('я', 'ты').replace('ты', 'я')
+            if word.lower() in text.split(' '):
+                bot.reply_to(m, phrase)
+                sended = True
+                break
 
 
 def medit(message_text, chat_id, message_id, reply_markup=None, parse_mode='Markdown'):
@@ -153,5 +162,4 @@ def pinloshadkin(m):
     for i in ['пасюк', 'loshadkin', 'лошадкин']:
         if i in m.text.lower():
             return True
-        else:
-            return False
+    return False

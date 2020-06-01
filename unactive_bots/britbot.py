@@ -3,8 +3,6 @@ from timeit import default_timer as timer
 
 from pymongo import MongoClient
 
-import traceback
-
 from config import *
 from modules.eatable import Cooker
 from modules.funcs import BotUtil
