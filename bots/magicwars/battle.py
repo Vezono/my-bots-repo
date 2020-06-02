@@ -67,11 +67,11 @@ class Dungeon(Game):
         super().__init__(chat_id)
         self.type = 'dungeon'
         self.level = 0
-        self.max_level = 1
+        self.max_level = 2
         self.mobs = []
 
     def init_mobs(self):
-        self.mobs = [random.choice(constants.mobs[self.level])(mob_id=len(self.mobs))
+        self.mobs = [random.choice(constants.mobs[self.level])(mob_id=i)
                      for i in range(random.randint(len(self.magicians), len(self.magicians) + 2))]
         if self.level == self.max_level:
             survived = [magician.name for magician in self.magicians]
@@ -92,11 +92,13 @@ class Dungeon(Game):
             return
 
         if not self.mobs:
+            if self.max_level == self.level:
+                bot.send_message(self.chat_id, f'Вы очистили все подземелье и дошли до последнего уровня! Выжившие:'
+                                               f' {", ".join([magician.name for magician in self.magicians])}')
+                return
             self.turn = 0
             self.init_mobs()
             self.level += 1
-            if not self.exists:
-                return
             bot.send_message(self.chat_id, f'Вы убили всех мобов на этом уровне и перешли на следующий,'
                                            f' {self.level} уровень!\nНовые мобы: '
                                            f' {", ".join([mob.name for mob in self.mobs])}')
@@ -115,6 +117,17 @@ class Dungeon(Game):
                         mob.states['defence'][element]]
             if defences:
                 tts += '\nЗащита от элементов: ' + ", ".join(defences)
+        if not self.mobs:
+            if self.max_level == self.level:
+                bot.send_message(self.chat_id, f'Вы очистили все подземелье и дошли до последнего уровня! Выжившие:'
+                                               f' {", ".join([magician.name for magician in self.magicians])}')
+                return
+            self.turn = 0
+            self.init_mobs()
+            self.level += 1
+            bot.send_message(self.chat_id, f'Вы убили всех мобов на этом уровне и перешли на следующий,'
+                                           f' {self.level} уровень!\nНовые мобы: '
+                                           f' {", ".join([mob.name for mob in self.mobs])}')
         for magician in self.magicians:
             if magician.xp <= 0:
                 self.magicians.remove(magician)
@@ -198,9 +211,10 @@ class Magician:
                 continue
             cast.append(element)
 
-        if len(cast) > 4:
-            random.shuffle(cast)
-            cast = [cast[i] for i in range(random.choice(1, 4))]
+        if not cast:
+            return
+        random.shuffle(cast)
+        cast = [cast[0]]
 
         target.clean_states()
 

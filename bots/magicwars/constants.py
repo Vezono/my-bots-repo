@@ -41,7 +41,8 @@ rus_localisation = {
 }
 
 mobs = {
-    0: [Rat, Spider]
+    0: [Rat, Spider],
+    1: [Goblin, Insane]
 }
 
 

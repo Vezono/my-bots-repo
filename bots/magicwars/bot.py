@@ -25,9 +25,8 @@ def elements_handler(m):
 
 @bot.message_handler(commands=['dungeon'])
 def dungeon_handler(m):
-    # games.update({m.chat.id: game.Dungeon(m.chat.id)})
-    # bot.send_message(m.chat.id, 'Подземелье открыто!\n/join для присоединения.')
-    bot.reply_to(m, 'Подземелье в стадии разработки.')
+    games.update({m.chat.id: game.Dungeon(m.chat.id)})
+    bot.send_message(m.chat.id, 'Подземелье открыто!\n/join для присоединения.')
 
 
 @bot.message_handler(commands=['battle'])

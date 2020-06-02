@@ -43,3 +43,21 @@ class Spider(Mob):
         self.damage = 40
         self.wobble = 15
         self.attack_descs = ['укусил', 'отравил']
+
+
+class Goblin(Mob):
+    def __init__(self, mob_id):
+        super().__init__(mob_id)
+        self.name = 'Гоблин'
+        self.xp = 100
+        self.damage = 30
+        self.wobble = 30
+
+
+class Insane(Mob):
+    def __init__(self, mob_id):
+        super().__init__(mob_id)
+        self.name = 'Сумасшедший'
+        self.xp = 50
+        self.damage = 0
+        self.wobble = 50
