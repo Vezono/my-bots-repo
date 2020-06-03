@@ -4,8 +4,4 @@ __pycache__
 bots/__*
 modules/__*
 tokens.py
-c
-logging
-nohup.out
-settings
-simple_commands
+
