@@ -61,3 +61,41 @@ class Insane(Mob):
         self.xp = 50
         self.damage = 0
         self.wobble = 50
+
+
+class Sceleton(Mob):
+    def __init__(self, mob_id):
+        super().__init__(mob_id)
+        self.name = 'Скелет'
+        self.xp = 110
+        self.damage = 30
+        self.wobble = 40
+
+
+class Gnome(Mob):
+    def __init__(self, mob_id):
+        super().__init__(mob_id)
+        self.name = 'Гном'
+        self.xp = 90
+        self.damage = 60
+        self.wobble = 40
+
+
+class Troll(Mob):
+    def __init__(self, mob_id):
+        super().__init__(mob_id)
+        self.name = 'Тролль'
+        self.xp = 150
+        self.damage = 70
+        self.wobble = 10
+        self.attack_descs = ['ударил дубинкой']
+
+
+class SpiderQueen(Mob):
+    def __init__(self, mob_id):
+        super().__init__(mob_id)
+        self.name = 'Королева пауков'
+        self.xp = 300
+        self.damage = 70
+        self.wobble = 10
+        self.attack_descs = ['отравила', 'укусила', 'ударила']

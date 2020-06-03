@@ -67,7 +67,7 @@ class Dungeon(Game):
         super().__init__(chat_id)
         self.type = 'dungeon'
         self.level = 0
-        self.max_level = 2
+        self.max_level = 5
         self.mobs = []
 
     def init_mobs(self):

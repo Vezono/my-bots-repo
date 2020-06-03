@@ -42,7 +42,10 @@ rus_localisation = {
 
 mobs = {
     0: [Rat, Spider],
-    1: [Goblin, Insane]
+    1: [Goblin, Insane],
+    2: [Sceleton, Gnome],
+    3: [Troll],
+    4: [SpiderQueen],
 }
 
 
