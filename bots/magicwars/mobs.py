@@ -17,7 +17,8 @@ class Mob:
             }
         }
 
-    def attack(self, target):
+    def attack(self, magicians):
+        target = random.choice(magicians)
         desc = random.choice(self.attack_descs)
         damage = random.randint(self.damage - self.wobble, self.damage + self.wobble)
         target.xp -= damage

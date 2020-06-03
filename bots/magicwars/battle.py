@@ -15,7 +15,7 @@ class Game:
         self.type = 'battle'
         self.turn = 0
         self.timer = None
-        self.speed = 30
+        self.speed = 60
         self.exists = True
         self.pause = False
 
@@ -72,7 +72,9 @@ class Dungeon(Game):
 
     def init_mobs(self):
         self.mobs = [random.choice(constants.mobs[self.level])(mob_id=i)
-                     for i in range(random.randint(len(self.magicians), len(self.magicians) + 2))]
+                     # for i in range(random.randint(len(self.magicians), len(self.magicians) + 2))
+                     for i in range(3)
+                     ]
         if self.level == self.max_level:
             survived = [magician.name for magician in self.magicians]
             bot.send_message(self.chat_id,
@@ -105,12 +107,13 @@ class Dungeon(Game):
 
         self.turn += 1
         tts = f'Уровень {self.level}, ход {self.turn}!'
-        for mob in self.mobs:
+        for mob_id in range(len(self.mobs)):
+            mob = self.mobs[mob_id]
             if mob.xp <= 0:
                 self.mobs.remove(mob)
                 bot.send_message(self.chat_id, f'{mob.name} убит!')
                 continue
-            bot.send_message(self.chat_id, mob.attack(random.choice(self.magicians)))
+            bot.send_message(self.chat_id, mob.attack(self.magicians))
             tts += f'\n\n{mob.name}:\n'
             tts += f'🖤️ХП: {mob.xp}'
             defences = [constants.rus(element) for element in mob.states['defence'] if
