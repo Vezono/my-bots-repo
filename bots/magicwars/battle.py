@@ -72,8 +72,7 @@ class Dungeon(Game):
 
     def init_mobs(self):
         self.mobs = [random.choice(constants.mobs[self.level])(mob_id=i)
-                     # for i in range(random.randint(len(self.magicians), len(self.magicians) + 2))
-                     for i in range(3)
+                     for i in range(random.randint(len(self.magicians), len(self.magicians) + 2))
                      ]
         if self.level == self.max_level:
             survived = [magician.name for magician in self.magicians]
