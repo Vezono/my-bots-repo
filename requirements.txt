@@ -12,3 +12,5 @@ matplotlib
 heroku3
 yandex-music
 pysed
+python-telegram-bot==8.1.1
+pony
