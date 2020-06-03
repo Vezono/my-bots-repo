@@ -1,1 +1,1 @@
-bot: bash start.sh
+bot: python3 main.py
