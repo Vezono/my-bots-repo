@@ -47,6 +47,10 @@ mobs = {
     3: [Troll],
     4: [SpiderQueen],
 }
+all_mobs = list()
+for level in mobs:
+    for mob in mobs[level]:
+        all_mobs.append(mob)
 
 
 def rus(text):

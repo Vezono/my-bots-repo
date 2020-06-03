@@ -13,7 +13,13 @@ games = {}
 def help_handler(m):
     tts = '/elements - доступные элементы\n' \
           '/battle - начать битву волшебников\n' \
-          '/dungeon - открыть подземелье'
+          '/hell - открыть врата в ад\n' \
+          '/dungeon - открыть подземелье\n\n'
+    tts += """Кастуешь реплаем на бота - кастуешь на мобов
+Кастуешь реплаем на юзера - кастуешь на мага
+В касте юзаешь до четырех элементов (можно больше но будет выбрано рандомно)
+Можно прописать любому мобу или магу защиту от элемента (блокировка жизни, защита от огня)
+Если будет защита от жизни, юзер не сможет хилится"""
     bot.reply_to(m, tts)
 
 
@@ -21,6 +27,12 @@ def help_handler(m):
 def elements_handler(m):
     tts = ", ".join([constants.rus(element) for element in constants.elements])
     bot.reply_to(m, f'Доступные элементы: {tts}')
+
+
+@bot.message_handler(commands=['hell'])
+def hell_handler(m):
+    games.update({m.chat.id: game.Hell(m.chat.id)})
+    bot.send_message(m.chat.id, 'Вы открыли врата в ад!\n/join для присоединения.')
 
 
 @bot.message_handler(commands=['dungeon'])
@@ -43,7 +55,7 @@ def join_handler(m):
         return
     if battle.turn:
         return
-    magician = game.Magician(m.from_user.id, m.from_user.first_name)
+    magician = game.Magician(battle, m.from_user.id, m.from_user.first_name)
     joined_users = [user.user_id for user in battle.magicians]
     if m.from_user.id in joined_users:
         bot.reply_to(m, 'Вы уже присоединились.')
@@ -92,7 +104,7 @@ def start_game_handler(m):
         bot.reply_to(m, 'Слишком мало игроков.')
         return
     elif len(battle.magicians) < 2 and battle.type == 'battle':
-        battle.magicians.append(game.Magician())
+        battle.magicians.append(game.Magician(game))
     battle.next_turn()
 
 
@@ -100,6 +112,8 @@ def start_game_handler(m):
 def cast_handler(m):
     battle = get_game(m.chat.id)
     if not battle:
+        return
+    if not battle.timer:
         return
     if not m.reply_to_message:
         return
