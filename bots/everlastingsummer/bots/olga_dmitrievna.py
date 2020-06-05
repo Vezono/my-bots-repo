@@ -1,8 +1,8 @@
 import time
 
 from modules.funcs import BotUtil
-from tokens import environ
 from .. import config
+from ..config import environ
 from ..mongohelper import MongoHelper
 
 bot = BotUtil(environ['TELEGRAM_TOKEN'])
