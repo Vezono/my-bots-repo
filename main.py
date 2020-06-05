@@ -30,7 +30,10 @@ if True:
     from bots import georges_db
     from bots import sedbot
     from bots.magicwars import bot as magicwars
-bots = {
+    from bots.everlastingsummer.sovenok import bots, Sovenok
+
+Sovenok()
+bots_to_start = {
     'Повар': cooker.bot,
     'Рандоман': randomer.bot,
     'Чабот': chatbot.bot,
@@ -43,6 +46,7 @@ bots = {
     'MagicWars': magicwars.bot,
     'Bot_Ruler': bot
 }
+bots_to_start.update(bots)
 
 
 @bot.message_handler(commands=['os'])
@@ -126,7 +130,7 @@ def reboot(m):
 
 
 runner = BotsRunner(admins=[config.creator], show_traceback=True)
-runner.add_bots(bots)
+runner.add_bots(bots_to_start)
 runner.set_main_bot(bot, 'status')
 bot.report('Готово! Боты запущены и готовы к работе.\nВремени использовано: {} секунд.'.format(timer() - start_time))
 runner.run()
