@@ -26,7 +26,9 @@ class Sovenok:
         self.chat_id = config.chat_id
 
         self.help_timer = threading.Timer(1, self.help_request)
-        self.help_timer.start()
+        h, m = self.get_time()
+        if 8 < h < 22:
+            self.help_timer.start()
         self.check_time()
 
     def help_request(self):
@@ -34,14 +36,37 @@ class Sovenok:
         self.help_timer.start()
         random.choice([self.alisa, self.lena, self.slavya, self.uliana, self.miku, self.zhenya]).help_request()
 
+    def init_work(self):
+        h, m = self.get_time()
+        if 18 < h < 20:
+            self.olga_dmitrievna.avaliable_works.append(config.works[0])
+        elif 20 < h < 22:
+            self.olga_dmitrievna.avaliable_works.append(config.works[2])
+        else:
+            self.olga_dmitrievna.avaliable_works = config.works
+            self.olga_dmitrievna.avaliable_works.remove(config.works[0])
+            self.olga_dmitrievna.avaliable_works.remove(config.works[2])
+
     def init_pioners(self):
         self.pioners = db.get_pioners()
         threading.Timer(300, self.init_pioners).start()
 
     def check_time(self):
-        t = threading.Timer(59, self.check_time)
+        t = threading.Timer(60, self.check_time)
         t.start()
+        self.init_work()
         hour, minute = self.get_time()
+        if hour == 22 and minute == 00:
+            self.help_timer.cancel()
+        if hour == 8 and minute == 30:
+            self.help_timer = threading.Timer(1800, self.help_request)
+            self.help_timer.start()
+        if hour == 7 and minute == 30:
+            self.linear()
+
+    def linear(self):
+        self.olga_dmitrievna.call_linear()
+        threading.Timer(30, self.olga_dmitrievna.end_linear).start()
 
     @staticmethod
     def get_time():

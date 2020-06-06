@@ -95,3 +95,8 @@ class BotUtil(TeleBot):
             if not quiet:
                 print(text)
             return self.bot.send_message(self.__creator, text)
+
+    def send_message(self, chat_id, text, disable_web_page_preview=None, reply_to_message_id=None, reply_markup=None,
+                     parse_mode="HTML", disable_notification=None, timeout=None):
+        super().send_message(chat_id, text, disable_web_page_preview, reply_to_message_id, reply_markup,
+                             parse_mode, disable_notification, timeout)

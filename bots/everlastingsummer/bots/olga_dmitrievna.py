@@ -1,3 +1,5 @@
+import random
+import threading
 import time
 
 from modules.funcs import BotUtil
@@ -12,12 +14,86 @@ db = MongoHelper()
 class OlgaDmitrievna:
     def __init__(self):
         self.bot = bot
+        self.name = 'OlgaDmitrievna'
         self.prefix = 'olg'
         self.chache = {}
         self.id = self.bot.get_me().id
+        self.hello_texts = [
+            'Ну что, пионер, скучаешь? Ничего, сейчас найду для тебя подходящее занятие! Подожди немного.',
+            'Бездельничаешь? Сейчас я это исправлю! Подожди пару минут, найду тебе занятие.',
+            'Здравствуй, пионер! Сейчас найду, чем тебя занять.']
+        self.avaliable_works = []
+
+    def call_linear(self):
+        self.chache.update({'linear': []})
+        bot.send_message(config.chat_id, 'Доброе утро, пионеры! В 7:30 жду всех на линейке!')
+
+    def end_linear(self):
+        bot.send_message(config.chat_id, f'Здраствуйте, пионеры! Сейчас проведём перекличку... '
+                                         f'{", ".join(olga.chache.get("linear"))}!', parse_mode='HTML')
+        bot.send_message(config.chat_id, 'Вот все, кто сегодня пришёл. Молодцы, пионеры! '
+                                         'Так держать! Сейчас расскажу о планах на день.')
+        self.chache.update({'linear': None})
+
+    def give_work(self, user_id):
+        pioner = db.get_pioner(user_id)
+        link = self.bot.get_link(pioner.name, pioner.id)
+        tts = ''
+        avaliable_works = []
+        if pioner.respects[self.name] < 85:
+            tts += f'Ответственные задания я тебе пока что доверить не могу, {link}. ' \
+                   f'Чтобы вырастить из тебя образцового пионера, начнем с малого.\n'
+            avaliable_works = [work for work in self.avaliable_works if not work['locked'] and work['lvl'] == 1]
+        elif pioner.respects[self.name] < 100:
+            tts += f'Нашла для тебя занятие, {link}!'
+            avaliable_works = [work for work in self.avaliable_works if not work['locked'] and work['lvl'] == 2]
+        elif pioner.respects[self.name] < 115:
+            avaliable_works = [work for work in self.avaliable_works if not work['locked'] and work['lvl'] == 3]
+            if avaliable_works:
+                tts += f'Так как ты у нас ответственный пионер, {link}, у меня для тебя есть важное задание!'
+            else:
+                avaliable_works = [work for work in self.avaliable_works if not work['locked'] and work['lvl'] < 3]
+                if avaliable_works:
+                    tts += f'Важных заданий на данный момент нет, {link}... ' \
+                           f'Но ничего, обычная работа почти всегда найдётся!'
+        if not avaliable_works:
+            bot.send_message(config.chat_id, f'К сожалению, заданий для тебя сейчас нет, {link}.'
+                                             f' Но за желание помочь лагерю хвалю!')
+            return
+        work = random.choice(avaliable_works)
+        bot.send_message(config.chat_id, tts)
+        self.work_request(work, pioner)
+
+    def work_request(self, work, pioner):
+        t = threading.Timer(100, self.cancel_work, args=[pioner])
+        self.chache.update({pioner.id: {'timer': t}})
+        t.start()
+
+    def cancel_work(self, pioner):
+        link = self.bot.get_link(pioner.name, pioner.id)
+        tts = f'{link}, почему не отвечаешь? Неприлично, знаешь ли! Ничего, найду другого пионера для этой работы.'
+        db.increase_value(pioner.id, {f'respects.{self.name}': -5})
+        bot.send_message(config.chat_id, tts)
 
 
 olga = OlgaDmitrievna()
+
+
+@bot.message_handler(commands=['work'])
+def work_handler(m):
+    user = db.get_pioner(m.from_user.id)
+    if db.user_banned(m.from_user.id) or not user:
+        return
+    link = bot.get_link(user.name, user.id)
+    if not olga.avaliable_works:
+        bot.reply_to(m, f'К сожалению, заданий для тебя сейчас нет, {link}. Но за желание помочь лагерю хвалю!')
+        return
+    if olga.chache.get(m.from_user.id):
+        if olga.chache[m.from_user.id].get('working'):
+            return
+    bot.send_message(m.chat.id, random.choice(olga.hello_texts))
+    olga.give_work(m.from_user.id)
+    olga.chache.update({m.from_user.id: {'working': True}})
 
 
 @bot.message_handler(commands=['control'])
@@ -91,12 +167,26 @@ def text_handler(m):
     if olga.chache.get('controller') == m.from_user.id:
         bot.send_message(m.chat.id, m.text)
         bot.delete_message(m.chat.id, m.message_id)
-    if m.chat.type != 'private':
-        return
+    if olga.chache.get('linear') is not None:
+        link = bot.get_link(m.from_user.first_name, m.from_user.id)
+        if link not in olga.chache.get('linear'):
+            olga.chache.get('linear').append(link)
     if db.user_banned(m.from_user.id) or db.get_pioner(m.from_user.id):
+        return
+    if m.reply_to_message:
+        if m.reply_to_message.from_user.id == bot.get_me().id:
+            if olga.chache.get(m.from_user.id):
+                if olga.chache.get(m.from_user.id).get('timer'):
+                    db.increase_value(m.from_user.id, {f'respects.{olga.name}': 3})
+                    olga.chache[m.from_user.id]['timer'].cancel()
+                    olga.chache[m.from_user.id]['timer'] = None
+                    threading.Timer(300, olga.chache.update, args=[{m.from_user.id: None}])
+                    bot.reply_to(m, 'Молодец, пионер! Сообщишь когда закончишь.')
+    if m.chat.type != 'private':
         return
     if m.from_user.id not in olga.chache:
         bot.reply_to(m, 'Вы не зарегестрированы. Нажмите /start')
+        return
     if len(m.text) > 12:
         return
     if not olga.chache[m.from_user.id]['name']:

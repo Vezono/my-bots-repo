@@ -31,6 +31,7 @@ if True:
     from bots import sedbot
     from bots.magicwars import bot as magicwars
     from bots.everlastingsummer.sovenok import bots, Sovenok
+    from bots import penis_meter
 
 Sovenok()
 bots_to_start = {
@@ -44,6 +45,7 @@ bots_to_start = {
     'Georges_DB': georges_db.bot,
     'SedBot': sedbot.bot,
     'MagicWars': magicwars.bot,
+    'Penis': penis_meter.bot,
     'Bot_Ruler': bot
 }
 bots_to_start.update(bots)

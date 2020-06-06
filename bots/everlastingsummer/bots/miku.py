@@ -18,7 +18,7 @@ class Miku:
         self.prefix = 'mik'
         self.chat_id = config.chat_id
         self.cache = {}
-        self.common_help_text = '{}, привет. Ты можешь ты мне помочь? '
+        self.common_help_text = '{}, привет. Ты можешь мне помочь? '
         self.respective_help_text = '{}, привет! Ты мне часто помогаешь, поэтому хотелось бы попросить тебя о помощи ' \
                                     'еще раз... Не откажешь?'
 
