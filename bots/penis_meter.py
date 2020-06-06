@@ -51,7 +51,7 @@ def give_handler(m):
         users.update_one(user, {'$inc': {'length': growth}})
         bot.reply_to(m.reply_to_message, f'Вам изменили пипирку на {growth}.')
         return
-    user = get_user(m.from_user.id)
+    user = get_user(m.from_user)
     users.update_one(user, {'$inc': {'length': growth}})
     bot.reply_to(m, f'Вы изменили себе пипирку на {growth}.')
 
@@ -66,7 +66,7 @@ def name_handler(m):
         users.update_one(user, {'$set': {'penis_name': name}})
         bot.reply_to(m.reply_to_message, f'Вам изменили имя пипирки на {name}.')
         return
-    user = get_user(m.from_user.id)
+    user = get_user(m.from_user)
     users.update_one(user, {'$set': {'penis_name': name}})
     bot.reply_to(m, f'Вы изменили себе имя пипирки на {name}.')
 
