@@ -99,12 +99,12 @@ def look_handler(m):
     bot.reply_to(m, tts)
 
 
-def get_user(user):
-    user = users.find_one({'id': user.id})
+def get_user(tg_user):
+    user = users.find_one({'id': tg_user.id})
     if not user:
         commit = {
-            'name': user.name,
-            'id': user.id,
+            'name': tg_user.first_name,
+            'id': tg_user.id,
             'length': 0,
             'penis_name': "Без имени"
         }
