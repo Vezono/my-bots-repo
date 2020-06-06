@@ -47,7 +47,7 @@ def give_handler(m):
         return
     growth = int(m.text.split(' ')[1])
     if m.reply_to_message:
-        user = get_user(m.reply_to_message.from_user.id)
+        user = get_user(m.reply_to_message.from_user)
         users.update_one(user, {'$inc': {'length': growth}})
         bot.reply_to(m.reply_to_message, f'Вам изменили пипирку на {growth}.')
         return
@@ -61,11 +61,11 @@ def cut_handler(m):
     if m.reply_to_message:
         if m.from_user.id != config.creator:
             return
-        user = get_user(m.reply_to_message.from_user.id)
+        user = get_user(m.reply_to_message.from_user)
         users.update_one(user, {'$set': {'length': 0}})
         bot.reply_to(m, 'Вы отрезали пипирку этому юзеру.')
         return
-    user = get_user(m.from_user.id)
+    user = get_user(m.from_user)
     users.update_one(user, {'$set': {'length': 0}})
     bot.reply_to(m, 'Вы отрезали себе пипирку.')
 
@@ -76,7 +76,7 @@ def dick_handler(m):
         bot.reply_to(m, 'Ты уже сегодня играл. Все игры обновляются в полночь и в полдень. Если вы ходите принудительно'
                         ' обновить пипирку, позовите Брита.')
         return
-    user = get_user(m.from_user.id)
+    user = get_user(m.from_user)
     growth = random.randint(-4, 10)
     users.update_one(user, {'$inc': {'length': growth}})
     growth_text = 'выросла'
@@ -91,10 +91,10 @@ def dick_handler(m):
 def look_handler(m):
     tts = ''
     if m.reply_to_message:
-        user = get_user(m.reply_to_message.from_user.id)
+        user = get_user(m.reply_to_message.from_user)
         tts += f'Пипирка юзера {m.reply_to_message.from_user.first_name} - {user["length"]}.'
     else:
-        user = get_user(m.from_user.id)
+        user = get_user(m.from_user)
         tts += f'Ваша пипирка - {user["length"]}.'
     bot.reply_to(m, tts)
 
