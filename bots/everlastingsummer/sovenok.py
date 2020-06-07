@@ -27,7 +27,7 @@ class Sovenok:
 
         self.help_timer = threading.Timer(1, self.help_request)
         h, m = self.get_time()
-        if 8 < h < 22:
+        if 8 < h or h < 22:
             self.help_timer.start()
         self.check_time()
 
