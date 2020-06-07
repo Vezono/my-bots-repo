@@ -35,7 +35,7 @@ def top_handler(m):
     top.reverse()
     for index in range(len(top)):
         user = top[index]
-        tts += f'{index + 1}. {user["penis_name"]} ({user["name"]}): {user["length"]} см'
+        tts += f'{index + 1}. {user["penis_name"]} ({user["name"]}): {user["length"]} см\n'
     bot.reply_to(m, tts)
 
 
@@ -60,7 +60,7 @@ def give_handler(m):
 def name_handler(m):
     if not m.text.count(' '):
         return
-    name = m.text.split(' ')[1]
+    name = m.text.split(' ', 1)[1]
     if m.reply_to_message:
         user = get_user(m.reply_to_message.from_user)
         users.update_one(user, {'$set': {'penis_name': name}})
