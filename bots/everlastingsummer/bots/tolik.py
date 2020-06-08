@@ -15,7 +15,6 @@ class Tolik:
         self.prefix = 'tol'
         self.chat_id = config.chat_id
         self.cache = {}
-        bot.send_message(config.admins[0], 'ЧАВК')
 
 
 tolik = Tolik()

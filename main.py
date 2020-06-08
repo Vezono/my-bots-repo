@@ -1,15 +1,12 @@
-import sys
-from subprocess import Popen, PIPE
-
 import config
 from modules.funcs import BotUtil
 
 bot = BotUtil(config.environ['mainbot'], config.creator)
-heroku = False
 if 'DYNO' in config.environ:
     heroku = True
     bot.report('Heroku initialization...')
 else:
+    heroku = False
     bot.report('Local initialization...')
 
 from timeit import default_timer as timer
@@ -20,8 +17,6 @@ app = Heroku().app
 
 from modules.manybotslib import BotsRunner
 if True:
-    from bots import cooker
-    from bots import randomer
     from bots import chatbot
     from bots import pasuk
     from bots import triggers
@@ -35,8 +30,8 @@ if True:
 
 Sovenok()
 bots_to_start = {
-    'Повар': cooker.bot,
-    'Рандоман': randomer.bot,
+    # 'Повар': cooker.bot,
+    # 'Рандоман': randomer.bot,
     'Чабот': chatbot.bot,
     'Пасюк': pasuk.bot,
     'Триггеры': triggers.bot,
@@ -67,37 +62,6 @@ def get_keys(m):
 def get_dynos(m):
     if m.from_user.id == config.creator:
         bot.report(str(app.dynos()).replace(', ', ',\n\n'))
-
-
-@bot.message_handler(commands=['deploy'])
-def deploy_on_heroku(m):
-    if heroku:
-        bot.reply_to(m, 'Why are you trying to deploy from heroku on heroku?')
-        return
-    if not m.text.count(' '):
-        bot.reply_to(m, 'Write the commit message!')
-        return
-    commit_message = m.text.split(' ', 1)[1]
-    cmd = ['git', 'commit', '-a', '-m', f'"{commit_message}"']
-    p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=False)
-    out, err = p.communicate()
-    out = out.decode()
-    err = err.decode()
-    if out:
-        bot.reply_to(m, out)
-    if err:
-        bot.reply_to(m, err)
-    cmd = ['git', 'push']
-    p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=False)
-    out, err = p.communicate()
-    out = out.decode()
-    err = err.decode()
-    if out:
-        bot.reply_to(m, out)
-    if err:
-        bot.reply_to(m, err)
-    app.restart()
-    sys.exit()
 
 
 @bot.message_handler(commands=['deploy_keys'])
