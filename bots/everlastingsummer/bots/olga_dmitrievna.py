@@ -137,13 +137,13 @@ def alisa_control(m):
 @bot.message_handler(commands=['clock'])
 def clock_handler(m):
     def get_time():
-        x = time.ctime(time.localtime()).split(":")
-        hour = int(x[0].split(' ')[-1])
-        minute = int(x[1])
+        x = time.localtime()
+        hour = x[3]
+        minute = x[4]
         return hour, minute
 
-    h, m = get_time()
-    bot.reply_to(m, f'На часах сейчас {h}:{m}.')
+    h, minute = get_time()
+    bot.reply_to(m, f'На часах сейчас {h}:{minute}.')
 
 
 @bot.message_handler(commands=['start'])

@@ -154,9 +154,9 @@ class Sovenok:
 
     @staticmethod
     def get_time():
-        x = time.ctime(time.localtime()).split(":")
-        hour = int(x[0].split(' ')[-1])
-        minute = int(x[1])
+        x = time.localtime()
+        hour = x[3]
+        minute = x[4]
         return hour, minute
 
 
