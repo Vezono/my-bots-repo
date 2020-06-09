@@ -134,6 +134,18 @@ def alisa_control(m):
     bot.send_message(m.chat.id, m.text.split(' ', 1)[1], parse_mode='HTML')
 
 
+@bot.message_handler(commands=['clock'])
+def clock_handler(m):
+    def get_time():
+        x = time.ctime(time.localtime()).split(":")
+        hour = int(x[0].split(' ')[-1])
+        minute = int(x[1])
+        return hour, minute
+
+    h, m = get_time()
+    bot.reply_to(m, f'На часах сейчас {h}:{m}.')
+
+
 @bot.message_handler(commands=['start'])
 def start_handler(m):
     if m.chat.type != 'private':
