@@ -50,12 +50,12 @@ class MongoHelper:
         return admins
 
     def add_bot_admin(self, pioner, user_id):
-        commit = {}
         if not self.db.admins.find_one({'id': user_id}):
             commit = {bot[:3]: False for bot in config.pioners}
+            self.db.admins.insert_one(commit)
         commit.update({pioner: True})
         self.db.admins.update_one({'id': user_id}, {'$set': commit})
-
+        
     def del_bot_admin(self, pioner, user_id):
         commit = {}
         if not self.db.admins.find_one({'id': user_id}):
