@@ -28,10 +28,10 @@ if True:
     #from bots.everlastingsummer.sovenok import bots, Sovenok
     from bots import penis_meter
 
-Sovenok()
+#Sovenok()
 bots_to_start = {
-    # 'Повар': cooker.bot,
-    # 'Рандоман': randomer.bot,
+    'Повар': cooker.bot,
+    'Рандоман': randomer.bot,
     'Чабот': chatbot.bot,
     'Пасюк': pasuk.bot,
     'Триггеры': triggers.bot,
