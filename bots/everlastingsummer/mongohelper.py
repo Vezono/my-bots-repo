@@ -46,13 +46,14 @@ class MongoHelper:
         return self.db.banned.find_one({'id': user_id})
 
     def get_bot_admins(self, pioner):
-        admins = [user.id for user in self.db.admins.find({pioner: True})] + config.admins
+        admins = [user['id'] for user in self.db.admins.find({pioner: True})] + config.admins
         return admins
 
     def add_bot_admin(self, pioner, user_id):
-        commit = {}
+        commit = {'id': user_id}
         if not self.db.admins.find_one({'id': user_id}):
-            commit = {bot[:3]: False for bot in config.pioners}
+            commit.update({bot[:3]: False for bot in config.pioners})
+            self.db.admins.insert_one(commit)
         commit.update({pioner: True})
         self.db.admins.update_one({'id': user_id}, {'$set': commit})
 

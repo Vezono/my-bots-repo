@@ -25,13 +25,13 @@ if True:
     from bots import georges_db
     from bots import sedbot
     from bots.magicwars import bot as magicwars
-    from bots.everlastingsummer.sovenok import bots, Sovenok
+    # from bots.everlastingsummer.sovenok import bots, Sovenok
     from bots import penis_meter
 
-Sovenok()
+# Sovenok()
 bots_to_start = {
-    # 'Повар': cooker.bot,
-    # 'Рандоман': randomer.bot,
+    'Повар': cooker.bot,
+    'Рандоман': randomer.bot,
     'Чабот': chatbot.bot,
     'Пасюк': pasuk.bot,
     'Триггеры': triggers.bot,
@@ -43,7 +43,9 @@ bots_to_start = {
     'Penis': penis_meter.bot,
     'Bot_Ruler': bot
 }
-bots_to_start.update(bots)
+
+
+# bots_to_start.update(bots)
 
 
 @bot.message_handler(commands=['os'])

@@ -142,8 +142,8 @@ def clock_handler(m):
         minute = x[4]
         return hour, minute
 
-    h, minute = get_time()
-    bot.reply_to(m, f'На часах сейчас {h}:{minute}.')
+    h, m = get_time()
+    bot.reply_to(m, f'На часах сейчас {h}:{m}.')
 
 
 @bot.message_handler(commands=['start'])
