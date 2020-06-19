@@ -17,6 +17,8 @@ app = Heroku().app
 
 from modules.manybotslib import BotsRunner
 if True:
+    from bots import cooker
+    from bots import randomer
     from bots import chatbot
     from bots import pasuk
     from bots import triggers
