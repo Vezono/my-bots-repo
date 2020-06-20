@@ -2,7 +2,6 @@ try:
     from tokens import environ
 except ImportError:
     import os
-
     environ = os.environ
 
 pioners = ['OlgaDmitrievna', 'Slavya', 'Uliana', 'Lena', 'Alisa', 'Electronic', 'Miku', 'Zhenya', 'Shurik', 'Tolik']

@@ -7,11 +7,11 @@ from . import mongohelper
 from .bots import olga_dmitrievna, alisa, slavya, uliana, lena, miku, zhenya, shurik, electronic, tolik
 
 db = mongohelper.MongoHelper()
-time.altzone = -10800
+altzone = -10800
 
 
 class Sovenok:
-    def __init__(self):
+    def __init__(self, heroku):
         self.olga_dmitrievna = olga_dmitrievna.olga
         self.alisa = alisa.alisa
         self.slavya = slavya.slavya
@@ -154,7 +154,7 @@ class Sovenok:
 
     @staticmethod
     def get_time():
-        x = time.localtime()
+        x = time.localtime(altzone)
         hour = x[3]
         minute = x[4]
         return hour, minute

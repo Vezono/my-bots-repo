@@ -29,8 +29,8 @@ if True:
     from bots.magicwars import bot as magicwars
     # from bots.everlastingsummer.sovenok import bots, Sovenok
     from bots import penis_meter
+    from bots.telegrad import bot as telegrad
 
-# Sovenok()
 bots_to_start = {
     'Повар': cooker.bot,
     'Рандоман': randomer.bot,
@@ -43,10 +43,12 @@ bots_to_start = {
     'SedBot': sedbot.bot,
     'MagicWars': magicwars.bot,
     'Penis': penis_meter.bot,
+    'Telegrad': telegrad.bot,
     'Bot_Ruler': bot
 }
 
 
+# Sovenok(heroku)
 # bots_to_start.update(bots)
 
 

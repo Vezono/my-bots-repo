@@ -7,6 +7,7 @@ from .. import config
 from ..config import environ
 from ..mongohelper import MongoHelper
 
+altzone = -10800
 bot = BotUtil(environ['TELEGRAM_TOKEN'])
 db = MongoHelper()
 

@@ -26,11 +26,10 @@ pasuk = TeleBot(ptoken)
 bot_id = pasuk.get_me().id
 client = MongoClient(os.environ['database'])
 db = client.loshadkin
-phrases = db.phrases
-converted = db.converted
-# lophrase = [phrases.find_one({})[ids] for ids in phrases.find_one({}) if phrases.find_one({})[ids]]
-# lophrase.remove(lophrase[0])
-lophrase = ['Тест']
+phrases = db.converted
+phrases_dict = phrases.find_one({})
+lophrase = [phrases_dict[ids] for ids in phrases_dict if phrases_dict[ids]]
+lophrase.remove(lophrase[0])
 bot = pasuk
 alpha = False
 
@@ -65,39 +64,9 @@ def getresponse():
 @pasuk.message_handler(commands=['count_of_phrases'])
 def count_of_phrases(m):
     global lophrase
-    # lophrase = [phrases.find_one({})[phrase] for phrase in phrases.find_one({})]
-    # lophrase.remove(lophrase[0])
+    lophrase = [phrases.find_one({})[phrase] for phrase in phrases.find_one({})]
+    lophrase.remove(lophrase[0])
     pasuk.reply_to(m, str(len(lophrase)))
-
-
-@pasuk.message_handler(commands=['convert'])
-def count_of_phrases(m):
-    if m.from_user.id != os.creator:
-        return
-    bot.reply_to(m, 'Процесс начат...')
-    dict_phrases = phrases.find_one({})
-    bot.reply_to(m, f'Количество срок для иницализации: {len(dict_phrases)}')
-    all_phrases = [index for index in dict_phrases if index.isdigit()]
-    normal_phrases = [index for index in dict_phrases if index not in all_phrases]
-    phrases_to_convert = list()
-    for index in all_phrases + normal_phrases:
-        if index == '_id':
-            continue
-        phrase = dict_phrases[index]
-        if phrase:
-            phrases_to_convert.append(phrase)
-    bot.reply_to(m, 'Списки иницализированы...')
-    bot.reply_to(m, f'Фраз для конвертации: {len(phrases_to_convert)}. Начинаю конвертацию...')
-    commit = {'$set': {}}
-    for phrase in phrases_to_convert:
-        if not phrase or not phrase.replace('.', ''):
-            continue
-        commit['$set'].update({phrase.replace('.', ''): phrase})
-    converted.update_one({}, commit)
-    bot.reply_to(m, 'Конвертировано! Проверяю результат...')
-    converted_dict = converted.find_one({})
-    converted_phrases = [converted[phrase] for phrase in converted_dict]
-    bot.reply_to(m, f'Результат: {len(converted_phrases)} нормальных фраз в бд!')
 
 
 @pasuk.message_handler(commands=['getm'])
