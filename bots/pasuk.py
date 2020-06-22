@@ -26,11 +26,10 @@ pasuk = TeleBot(ptoken)
 bot_id = pasuk.get_me().id
 client = MongoClient(os.environ['database'])
 db = client.loshadkin
-phrases = db.phrases
-converted = db.converted
-# lophrase = [phrases.find_one({})[ids] for ids in phrases.find_one({}) if phrases.find_one({})[ids]]
-# lophrase.remove(lophrase[0])
-lophrase = ['Тест']
+phrases = db.converted
+conv_dict = phrases.find_one({})
+lophrase = [conv_dict[ids] for ids in conv_dict if conv_dict[ids]]
+lophrase.remove(lophrase[0])
 bot = pasuk
 alpha = False
 
