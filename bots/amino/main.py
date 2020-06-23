@@ -104,7 +104,8 @@ def call_handler(c):
     tts = f'<b>{c.data}:</b>\n'
     kb = types.InlineKeyboardMarkup()
     for drink in bar[c.data]:
-        print(bar[c.data])
+        if bar[c.data][drink]["count"] <= 0:
+            return
         kb.add(types.InlineKeyboardButton(text=f'{drink}: {bar[c.data][drink]["count"]} шт.',
                                           callback_data=f'{c.data}?{drink}'))
     kb.add(types.InlineKeyboardButton(text=f'Назад.', callback_data=f'back'))
@@ -119,20 +120,46 @@ def back_handler(c):
     for name in bar:
         kb.add(types.InlineKeyboardButton(text=name, callback_data=name))
     t_bot.edit_message_text('Что хотите посмотреть?', c.message.chat.id, c.message.message_id, reply_markup=kb)
-    return
+
+
+@t_bot.callback_query_handler(func=lambda c: c.data.split(' ')[0] == 'accept')
+def accept_handler(c):
+    if c.from_user.id != tg_brit_id:
+        return
+    name = c.data.split(' ')[1].split('?')[0]
+    drink = c.data.split(' ')[1].split('?')[1]
+    bar_db.update_one({}, {'$inc': {f'{name}.{drink}': {'count': -0.2}}})
+    tts = f'{c.message.from_user.first_name} выпил(а) {drink}!'
+    global bar
+    bar = bar_db.find_one({})
+    del bar['_id']
+    t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id)
+
+
+@t_bot.callback_query_handler(func=lambda c: c.data.split(' ')[0] == 'request')
+def request_handler(c):
+    if c.from_user.id != c.message.reply_to_message.from_user.id:
+        return
+    name = c.data.split(' ')[1].split('?')[0]
+    drink = c.data.split(' ')[1].split('?')[1]
+    tts = f'Ожидайте, пока Брит одобрит выдачу напитка.'
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton(text='Одобрить.', callback_data=f'accept {name}?{drink}'))
+    t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb)
 
 
 @t_bot.callback_query_handler(func=lambda c: '?' in c.data and c.data.split('?')[0] in bar)
-def back_handler(c):
+def drink_handler(c):
     if c.from_user.id != c.message.reply_to_message.from_user.id:
         return
     name = c.data.split('?')[0]
     drink = c.data.split('?')[1]
     kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton(text='Выпить.', callback_data=f'request {c.data}'))
     kb.add(types.InlineKeyboardButton(text='Назад.', callback_data=name))
     tts = f'Название: {drink}\nКоличество: {bar[name][drink]["count"]}\nОписание: {bar[name][drink]["desc"]}'
     t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb)
-    return
+
 
 
 @bot.message_handler(command='/online')
@@ -167,32 +194,6 @@ def random_handler(m):
     bot.client.send_message(m['threadId'], f'Результат: {random.randint(int(args[0]), int(args[1]))}')
 
 
-@bot.message_handler(command='/add_drink')
-def add_handler(m):
-    if m['author']['uid'] != brit_id:
-        bot.client.send_message(m['threadId'], 'Только для Брита. Ищите в поиске.')
-        return
-    if m['content'].count(' ') < 3:
-        bot.client.send_message(m['threadId'], 'Вы забыли указать аргументы!')
-        return
-    args = m['content'].split(' ')
-    args.remove('/add_drink')
-    count = 10
-    if args[0].isdigit():
-        count = args[0]
-    code = args[1]
-    name = args[2]
-    for user in users.find({}):
-        user['drinks'].update({
-            code: {
-                'name': name,
-                'count': int(count)
-            }
-        })
-        users.update_one({'id': user['id']}, {'$set': user})
-    bot.client.send_message(m['threadId'], 'Напиток добавлен.')
-
-
 @bot.message_handler(command='/watch_ad')
 def ad_handler(m):
     response = bot.client.watch_ad
@@ -201,51 +202,8 @@ def ad_handler(m):
                             replyTo=m['messageId'])
 
 
-@bot.message_handler(command='/drink')
-def drink_handler(m):
-    user = get_user(m['author']['uid'])
-    if not user['drinks']:
-        bot.client.send_message(m['threadId'], 'У вас нет напитков в инвентаре!')
-        return
-    if not m['content'].count(' '):
-        tts = 'Напитки в вашем инвентаре: \n\n'
-        for drink in user['drinks']:
-            if not user["drinks"][drink]['count']:
-                continue
-            tts += f'{user["drinks"][drink]["name"]}. Кол-во: {user["drinks"][drink]["count"]}. Код напитка: {drink}.\n'
-        tts += '\nЧтобы выпить напиток напишите /drink <код напитка>'
-        bot.client.send_message(m['threadId'], tts)
-        return
-    drink_code = m['content'].split(' ', 1)[1]
-    if drink_code not in user['drinks']:
-        bot.client.send_message(m['threadId'], 'У вас нет такого напитка!')
-        return
-    user['drinks'][drink_code]['count'] -= 1
-    if not user['drinks'][drink_code]['count']:
-        del user['drinks'][drink_code]
-    users.update_one({'id': user['id']}, {'$set': user})
-    bot.client.send_message(m['threadId'], f"Вы выпили напиток {user['drinks'][drink_code]['name']}!")
-
-
-def get_user(user_id):
-    user = users.find_one({'id': user_id})
-    if not user:
-        user = {
-            'id': user_id,
-            'drinks': {
-                'water': {
-                    'name': 'Водичка',
-                    'count': 100
-                }
-            },
-        }
-        users.insert_one(user)
-    return user
-
-
 @bot.message_handler(content_type='text_message')
 def text_handler(m):
-    get_user(m['author']['uid'])
     if m["threadId"] != cn_id:
         return
     tts = f'[amino][{m["author"]["nickname"]}]: {m["content"]}'
@@ -278,7 +236,6 @@ def join_handler(m):
 def c_ban_handler(c):
     if c.from_user.id != tg_brit_id:
         return
-    print(c.data)
     user_id = c.data.split(' ')[1]
     bot.client.kick(user_id, cn_id)
     tts = c.message.text.split(' Что будем делать?')[0] + ' Он успешно заблокирован.'
@@ -291,6 +248,18 @@ def c_ban_handler(c):
         return
     tts = c.message.text.split(' Что будем делать?')[0]
     t_bot.edit_message_text(tts, tg_cn_id, c.message_id)
+
+
+def get_user(user_id):
+    user = users.find_one({'id': user_id})
+    if not user:
+        commit = {
+            'id': user_id,
+            'inventory': {}
+        }
+        users.insert_one(commit)
+        return commit
+    return user
 
 
 def boot():
