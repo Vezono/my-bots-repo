@@ -30,6 +30,7 @@ if True:
     # from bots.everlastingsummer.sovenok import bots, Sovenok
     from bots import penis_meter
     from bots.telegrad import bot as telegrad
+    from bots.amino import main
 
 bots_to_start = {
     'Повар': cooker.bot,
@@ -47,6 +48,7 @@ bots_to_start = {
     'Bot_Ruler': bot
 }
 
+main.boot()
 
 # Sovenok(heroku)
 # bots_to_start.update(bots)
