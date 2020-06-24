@@ -15,8 +15,6 @@ calendar_db = db.amino.calendar
 
 calendar = calendar_db.find_one({})
 del calendar['_id']
-bar = bar_db.find_one({})
-del bar['_id']
 
 bot = Bot()
 t_bot = TeleBot(t_token)
@@ -24,6 +22,7 @@ t_bot = TeleBot(t_token)
 
 @t_bot.message_handler(commands=['bar'])
 def bar_handler(m):
+    reload_bar()
     kb = types.InlineKeyboardMarkup()
     for name in bar:
         kb.add(types.InlineKeyboardButton(text=name, callback_data=name))
@@ -61,9 +60,7 @@ def add_handler(m):
             {'count': count,
              'desc': desc}
     }})
-    global bar
-    bar = bar_db.find_one({})
-    del bar['_id']
+    reload_bar()
     t_bot.reply_to(m, f'Добавила напиток "{drink}" в категорию {name} с количеством {count} и описанием "{desc}" '
                       f'и обновила бар.')
 
@@ -122,17 +119,15 @@ def back_handler(c):
     t_bot.edit_message_text('Что хотите посмотреть?', c.message.chat.id, c.message.message_id, reply_markup=kb)
 
 
-@t_bot.callback_query_handler(func=lambda c: c.data.split(' ')[0] == 'accept')
+@t_bot.callback_query_handler(func=lambda c: c.data.split(' ', 1)[0] == 'accept')
 def accept_handler(c):
     if c.from_user.id != tg_brit_id:
         return
-    name = c.data.split(' ')[1].split('?')[0]
-    drink = c.data.split(' ')[1].split('?')[1]
-    bar_db.update_one({}, {'$inc': {f'{name}.{drink}': {'count': -0.2}}})
-    tts = f'{c.message.from_user.first_name} выпил(а) {drink}!'
-    global bar
-    bar = bar_db.find_one({})
-    del bar['_id']
+    name = c.data.split(' ', 1)[1].split('?')[0]
+    drink = c.data.split(' ', 1)[1].split('?')[1]
+    bar_db.update_one({}, {'$inc': {f'{name}.{drink}.count': -0.2}})
+    tts = f'{c.message.reply_to_message.from_user.first_name} выпил(а) {drink}!'
+    reload_bar()
     t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id)
 
 
@@ -140,8 +135,8 @@ def accept_handler(c):
 def request_handler(c):
     if c.from_user.id != c.message.reply_to_message.from_user.id:
         return
-    name = c.data.split(' ')[1].split('?')[0]
-    drink = c.data.split(' ')[1].split('?')[1]
+    name = c.data.split(' ', 1)[1].split('?')[0]
+    drink = c.data.split(' ', 1)[1].split('?')[1]
     tts = f'Ожидайте, пока Брит одобрит выдачу напитка.'
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton(text='Одобрить.', callback_data=f'accept {name}?{drink}'))
@@ -159,7 +154,6 @@ def drink_handler(c):
     kb.add(types.InlineKeyboardButton(text='Назад.', callback_data=name))
     tts = f'Название: {drink}\nКоличество: {bar[name][drink]["count"]}\nОписание: {bar[name][drink]["desc"]}'
     t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb)
-
 
 
 @bot.message_handler(command='/online')
@@ -260,6 +254,19 @@ def get_user(user_id):
         users.insert_one(commit)
         return commit
     return user
+
+
+def reload_bar():
+    try:
+        global bar
+        bar = bar_db.find_one({})
+        del bar['_id']
+    except:
+        pass
+    return bar
+
+
+bar = reload_bar()
 
 
 def boot():

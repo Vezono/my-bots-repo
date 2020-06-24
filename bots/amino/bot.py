@@ -65,8 +65,8 @@ class Bot:
 
         return decorator
 
-    def polling(self, speed=1):
-        while True:
+    def polling(self, speed=1, none_stop=True):
+        while none_stop:
             self.operate()
             time.sleep(speed)
 

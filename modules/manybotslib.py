@@ -76,7 +76,7 @@ class BotsRunner:
         while True:
             try:
                 self.__bots_status[botname] = True
-                self.__bots[botname].polling()
+                self.__bots[botname].polling(none_stop=True)
             except Exception:
                 self.__bots_status[botname] = False
                 self.__warn_about_fail(botname)
