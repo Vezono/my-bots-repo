@@ -20,8 +20,6 @@ del calendar['_id']
 bot = Bot()
 t_bot = TeleBot(t_token)
 
-potions_db.insert_one({})
-
 
 @t_bot.message_handler(commands=['potions'])
 def potions_handler(m):
