@@ -192,6 +192,18 @@ def back_handler(c):
     t_bot.edit_message_text('Что хотите посмотреть?', c.message.chat.id, c.message.message_id, reply_markup=kb)
 
 
+@t_bot.callback_query_handler(func=lambda c: c.data.split(' ', 1)[0] == 'paccept')
+def accept_handler(c):
+    if c.from_user.id != tg_brit_id:
+        return
+    name = c.data.split(' ', 1)[1].split('?')[0]
+    drink = c.data.split(' ', 1)[1].split('?')[1]
+    potions_db.update_one({}, {'$inc': {f'{name}.{drink}.count': -0.2}})
+    tts = f'{c.message.reply_to_message.from_user.first_name} выпил(а) {drink}!'
+    reload_bar()
+    t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id)
+
+
 @t_bot.callback_query_handler(func=lambda c: c.data.split(' ', 1)[0] == 'accept')
 def accept_handler(c):
     if c.from_user.id != tg_brit_id:
@@ -202,6 +214,18 @@ def accept_handler(c):
     tts = f'{c.message.reply_to_message.from_user.first_name} выпил(а) {drink}!'
     reload_bar()
     t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id)
+
+
+@t_bot.callback_query_handler(func=lambda c: c.data.split(' ')[0] == 'prequest')
+def request_handler(c):
+    if c.from_user.id != c.message.reply_to_message.from_user.id:
+        return
+    name = c.data.split(' ', 1)[1].split('?')[0]
+    drink = c.data.split(' ', 1)[1].split('?')[1]
+    tts = f'Ожидайте, пока Брит одобрит выдачу напитка.'
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton(text='Одобрить.', callback_data=f'paccept {name}?{drink}'))
+    t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb)
 
 
 @t_bot.callback_query_handler(func=lambda c: c.data.split(' ')[0] == 'request')
@@ -236,7 +260,7 @@ def drink_handler(c):
     name = c.data.split('?')[0]
     drink = c.data.split('?')[1]
     kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton(text='Выпить.', callback_data=f'request {c.data}'))
+    kb.add(types.InlineKeyboardButton(text='Выпить.', callback_data=f'prequest {c.data}'))
     kb.add(types.InlineKeyboardButton(text='Назад.', callback_data=name))
     tts = f'Название: {drink}\nКоличество: {potions[name][drink]["count"]}\nОписание: {potions[name][drink]["desc"]}'
     t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb)
