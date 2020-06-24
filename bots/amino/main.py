@@ -12,12 +12,22 @@ db = MongoClient(mongo_token)
 users = db.amino.users
 bar_db = db.amino.bar
 calendar_db = db.amino.calendar
+garden = db.amino.garden
 
 calendar = calendar_db.find_one({})
 del calendar['_id']
 
 bot = Bot()
 t_bot = TeleBot(t_token)
+
+
+@t_bot.message_handler(commands=['museum'])
+def museum_handler(m):
+    tts = '<b>Национальный музей клубничной культуры:</b>'
+    for shelf in museum:
+        item = museum[shelf]
+        tts += f'\n{shelf}. {item["name"]}, {item["count"]} шт.'
+    t_bot.reply_to(m, tts, parse_mode='HTML')
 
 
 @t_bot.message_handler(commands=['bar'])
@@ -51,7 +61,7 @@ def add_handler(m):
     if m.from_user.id != tg_brit_id:
         return
     text = m.text.split(' ', 1)[1]
-    count = text.split("/", 3)[0]
+    count = int(text.split("/", 3)[0])
     name = text.split('/', 3)[1]
     drink = text.split('/', 3)[2]
     desc = text.split('/', 3)[3]
