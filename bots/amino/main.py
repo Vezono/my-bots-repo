@@ -182,6 +182,16 @@ def call_handler(c):
     t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb, parse_mode='HTML')
 
 
+@t_bot.callback_query_handler(func=lambda c: c.data == 'pback')
+def back_handler(c):
+    if c.from_user.id != c.message.reply_to_message.from_user.id:
+        return
+    kb = types.InlineKeyboardMarkup()
+    for name in potions:
+        kb.add(types.InlineKeyboardButton(text=name, callback_data=name))
+    t_bot.edit_message_text('Что хотите посмотреть?', c.message.chat.id, c.message.message_id, reply_markup=kb)
+
+
 @t_bot.callback_query_handler(func=lambda c: c.data == 'back')
 def back_handler(c):
     if c.from_user.id != c.message.reply_to_message.from_user.id:
