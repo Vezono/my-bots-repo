@@ -11,6 +11,7 @@ from .config import *
 db = MongoClient(mongo_token)
 users = db.amino.users
 bar_db = db.amino.bar
+potions_db = db.amino.potions
 calendar_db = db.amino.calendar
 
 calendar = calendar_db.find_one({})
@@ -18,6 +19,17 @@ del calendar['_id']
 
 bot = Bot()
 t_bot = TeleBot(t_token)
+
+potions_db.insert_one({})
+
+
+@t_bot.message_handler(commands=['potions'])
+def potions_handler(m):
+    reload_bar()
+    kb = types.InlineKeyboardMarkup()
+    for name in potions:
+        kb.add(types.InlineKeyboardButton(text=name, callback_data=name))
+    t_bot.reply_to(m, 'Что хотите посмотреть?', reply_markup=kb)
 
 
 @t_bot.message_handler(commands=['weapons'])
@@ -75,6 +87,25 @@ def calendar_handler(m):
     t_bot.send_message(m.chat.id, tts, parse_mode='HTML')
 
 
+@t_bot.message_handler(commands=['potion'])
+def add_handler(m):
+    if m.from_user.id != tg_brit_id:
+        return
+    text = m.text.split(' ', 1)[1]
+    count = int(text.split("/", 3)[0])
+    name = text.split('/', 3)[1]
+    drink = text.split('/', 3)[2]
+    desc = text.split('/', 3)[3]
+    potions_db.update_one({}, {'$set': {
+        f'{name}.{drink}':
+            {'count': count,
+             'desc': desc}
+    }})
+    reload_bar()
+    t_bot.reply_to(m, f'Добавила зелье "{drink}" в категорию {name} с количеством {count} и описанием "{desc}" '
+                      f'и обновила зелья.')
+
+
 @t_bot.message_handler(commands=['add'])
 def add_handler(m):
     if m.from_user.id != tg_brit_id:
@@ -121,6 +152,21 @@ def txt_handler(m):
 def txt_handler(m):
     tts = f'[tg]{m.new_chat_members[0].first_name} присоединился к чату'
     bot.client.send_message(cn_id, tts)
+
+
+@t_bot.callback_query_handler(func=lambda c: c.data in potions)
+def call_handler(c):
+    if c.from_user.id != c.message.reply_to_message.from_user.id:
+        return
+    tts = f'<b>{c.data}:</b>\n'
+    kb = types.InlineKeyboardMarkup()
+    for drink in potions[c.data]:
+        if potions[c.data][drink]["count"] <= 0:
+            return
+        kb.add(types.InlineKeyboardButton(text=f'{drink}: {potions[c.data][drink]["count"]} шт.',
+                                          callback_data=f'{c.data}?{drink}'))
+    kb.add(types.InlineKeyboardButton(text=f'Назад.', callback_data=f'back'))
+    t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb, parse_mode='HTML')
 
 
 @t_bot.callback_query_handler(func=lambda c: c.data in bar)
@@ -179,9 +225,22 @@ def drink_handler(c):
     name = c.data.split('?')[0]
     drink = c.data.split('?')[1]
     kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton(text='Выпить.', callback_data=f'request {c.data}'))
+    kb.add(types.InlineKeyboardButton(text='Выпить.', callback_data=f'prequest {c.data}'))
     kb.add(types.InlineKeyboardButton(text='Назад.', callback_data=name))
     tts = f'Название: {drink}\nКоличество: {bar[name][drink]["count"]}\nОписание: {bar[name][drink]["desc"]}'
+    t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb)
+
+
+@t_bot.callback_query_handler(func=lambda c: '?' in c.data and c.data.split('?')[0] in potions)
+def drink_handler(c):
+    if c.from_user.id != c.message.reply_to_message.from_user.id:
+        return
+    name = c.data.split('?')[0]
+    drink = c.data.split('?')[1]
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton(text='Выпить.', callback_data=f'request {c.data}'))
+    kb.add(types.InlineKeyboardButton(text='Назад.', callback_data=name))
+    tts = f'Название: {drink}\nКоличество: {potions[name][drink]["count"]}\nОписание: {potions[name][drink]["desc"]}'
     t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb)
 
 
@@ -286,6 +345,9 @@ def get_user(user_id):
 
 
 def reload_bar():
+    global potions
+    potions = potions_db.find_one({})
+    del potions['_id']
     try:
         global bar
         bar = bar_db.find_one({})
@@ -295,6 +357,7 @@ def reload_bar():
     return bar
 
 
+potions = {}
 bar = reload_bar()
 
 
