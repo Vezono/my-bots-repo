@@ -12,13 +12,32 @@ db = MongoClient(mongo_token)
 users = db.amino.users
 bar_db = db.amino.bar
 calendar_db = db.amino.calendar
-garden = db.amino.garden
 
 calendar = calendar_db.find_one({})
 del calendar['_id']
 
 bot = Bot()
 t_bot = TeleBot(t_token)
+
+
+@t_bot.message_handler(commands=['weapons'])
+def weapons_handler(m):
+    t_bot.reply_to(m, weapons, parse_mode='HTML')
+
+
+@t_bot.message_handler(commands=['map'])
+def map_handler(m):
+    t_bot.reply_to(m, map_text, parse_mode='HTML')
+
+
+@t_bot.message_handler(commands=['employers'])
+def employers_handler(m):
+    t_bot.reply_to(m, employers, parse_mode='HTML')
+
+
+@t_bot.message_handler(commands=['rules'])
+def rules_handler(m):
+    t_bot.reply_to(m, rules, parse_mode='HTML')
 
 
 @t_bot.message_handler(commands=['museum'])
