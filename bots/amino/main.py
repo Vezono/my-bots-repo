@@ -152,21 +152,6 @@ def txt_handler(m):
     bot.client.send_message(cn_id, tts)
 
 
-@t_bot.callback_query_handler(func=lambda c: c.data in potions)
-def call_handler(c):
-    if c.from_user.id != c.message.reply_to_message.from_user.id:
-        return
-    tts = f'<b>{c.data}:</b>\n'
-    kb = types.InlineKeyboardMarkup()
-    for drink in potions[c.data]:
-        if potions[c.data][drink]["count"] <= 0:
-            return
-        kb.add(types.InlineKeyboardButton(text=f'{drink}: {potions[c.data][drink]["count"]} шт.',
-                                          callback_data=f'{c.data}?{drink}'))
-    kb.add(types.InlineKeyboardButton(text=f'Назад.', callback_data=f'back'))
-    t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb, parse_mode='HTML')
-
-
 @t_bot.callback_query_handler(func=lambda c: c.data in bar)
 def call_handler(c):
     if c.from_user.id != c.message.reply_to_message.from_user.id:
@@ -179,6 +164,21 @@ def call_handler(c):
         kb.add(types.InlineKeyboardButton(text=f'{drink}: {bar[c.data][drink]["count"]} шт.',
                                           callback_data=f'{c.data}?{drink}'))
     kb.add(types.InlineKeyboardButton(text=f'Назад.', callback_data=f'back'))
+    t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb, parse_mode='HTML')
+
+
+@t_bot.callback_query_handler(func=lambda c: c.data in potions)
+def call_handler(c):
+    if c.from_user.id != c.message.reply_to_message.from_user.id:
+        return
+    tts = f'<b>{c.data}:</b>\n'
+    kb = types.InlineKeyboardMarkup()
+    for drink in potions[c.data]:
+        if potions[c.data][drink]["count"] <= 0:
+            return
+        kb.add(types.InlineKeyboardButton(text=f'{drink}: {potions[c.data][drink]["count"]} шт.',
+                                          callback_data=f'{c.data}?{drink}'))
+    kb.add(types.InlineKeyboardButton(text=f'Назад.', callback_data=f'pback'))
     t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb, parse_mode='HTML')
 
 
@@ -202,9 +202,9 @@ def back_handler(c):
     t_bot.edit_message_text('Что хотите посмотреть?', c.message.chat.id, c.message.message_id, reply_markup=kb)
 
 
-@t_bot.callback_query_handler(func=lambda c: c.data.split(' ', 1)[0] == 'paccept')
-def accept_handler(c):
-    if c.from_user.id != tg_brit_id:
+@t_bot.callback_query_handler(func=lambda c: c.data.split(' ')[0] == 'prequest')
+def request_handler(c):
+    if c.from_user.id != c.message.reply_to_message.from_user.id:
         return
     name = c.data.split(' ', 1)[1].split('?')[0]
     drink = c.data.split(' ', 1)[1].split('?')[1]
@@ -214,9 +214,9 @@ def accept_handler(c):
     t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id)
 
 
-@t_bot.callback_query_handler(func=lambda c: c.data.split(' ', 1)[0] == 'accept')
-def accept_handler(c):
-    if c.from_user.id != tg_brit_id:
+@t_bot.callback_query_handler(func=lambda c: c.data.split(' ')[0] == 'request')
+def request_handler(c):
+    if c.from_user.id != c.message.reply_to_message.from_user.id:
         return
     name = c.data.split(' ', 1)[1].split('?')[0]
     drink = c.data.split(' ', 1)[1].split('?')[1]
@@ -224,30 +224,6 @@ def accept_handler(c):
     tts = f'{c.message.reply_to_message.from_user.first_name} выпил(а) {drink}!'
     reload_bar()
     t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id)
-
-
-@t_bot.callback_query_handler(func=lambda c: c.data.split(' ')[0] == 'prequest')
-def request_handler(c):
-    if c.from_user.id != c.message.reply_to_message.from_user.id:
-        return
-    name = c.data.split(' ', 1)[1].split('?')[0]
-    drink = c.data.split(' ', 1)[1].split('?')[1]
-    tts = f'Ожидайте, пока Брит одобрит выдачу напитка.'
-    kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton(text='Одобрить.', callback_data=f'paccept {name}?{drink}'))
-    t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb)
-
-
-@t_bot.callback_query_handler(func=lambda c: c.data.split(' ')[0] == 'request')
-def request_handler(c):
-    if c.from_user.id != c.message.reply_to_message.from_user.id:
-        return
-    name = c.data.split(' ', 1)[1].split('?')[0]
-    drink = c.data.split(' ', 1)[1].split('?')[1]
-    tts = f'Ожидайте, пока Брит одобрит выдачу напитка.'
-    kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton(text='Одобрить.', callback_data=f'accept {name}?{drink}'))
-    t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb)
 
 
 @t_bot.callback_query_handler(func=lambda c: '?' in c.data and c.data.split('?')[0] in bar)

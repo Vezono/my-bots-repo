@@ -1,8 +1,7 @@
-import config
-
 import telebot
-
 from pymongo import MongoClient
+
+import config
 
 teachers = [792414733]
 
@@ -44,6 +43,8 @@ def texthandler(m):
         pass
     chat_triggers = {}
     triggers = triggs.find_one({'chat': m.chat.id})
+    del triggers['_id']
+    del triggers['chat']
     for trigger in triggers:
         chat_triggers.update({trigger: triggers[trigger]})
     for i in chat_triggers.keys():
