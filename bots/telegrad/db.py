@@ -61,10 +61,10 @@ class Database:
         self.kvs.remove({})
 
     def get_friend(self, name):
-        self.users.find_one({'human.name': name})
+        return self.users.find_one({'human.name': name})
 
     def get_kv(self, h):
-        self.kvs.find_one({'id': h['position']['flat']})
+        return self.kvs.find_one({'id': h['position']['flat']})
 
     def unlock_kv(self, kv):
         self.kvs.update_one({'id': kv['id']}, {'$set': {'locked': False}})

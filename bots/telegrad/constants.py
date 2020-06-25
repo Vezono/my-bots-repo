@@ -52,3 +52,4 @@ streets = {
     }
 
 }
+walk_speed = 10

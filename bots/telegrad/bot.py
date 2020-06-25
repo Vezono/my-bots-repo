@@ -90,9 +90,9 @@ def look(m):
     user = db.get_user(m.from_user)
     if not m.reply_to_message:
         return
-    if not m.reply_to_message.text.count(':'):
+    if not m.reply_to_message.text.count(': '):
         return
-    human_name = m.reply_to_message.text.split(':')[0]
+    human_name = m.reply_to_message.text.split(': ')[0]
     if user['human']['name'] == human_name:
         bot.reply_to(m, 'Нельзя взаимодействовать с самим собой!')
         return
@@ -157,9 +157,9 @@ def in_cafe(user):
             b = street['buildings'][idss]
             if b['code'] == h['position']['building']:
                 cafe = b
-    if kv is None and cafe is None:
+    if not kv and not cafe:
         return False
-    if cafe is not None and cafe['type'] != 'cafe':
+    if cafe and cafe['type'] != 'cafe':
         return False
     return True
 
@@ -496,13 +496,15 @@ def doings(m):
                     return
             users.update_one({'id': user['id']}, {'$set': {'human.walking': True}})
             if h['position']['flat']:
-                threading.Timer(random.randint(50, 70), endwalk, args=[user, newstr, 'flat']).start()
+                threading.Timer(random.randint(walk_speed - 10, walk_speed + 10),
+                                endwalk, args=[user, newstr, 'flat']).start()
                 bot.send_message(m.chat.id, 'Вы выходите из квартиры. Окажетесь на улице примерно через минуту.')
             elif h['position']['building']:
-                threading.Timer(random.randint(50, 70), endwalk, args=[user, newstr, 'building']).start()
+                threading.Timer(random.randint(walk_speed - 10, walk_speed + 10), endwalk,
+                                args=[user, newstr, 'building']).start()
                 bot.send_message(m.chat.id, 'Вы выходите из здания. Окажетесь на улице примерно через минуту.')
             else:
-                threading.Timer(random.randint(50, 70), endwalk, args=[user, newstr]).start()
+                threading.Timer(random.randint(walk_speed - 10, walk_speed + 10), endwalk, args=[user, newstr]).start()
                 bot.send_message(m.chat.id, 'Вы направились в сторону улицы ' + newstr[
                     'name'] + '. Дойдёте примерно через минуту.')
 
@@ -527,7 +529,7 @@ def doings(m):
                 return
 
             users.update_one({'id': user['id']}, {'$set': {'human.walking': True}})
-            threading.Timer(random.randint(50, 70), endwalk_flat, args=[user, kv]).start()
+            threading.Timer(random.randint(walk_speed - 10, walk_speed + 10), endwalk_flat, args=[user, kv]).start()
             bot.send_message(m.chat.id,
                              'Вы начали подниматься в квартиру ' + str(which) + '. Дойдёте примерно через минуту.')
 
@@ -549,7 +551,7 @@ def doings(m):
                 return
 
             users.update_one({'id': user['id']}, {'$set': {'human.walking': True}})
-            threading.Timer(random.randint(50, 70), endwalk_build, args=[user, shop]).start()
+            threading.Timer(random.randint(walk_speed - 10, walk_speed + 10), endwalk_build, args=[user, shop]).start()
             bot.send_message(m.chat.id, 'Вы направились в магазин ' + str(which) + '. Дойдёте примерно через минуту.')
 
 
@@ -584,7 +586,10 @@ def endwalk_flat(user, kv):
         kv = kvs.find_one({'id': kv['id']})
         for ids in kv['humans']:
             if int(ids) != user['id']:
-                bot.send_message(ids, 'В квартиру заходит ' + desc(user))
+                try:
+                    bot.send_message(ids, 'В квартиру заходит ' + desc(user))
+                except:
+                    pass
 
         text = 'В квартире вы видите следующих людей:\n\n'
         for ids in kv['humans']:
@@ -766,7 +771,10 @@ def endwalk(user, newstr, start='street'):
             curflat = kvs.find_one({'id': h['position']['flat']})
             for ids in curflat['humans']:
                 if ids != user['id']:
-                    bot.send_message(ids, h['name'] + ' покидает квартиру!')
+                    try:
+                        bot.send_message(ids, h['name'] + ' покидает квартиру!')
+                    except:
+                        pass
         if start == 'building':
             b = user['human']['position']['building']
             h = user['human']
@@ -785,7 +793,10 @@ def endwalk(user, newstr, start='street'):
                     user2 = users.find_one({'id': ids})
                     h2 = user2['human']
                     if not h2['position']['flat'] and not h2['position']['building']:
-                        bot.send_message(ids, h['name'] + ' покидает улицу!')
+                        try:
+                            bot.send_message(ids, h['name'] + ' покидает улицу!')
+                        except:
+                            pass
 
         users.update_one({'id': user['id']}, {'$set': {'human.position.building': None, 'human.position.flat': None}})
         user = users.find_one({'id': user['id']})
@@ -802,8 +813,10 @@ def endwalk(user, newstr, start='street'):
             user2 = users.find_one({'id': ids})
             if not user2['human']['position']['flat'] and not user2['human']['position']['building']:
                 if int(ids) != user['id']:
-                    bot.send_message(ids, 'На улице появляется ' + desc(user))
-
+                    try:
+                        bot.send_message(ids, 'На улице появляется ' + desc(user))
+                    except:
+                        pass
         text = 'На улице вы видите следующих людей:\n\n'
         for ids in street['humans']:
             if ids != user['id']:
