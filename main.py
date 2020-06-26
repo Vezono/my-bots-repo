@@ -31,6 +31,7 @@ if True:
     from bots import penis_meter
     from bots.telegrad import bot as telegrad
     from bots.amino import main as aminobots
+    from bots import spamer_base
 
 
 bots_to_start = {
@@ -48,6 +49,7 @@ bots_to_start = {
     'Telegrad': telegrad.bot,
     'Аминомост': aminobots.bot,
     'Амино_Ассистент': aminobots.t_bot,
+    'Спамер_Бастер': spamer_base.bot,
     'Bot_Ruler': bot
 }
 

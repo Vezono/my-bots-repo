@@ -1,5 +1,4 @@
 import random
-import threading
 import time
 
 from pymongo import MongoClient
@@ -233,7 +232,7 @@ def drink_handler(c):
     name = c.data.split('?')[0]
     drink = c.data.split('?')[1]
     kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton(text='Выпить.', callback_data=f'prequest {c.data}'))
+    kb.add(types.InlineKeyboardButton(text='Выпить.', callback_data=f'request {c.data}'))
     kb.add(types.InlineKeyboardButton(text='Назад.', callback_data=name))
     tts = f'Название: {drink}\nКоличество: {bar[name][drink]["count"]}\nОписание: {bar[name][drink]["desc"]}'
     t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb)
@@ -353,22 +352,18 @@ def get_user(user_id):
 
 
 def reload_bar():
-    global potions
-    potions = potions_db.find_one({})
-    del potions['_id']
-    try:
+    if 'bar' in globals():
         global bar
+        global potions
+        potions = potions_db.find_one({})
+        del potions['_id']
         bar = bar_db.find_one({})
         del bar['_id']
-    except:
-        pass
-    return bar
+    p = potions_db.find_one({})
+    del p['_id']
+    b = bar_db.find_one({})
+    del b['_id']
+    return b, p
 
 
-potions = {}
-bar = reload_bar()
-
-
-def boot():
-    threading.Thread(target=bot.polling, args=[0]).start()
-    threading.Thread(target=t_bot.polling, args=[True]).start()
+bar, potions = reload_bar()
