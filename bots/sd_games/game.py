@@ -47,9 +47,10 @@ class Game:
         return near
 
     def get_icon(self, pos) -> str:
-        player_poss = [self.players[player]['icon'] for player in self.players if self.players[player]['pos'] == pos]
-        if player_poss:
-            return player_poss[0]
+        player_posss = [player['icon'] for player in [self.players[player] for player in self.players]
+                        if player['pos'] == pos]
+        if player_posss:
+            return player_posss[0]
         tile = self.map.get(pos)
         if not tile:
             self.map.update({pos: random.choice(list(self.icons.keys()))})

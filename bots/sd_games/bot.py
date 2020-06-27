@@ -31,7 +31,7 @@ def warp_handler(m):
     if pos.count('_') != 1:
         return
     player = str(m.from_user.id)
-    game.players['pos'] = pos
+    game.players[player]['pos'] = pos
     kb = get_kb(player)
     bot.send_message(player, 'Карта', reply_markup=kb)
 
