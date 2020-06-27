@@ -1,3 +1,5 @@
+import threading
+
 import telebot
 from emoji import UNICODE_EMOJI
 from telebot import types
@@ -18,7 +20,7 @@ def join_handler(m):
     game.create_player(m.from_user)
     player = str(m.from_user.id)
     kb = get_kb(player)
-    bot.send_message(player, 'Карта', reply_markup=kb)
+    game.players[player]['message'] = bot.send_message(player, 'Карта', reply_markup=kb)
 
 
 @bot.message_handler()
@@ -29,7 +31,18 @@ def emoji_handler(m):
     bot.reply_to(m, 'Иконка обновлена.')
 
 
-@bot.callback_query_handler(func=lambda c: c)
+@bot.callback_query_handler(func=lambda c: c.data == 'place')
+def call(c: types.CallbackQuery):
+    player_id = str(c.from_user.id)
+    pos = game.players[player_id]['pos']
+    if game.players[player_id]['bricks'] <= 0:
+        bot.answer_callback_query(c.id, 'У вас нет кирпичей!')
+    game.map[pos] = 'wall'
+    game.players[player_id]['bricks'] -= 1
+    bot.answer_callback_query(c.id, 'Вы построили стену!')
+
+
+@bot.callback_query_handler(func=lambda c: '_' in c.data)
 def call(c: types.CallbackQuery):
     player_id = str(c.from_user.id)
     pos = game.players[player_id]['pos']
@@ -41,11 +54,23 @@ def call(c: types.CallbackQuery):
         game.map[c.data] = 'nothing'
         game.players[player_id]['goats'] += 1
         bot.answer_callback_query(c.id, f'Вы получили казу! Теперь у вас {game.players[player_id]["goats"]} коз.')
+    if game.map[c.data] == 'brick':
+        game.map[c.data] = 'nothing'
+        game.players[player_id]['bricks'] += 1
+        bot.answer_callback_query(c.id,
+                                  f'Вы получили кирпич! Теперь у вас {game.players[player_id]["bricks"]} кирпичей.')
+    if game.map[c.data] == 'wall':
+        threading.Timer(60, game.map.update, args=[{c.data: 'nothing'}]).start()
+        bot.answer_callback_query(c.id, f'Вы уебали стену. Она разрушится через минуту.')
+        return
     game.players[player_id]['pos'] = c.data
     game.down_data()
     kb = get_kb(player_id)
-    bot.edit_message_text(f'Карта. Козы: {game.players[player_id]["goats"]} Координаты: {pos}', c.message.chat.id,
-                          c.message.message_id, reply_markup=kb)
+    bot.edit_message_text(f'Карта. '
+                          f'\nКозы: {game.players[player_id]["goats"]}'
+                          f'\n Координаты: {pos}'
+                          f'\nКирпичи: {game.players[player_id]["bricks"]}',
+                          c.message.chat.id, c.message.message_id, reply_markup=kb)
 
 
 def get_kb(user_id: str) -> types.InlineKeyboardMarkup:
@@ -61,4 +86,5 @@ def get_kb(user_id: str) -> types.InlineKeyboardMarkup:
             encounter = 0
             row = []
         encounter += 1
+    kb.add(types.InlineKeyboardButton(text='Положить кирпич (спавнит стену)', callback_data='place'))
     return kb

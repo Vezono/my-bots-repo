@@ -13,6 +13,7 @@ class Game:
         self.icons = {
             'wall': '⬛️',
             'goat': '🐐',
+            'brick': '🧱',
             'nothing': 'ᅠ'
         }
         self.size = size
@@ -32,8 +33,7 @@ class Game:
         for j in [-1, 0, 1]:
             for i in [-1, 0, 1]:
                 tile = f'{x + i}_{y + j}'
-                if self.map.get(tile) != 'wall':
-                    near.append(tile)
+                near.append(tile)
         return near
 
     @staticmethod
@@ -63,7 +63,8 @@ class Game:
             'name': user.first_name,
             'pos': pos,
             'icon': '🔵',
-            'goats': 0
+            'goats': 0,
+            'bricks': 0
         }
         self.players.update({
             str(user.id): commit
