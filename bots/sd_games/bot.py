@@ -20,7 +20,20 @@ def join_handler(m):
     game.create_player(m.from_user)
     player = str(m.from_user.id)
     kb = get_kb(player)
-    game.players[player]['message'] = bot.send_message(player, 'Карта', reply_markup=kb)
+    bot.send_message(player, 'Карта', reply_markup=kb)
+
+
+@bot.message_handler(commands=['warp'])
+def warp_handler(m):
+    if not m.text.count(' '):
+        return
+    pos = m.text.split()[1]
+    if pos.count('_') != 1:
+        return
+    player = str(m.from_user.id)
+    game.players['pos'] = pos
+    kb = get_kb(player)
+    bot.send_message(player, 'Карта', reply_markup=kb)
 
 
 @bot.message_handler()
