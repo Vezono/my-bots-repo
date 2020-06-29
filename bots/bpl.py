@@ -99,8 +99,6 @@ def pisya_handler(m):
 
 @bot.message_handler(content_types=['sticker'])
 def lagushka_handler(m):
-    if m.chat.id != bpl_chat:
-        return
     file_url = bot.get_file_url(m.sticker.thumb.file_id)
     r = requests.get(file_url)
     with open('res/jaba_compare.jpg', 'wb') as fd:
