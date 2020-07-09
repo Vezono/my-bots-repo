@@ -64,7 +64,8 @@ def getresponse():
 @pasuk.message_handler(commands=['count_of_phrases'])
 def count_of_phrases(m):
     global lophrase
-    lophrase = [phrases.find_one({})[phrase] for phrase in phrases.find_one({})]
+    local_phrases_dict = phrases.find_one({})
+    lophrase = [local_phrases_dict[phrase] for phrase in local_phrases_dict]
     lophrase.remove(lophrase[0])
     pasuk.reply_to(m, str(len(lophrase)))
 
@@ -78,7 +79,7 @@ def getm(m):
 def filter_prases(m):
     if not m.text.count(' '):
         return
-    filtered = [phrase for phrase in lophrase if m.split(' ', 1)[1] in phrase]
+    filtered = [phrase for phrase in lophrase if m.text.split(' ', 1)[1] in phrase]
     bot.reply_to(m, f'В базе {len(filtered)} сообщений содержащих данный отрывок.')
 
 

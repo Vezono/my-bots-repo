@@ -17,8 +17,7 @@ app = Heroku().app
 
 from modules.manybotslib import BotsRunner
 if True:
-    from bots import cooker
-    from bots import randomer
+    from bots import cooker, penis_meter
     from bots import chatbot
     from bots import pasuk
     from bots import triggers
@@ -28,14 +27,12 @@ if True:
     from bots import sedbot
     from bots.magicwars import bot as magicwars
     # from bots.everlastingsummer.sovenok import bots, Sovenok
-    from bots import penis_meter
     from bots.telegrad import bot as telegrad
     from bots.amino import main as aminobots
 
 
 bots_to_start = {
     'Повар': cooker.bot,
-    'Рандоман': randomer.bot,
     'Чабот': chatbot.bot,
     'Пасюк': pasuk.bot,
     'Триггеры': triggers.bot,
