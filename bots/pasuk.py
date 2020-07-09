@@ -76,7 +76,7 @@ def getm(m):
 
 @pasuk.message_handler(commands=["filter"])
 def filter_prases(m):
-    if not m.count(' '):
+    if not m.text.count(' '):
         return
     filtered = [phrase for phrase in lophrase if m.split(' ', 1)[1] in phrase]
     bot.reply_to(m, f'В базе {len(filtered)} сообщений содержащих данный отрывок.')
