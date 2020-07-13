@@ -14,5 +14,5 @@ yandex-music
 pysed
 pony
 apiai
-amino.py==1.0.4
+amino.py
 emoji

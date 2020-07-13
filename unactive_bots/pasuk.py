@@ -113,6 +113,8 @@ def texthandler(m):
         return
     sended = False
     random.shuffle(lophrase)
+    if alpha:
+        return
     for phrase in lophrase:
         if sended:
             break

@@ -19,7 +19,7 @@ from modules.manybotslib import BotsRunner
 if True:
     from bots import cooker, penis_meter
     from bots import chatbot
-    from bots import pasuk
+    from bots.loshadkin import bot as pasuk
     from bots import triggers
     from bots.forest import bot as forest
     from bots import bpl
@@ -104,5 +104,5 @@ def reboot(m):
 runner = BotsRunner(admins=[config.creator], show_traceback=True)
 runner.add_bots(bots_to_start)
 runner.set_main_bot(bot, 'status')
-bot.report('Готово! Боты запущены и готовы к работе.\nВремени использовано: {} секунд.'.format(timer() - start_time))
+bot.report(f'Готово! Боты запущены и готовы к работе.\nВремени использовано: {timer() - start_time} секунд.')
 runner.run()
