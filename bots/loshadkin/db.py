@@ -65,7 +65,7 @@ class Database:
         return random.choice(list(answers))
 
     def insert_message(self, text):
-        self.two_g.update_one({}, {text.replace('.', ''): text})
+        self.two_g.update_one({}, {'$set': {text.replace('.', ''): text}})
         self.sync()
 
     def insert_pair(self, q, a):

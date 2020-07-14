@@ -67,8 +67,11 @@ class Bot:
 
     def polling(self, speed=1, none_stop=True):
         while none_stop:
-            self.operate()
-            time.sleep(speed)
+            try:
+                self.operate()
+                time.sleep(speed)
+            except:
+                pass
 
     def operate(self):
         for m in self.handle_messages():
