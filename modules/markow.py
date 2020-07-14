@@ -1,6 +1,4 @@
-import random
-
-
+'''
 class MarkowChains:
     def __init__(self, db):
         self.__db = db
@@ -134,3 +132,4 @@ class MarkowChains:
 
         except Exception as e:
             pass
+'''
