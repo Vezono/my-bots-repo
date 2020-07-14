@@ -1,11 +1,12 @@
+import random
+
+
 class MarkowChains:
     def __init__(self, db):
         self.__db = db
         self.__allwords = dict()
         self.__end_symbols = ['!', '.', '?', ')']
 
-
-'''
     def generate(self, sentences=3):
         ctext = ''
         csent = 0
@@ -133,4 +134,3 @@ class MarkowChains:
 
         except Exception as e:
             pass
-'''
