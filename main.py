@@ -21,31 +21,25 @@ from modules.manybotslib import BotsRunner
 
 if True:
     from bots import cooker, penis_meter
-    from bots import chatbot
     from bots.loshadkin import bot as pasuk
     from bots import triggers
     from bots.forest import bot as forest
     from bots import bpl
-    from bots import georges_db
     from bots import sedbot
     from bots.magicwars import bot as magicwars
     # from bots.everlastingsummer.sovenok import bots, Sovenok
-    from bots.telegrad import bot as telegrad
     from bots.amino import main as aminobots
 
 
 bots_to_start = {
     'Повар': cooker.bot,
-    'Чабот': chatbot.bot,
     'Пасюк': pasuk.bot,
     'Триггеры': triggers.bot,
     'Лес': forest.bot,
     'BPL': bpl.bot,
-    'Georges_DB': georges_db.bot,
     'SedBot': sedbot.bot,
     'MagicWars': magicwars.bot,
     'Penis': penis_meter.bot,
-    'Telegrad': telegrad.bot,
     'Аминомост': aminobots.bot,
     'Амино_Ассистент': aminobots.t_bot,
     'Bot_Ruler': bot

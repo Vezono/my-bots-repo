@@ -1,3 +1,7 @@
+from modules.coach import Coach
+
+coach = Coach()
+
 import random
 import time
 
@@ -367,3 +371,4 @@ def reload_bar():
 
 
 bar, potions = reload_bar()
+print(f'Aminos booted in {coach.time()} seconds.')

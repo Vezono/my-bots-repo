@@ -22,7 +22,6 @@ class Bot:
         self.db = MongoClient(mongo_token).amino.readed
         self.client = SubClient(comId=com_id, profile='')
         self.client.login(email=email, password=password)
-        print(f'Вошел как {self.client.get_user_info(self.client.userId).nickname}.')
         self.client.activity_status(1)
         self.client.check_in()
 
