@@ -9,13 +9,16 @@ else:
     heroku = False
     bot.report('Local initialization...')
 
-from timeit import default_timer as timer
-start_time = timer()
+from modules.coach import Coach
+
+coach = Coach()
 
 from modules.heroku import Heroku
+
 app = Heroku().app
 
 from modules.manybotslib import BotsRunner
+
 if True:
     from bots import cooker, penis_meter
     from bots import chatbot
@@ -104,5 +107,5 @@ def reboot(m):
 runner = BotsRunner(admins=[config.creator], show_traceback=True)
 runner.add_bots(bots_to_start)
 runner.set_main_bot(bot, 'status')
-bot.report(f'Готово! Боты запущены и готовы к работе.\nВремени использовано: {timer() - start_time} секунд.')
+bot.report(f'Готово! Боты запущены и готовы к работе.\nВремени использовано: {coach.time()} секунд.')
 runner.run()
