@@ -20,7 +20,16 @@ app = Heroku().app
 from modules.manybotslib import BotsRunner
 
 if True:
-    pass
+    from bots import cooker
+    from bots import penis_meter
+    from bots.loshadkin import bot as pasuk
+    from bots import triggers
+    from bots.forest import bot as forest
+    from bots import bpl
+    from bots import sedbot
+    from bots.magicwars import bot as magicwars
+    from bots.amino import main as aminobots
+    from bots.library import bot as library
 
 from modules.bot_keeper import keeper
 

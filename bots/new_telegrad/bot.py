@@ -3,7 +3,6 @@ import telebot
 import config
 from .db import db
 from .views import Views
-
 views = Views()
 
 token = config.environ['telegrad']

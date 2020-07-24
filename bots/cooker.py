@@ -1,6 +1,5 @@
 from config import environ
 from modules.coach import Coach
-
 coach = Coach()
 from modules.eatable import Cooker
 from modules.funcs import BotUtil
@@ -87,6 +86,5 @@ def callback_handler(c):
 
 
 from modules.bot_keeper import keeper
-
 keeper.bots_to_run.update({bot.get_me().first_name: bot})
 print(f'{bot.get_me().first_name} booted in {coach.time()}.')

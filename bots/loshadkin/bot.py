@@ -53,6 +53,5 @@ def text_handler(m):
 
 
 from modules.bot_keeper import keeper
-
 keeper.bots_to_run.update({bot.get_me().first_name: bot})
 print(f'{bot.get_me().first_name} booted in {coach.time()}.')

@@ -1,8 +1,6 @@
 import telebot
 from pymongo import MongoClient
-
 from modules.coach import Coach
-
 coach = Coach()
 import config
 
@@ -56,6 +54,5 @@ def texthandler(m):
 
 
 from modules.bot_keeper import keeper
-
 keeper.bots_to_run.update({bot.get_me().first_name: bot})
 print(f'{bot.get_me().first_name} booted in {coach.time()}.')

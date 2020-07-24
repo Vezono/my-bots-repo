@@ -1,9 +1,7 @@
 import typing
-
-import dataclass_factory
 from pymongo import MongoClient
-
 import config
+import dataclass_factory
 from .book import Book
 
 

@@ -1,9 +1,6 @@
 import typing
-
 from pymongo import MongoClient
-
 import config
-
 db = MongoClient(config.environ['database']).library
 
 import dataclass_factory

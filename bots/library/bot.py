@@ -155,6 +155,5 @@ def book_list_kb(user_id, number=0):
 
 
 from modules.bot_keeper import keeper
-
 keeper.bots_to_run.update({bot.get_me().first_name: bot})
 print(f'{bot.get_me().first_name} booted in {coach.time()}.')

@@ -1,6 +1,5 @@
 import config
 from modules.coach import Coach
-
 coach = Coach()
 from bots.forest.mongohelper import MongoHelper
 from modules.funcs import BotUtil
@@ -370,6 +369,5 @@ def broadcast(game, text):
 
 
 from modules.bot_keeper import keeper
-
 keeper.bots_to_run.update({bot.get_me().first_name: bot})
 print(f'{bot.get_me().first_name} booted in {coach.time()}.')
