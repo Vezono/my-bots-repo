@@ -1,6 +1,10 @@
 import os
 import random
 
+from modules.coach import Coach
+
+coach = Coach()
+
 import cv2
 import requests
 
@@ -186,3 +190,9 @@ def CompareHash(hash1, hash2):
             count = count + 1
         i = i + 1
     return count
+
+
+from modules.bot_keeper import keeper
+
+keeper.bots_to_run.update({bot.get_me().first_name: bot})
+print(f'{bot.get_me().first_name} booted in {coach.time()}.')

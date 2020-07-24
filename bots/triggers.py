@@ -1,6 +1,9 @@
 import telebot
 from pymongo import MongoClient
 
+from modules.coach import Coach
+
+coach = Coach()
 import config
 
 teachers = [792414733]
@@ -50,3 +53,9 @@ def texthandler(m):
     for i in chat_triggers.keys():
         if i in m.text.lower():
             bot.reply_to(m, chat_triggers[i])
+
+
+from modules.bot_keeper import keeper
+
+keeper.bots_to_run.update({bot.get_me().first_name: bot})
+print(f'{bot.get_me().first_name} booted in {coach.time()}.')

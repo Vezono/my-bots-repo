@@ -52,4 +52,7 @@ def text_handler(m):
     bot.reply_to(m, tts)
 
 
-print(f'Loshadkin booted in {coach.time()} seconds.')
+from modules.bot_keeper import keeper
+
+keeper.bots_to_run.update({bot.get_me().first_name: bot})
+print(f'{bot.get_me().first_name} booted in {coach.time()}.')

@@ -16,3 +16,4 @@ pony
 apiai
 amino.py
 emoji
+dataclass_factory

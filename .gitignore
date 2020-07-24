@@ -4,4 +4,4 @@ __pycache__
 bots/__*
 modules/__*
 tokens.py
-
+/device.json

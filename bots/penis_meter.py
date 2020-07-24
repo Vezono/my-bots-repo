@@ -3,6 +3,9 @@ import threading
 import time
 
 import config
+from modules.coach import Coach
+
+coach = Coach()
 from modules.funcs import BotUtil
 
 bot = BotUtil(config.environ['penis_meter'], config.creator)
@@ -142,3 +145,9 @@ def get_time():
     hour = int(x[0].split(' ')[-1])
     minute = int(x[1])
     return hour, minute
+
+
+from modules.bot_keeper import keeper
+
+keeper.bots_to_run.update({bot.get_me().first_name: bot})
+print(f'{bot.get_me().first_name} booted in {coach.time()}.')

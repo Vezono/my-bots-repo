@@ -20,33 +20,14 @@ app = Heroku().app
 from modules.manybotslib import BotsRunner
 
 if True:
-    from bots import cooker, penis_meter
-    from bots.loshadkin import bot as pasuk
-    from bots import triggers
-    from bots.forest import bot as forest
-    from bots import bpl
-    from bots import sedbot
-    from bots.magicwars import bot as magicwars
-    # from bots.everlastingsummer.sovenok import bots, Sovenok
-    from bots.amino import main as aminobots
+    pass
 
+from modules.bot_keeper import keeper
 
 bots_to_start = {
-    'Повар': cooker.bot,
-    'Пасюк': pasuk.bot,
-    'Триггеры': triggers.bot,
-    'Лес': forest.bot,
-    'BPL': bpl.bot,
-    'SedBot': sedbot.bot,
-    'MagicWars': magicwars.bot,
-    'Penis': penis_meter.bot,
-    'Аминомост': aminobots.bot,
-    'Амино_Ассистент': aminobots.t_bot,
     'Bot_Ruler': bot
 }
-
-# Sovenok(heroku)
-# bots_to_start.update(bots)
+bots_to_start.update(keeper.bots_to_run)
 
 
 @bot.message_handler(commands=['os'])
@@ -102,4 +83,7 @@ runner = BotsRunner(admins=[config.creator], show_traceback=True)
 runner.add_bots(bots_to_start)
 runner.set_main_bot(bot, 'status')
 bot.report(f'Готово! Боты запущены и готовы к работе.\nВремени использовано: {coach.time()} секунд.')
-runner.run()
+try:
+    runner.run()
+except KeyboardInterrupt:
+    bot.report('Server shutted down.')

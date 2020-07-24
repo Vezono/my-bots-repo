@@ -1,3 +1,7 @@
+from modules.coach import Coach
+
+coach = Coach()
+
 from telebot import types
 
 import bots.magicwars.battle as game
@@ -184,3 +188,9 @@ def get_game(chat_id):
     if not battle.exists:
         return
     return battle
+
+
+from modules.bot_keeper import keeper
+
+keeper.bots_to_run.update({bot.get_me().first_name: bot})
+print(f'{bot.get_me().first_name} booted in {coach.time()}.')

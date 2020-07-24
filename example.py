@@ -14,4 +14,7 @@ def text_handler(m):
     pass
 
 
-print(f'Booted in {coach.time()}.')
+from modules.bot_keeper import keeper
+
+keeper.bots_to_run.update({bot.get_me().first_name: bot})
+print(f'{bot.get_me().first_name} booted in {coach.time()}.')
