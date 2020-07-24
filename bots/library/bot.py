@@ -27,6 +27,7 @@ def library_handler(m):
         types.InlineKeyboardButton(text='По автору', callback_data='search author'),
         types.InlineKeyboardButton(text='По названию', callback_data='search title'),
         types.InlineKeyboardButton(text='По жанру', callback_data=f'search genre'),
+        types.InlineKeyboardButton(text='Все книги', callback_data=f'search all')
     )
     bot.reply_to(m, 'Поиск по:', reply_markup=kb)
 
@@ -80,11 +81,12 @@ def text_handler(m):
                               reply_markup=kb)
     elif user_data['type'] == 'search':
         book_list = []
-        for book in book_repo.all_books:
+        for book in book_repo.all_book_dicts:
             for word in m.text.lower().split(' '):
-                if word in book.title.lower():
+                if word in book[user_data['line']].lower():
                     if book not in book_list:
                         book_list.append(book)
+        book_list = book_repo.deserialize_books(book_list)
         kb = book_list_kb(book_list)
         bot.edit_message_text(
             'Книги по вашему запросу: ',
@@ -111,6 +113,15 @@ def callback_handler(c):
     if c.from_user.id != c.message.reply_to_message.from_user.id:
         return
     line = c.data.split(' ')[1]
+    if line == 'all':
+        kb = book_list_kb(book_repo.all_books)
+        bot.edit_message_text(
+            'Книги по вашему запросу: ',
+            c.message.chat.id,
+            c.message.message_id,
+            reply_markup=kb
+        )
+        return
     temp.update({
         c.from_user.id: {
             'line': line,

@@ -26,6 +26,10 @@ class Books:
         books = self.books.find({})
         return [self.deserialize_book(book) for book in books]
 
+    @property
+    def all_book_dicts(self) -> typing.List[dict]:
+        return self.books.find({})
+
     def sync_book(self, book: Book):
         sample_book_dict = self.form_book_dict()
         book_dict = self.serialize_book(book)
@@ -89,7 +93,7 @@ class Books:
         books = self.books.find(query)
         return self.deserialize_books(books)
 
-    def deserialize_books(self, books: dict) -> typing.List[Book]:
+    def deserialize_books(self, books: list) -> typing.List[Book]:
         return [self.deserialize_book(book) for book in books]
 
     def serialize_books(self, books: typing.List[Book]) -> typing.List[dict]:

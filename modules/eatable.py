@@ -40,7 +40,8 @@ class Cooker:
         kb.add(*buttons1)
         self.__bot.reply(chat.id, tts, message, reply_markup=kb, parse_mode='HTML')
 
-    def __rus(self, text):
+    @staticmethod
+    def __rus(text):
         try:
             return config.r[text]
         except:

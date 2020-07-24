@@ -19,7 +19,8 @@ class BotUtil(TeleBot):
         return self.bot.send_message(chat_id, message_text, reply_to_message_id=message_id, reply_markup=reply_markup,
                                      parse_mode=parse_mode)
 
-    def get_link(self, name, user_id):
+    @staticmethod
+    def get_link(name, user_id):
         return '<a href="tg://user?id={}">{}</a>'.format(user_id, name)
 
     def is_admin(self, chat, user):

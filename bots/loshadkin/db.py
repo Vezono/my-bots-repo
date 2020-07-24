@@ -76,7 +76,8 @@ class Database:
         self.three_g.update_one({}, {'$push': {'pairs': packet}})
         self.sync()
 
-    def is_triggered(self, text):
+    @staticmethod
+    def is_triggered(text):
         if random.randint(1, 100) == 1:
             return True
         for name in {'loshadkin', 'пасюк', 'лошадкин'}:

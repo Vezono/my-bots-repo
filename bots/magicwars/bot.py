@@ -1,4 +1,5 @@
 from modules.coach import Coach
+
 coach = Coach()
 
 from telebot import types
@@ -190,5 +191,6 @@ def get_game(chat_id):
 
 
 from modules.bot_keeper import keeper
+
 keeper.bots_to_run.update({bot.get_me().first_name: bot})
 print(f'{bot.get_me().first_name} booted in {coach.time()}.')
