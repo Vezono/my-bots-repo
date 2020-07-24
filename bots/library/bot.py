@@ -20,6 +20,17 @@ book_repo = test_books
 temp = dict()
 
 
+@bot.message_handler(commands=['library'])
+def library_handler(m):
+    kb = types.InlineKeyboardMarkup(2)
+    kb.add(
+        types.InlineKeyboardButton(text='По автору', callback_data='search author'),
+        types.InlineKeyboardButton(text='По названию', callback_data='search title'),
+        types.InlineKeyboardButton(text='По жанру', callback_data=f'search genre'),
+    )
+    bot.reply_to(m, 'Поиск по:', reply_markup=kb)
+
+
 @bot.message_handler(commands=['add_book'])
 def add_book(m):
     if m.chat.type != 'private':
@@ -58,16 +69,31 @@ def text_handler(m):
     if m.from_user.id not in temp:
         return
     user_data = temp[m.from_user.id]
-    book_repo.update_book(user_data['book_id'], {user_data['line']: m.text})
-    book = book_repo.get_book(user_data['book_id'])
-    kb = form_book_kb(book)
-    kb.add(types.InlineKeyboardButton(text='В список книг', callback_data='my_books 0'))
-    bot.edit_message_text(form_book_msg(book),
-                          m.from_user.id,
-                          user_data['msg'].message_id,
-                          reply_markup=kb)
-    del temp[m.from_user.id]
+    if user_data['type'] == 'edit':
+        book_repo.update_book(user_data['book_id'], {user_data['line']: m.text})
+        book = book_repo.get_book(user_data['book_id'])
+        kb = form_book_kb(book)
+        kb.add(types.InlineKeyboardButton(text='В список книг', callback_data='my_books 0'))
+        bot.edit_message_text(form_book_msg(book),
+                              m.from_user.id,
+                              user_data['msg'].message_id,
+                              reply_markup=kb)
+    elif user_data['type'] == 'search':
+        book_list = []
+        for book in book_repo.all_books:
+            for word in m.text.lower().split(' '):
+                if word in book.title.lower():
+                    if book not in book_list:
+                        book_list.append(book)
+        kb = book_list_kb(book_list)
+        bot.edit_message_text(
+            'Книги по вашему запросу: ',
+            m.from_user.id,
+            user_data['msg'].message_id,
+            reply_markup=kb
+        )
     bot.delete_message(m.from_user.id, m.message_id)
+    del temp[m.from_user.id]
 
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('my_books'))
@@ -75,8 +101,24 @@ def callback_handler(c):
     if c.from_user.id != c.message.reply_to_message.from_user.id:
         return
     page = int(c.data.split(' ')[1])
-    kb = book_list_kb(c.from_user.id, page)
+    book_list = book_repo.get_user_books(c.from_user.id)
+    kb = book_list_kb(book_list, page)
     bot.edit_message_text('Ваши книги.', c.message.chat.id, c.message.message_id, reply_markup=kb)
+
+
+@bot.callback_query_handler(func=lambda c: c.data.startswith('search '))
+def callback_handler(c):
+    if c.from_user.id != c.message.reply_to_message.from_user.id:
+        return
+    line = c.data.split(' ')[1]
+    temp.update({
+        c.from_user.id: {
+            'line': line,
+            'msg': c.message,
+            'type': 'search'
+        }
+    })
+    bot.edit_message_text('Введите текст запроса: ', c.message.chat.id, c.message.message_id)
 
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('v '))
@@ -100,7 +142,8 @@ def callback_handler(c):
         c.from_user.id: {
             'book_id': book_id,
             'line': line,
-            'msg': c.message
+            'msg': c.message,
+            'type': 'edit'
         }
     })
     bot.edit_message_text(f'Вы хотите изменить поле {line}. Отправьте его значение следующим значением.',
@@ -127,8 +170,7 @@ def form_book_msg(book):
     return tts
 
 
-def book_list_kb(user_id, number=0):
-    book_list = book_repo.get_user_books(user_id)
+def book_list_kb(book_list, number=0):
     kb = types.InlineKeyboardMarkup()
     pages = []
     page = []

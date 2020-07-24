@@ -83,7 +83,10 @@ class Books:
         return self.deserialize_book(book_dict)
 
     def get_user_books(self, user_id):
-        books = self.books.find({'pushed_by': user_id})
+        return self.filter_books({'pushed_by': user_id})
+
+    def filter_books(self, query):
+        books = self.books.find(query)
         return self.deserialize_books(books)
 
     def deserialize_books(self, books: dict) -> typing.List[Book]:
