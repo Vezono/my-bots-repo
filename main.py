@@ -24,7 +24,7 @@ if True:
     from bots import penis_meter
     from bots.loshadkin import bot as pasuk
     from bots import triggers
-    from bots import bpl
+    from bots.simple_bplist import bot as bpl
     from bots import sedbot
     from bots.magicwars import bot as magicwars
     from bots.amino import main as aminobots
