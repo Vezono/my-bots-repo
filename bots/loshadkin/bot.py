@@ -26,7 +26,8 @@ def handler(m):
     elif m.new_chat_members[0].is_bot:
         if m.new_chat_members[0].username == 'rextester_bot':
             try:
-                m = bot.unban_chat_member(m.chat.id, m.new_chat_members[0].id)
+                bot.unban_chat_member(m.chat.id, m.new_chat_members[0].id)
+                bot.delete_message(m.chat.id, m.message_id + 1)
             except:
                 raise RuntimeError('ААААААААААААААААААААА')
         bot.reply_to(m, 'Тут уже 1000000 твоих ботов')
