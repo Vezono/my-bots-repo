@@ -17,3 +17,5 @@ apiai
 amino.py
 emoji
 dataclass_factory
+pyrogram
+tgcrypto

@@ -29,6 +29,7 @@ if True:
     from bots.magicwars import bot as magicwars
     from bots.amino import main as aminobots
     from bots.library import bot as library
+    from bots.goatwars import bot as goatwars
 
 from modules.bot_keeper import keeper
 

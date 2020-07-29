@@ -105,7 +105,7 @@ def callback_handler(c):
     page = int(c.data.split(' ')[1])
     book_list = book_repo.get_user_books(c.from_user.id)
     kb = book_list_kb(book_list, page)
-    bot.edit_message_text('Ваши книги.', c.message.chat.id, c.message.message_id, reply_markup=kb)
+    bot.edit_message_text('Книги: ', c.message.chat.id, c.message.message_id, reply_markup=kb)
 
 
 @bot.callback_query_handler(func=lambda c: c.data.startswith('search '))

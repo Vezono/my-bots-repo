@@ -24,6 +24,9 @@ def handler(m):
     if m.new_chat_members[0].id == bot.get_me().id:
         bot.reply_to(m, 'Ебло? Нахуя меня в рандомные чаты добавлять')
     elif m.new_chat_members[0].is_bot:
+        if m.new_chat_members[0].username == 'rextester_bot':
+            m = bot.unban_chat_member(m.chat.id, m.new_chat_members[0].id)
+            bot.delete_message(m.chat.id, m)
         bot.reply_to(m, 'Тут уже 1000000 твоих ботов')
     else:
         bot.reply_to(m, 'Добро пожаловать к нашему шалашу')
