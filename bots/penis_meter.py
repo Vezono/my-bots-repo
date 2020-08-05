@@ -35,6 +35,7 @@ def top_handler(m):
     top.sort('length')
     top = [user for user in top]
     top.reverse()
+    top = top[:10]
     for index in range(len(top)):
         user = top[index]
         tts += f'{index + 1}. {user["penis_name"]} ({user["name"]}): {user["length"]} см\n'
