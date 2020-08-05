@@ -59,6 +59,21 @@ def give_handler(m):
     bot.reply_to(m, f'Вы изменили себе пипирку на {growth}.')
 
 
+@bot.message_handler(commands=['sanitize'])   
+def sanitizer_handler(m):
+    if m.from_user.id != config.creator:
+        return
+    tts = 'Все пипирщики: \n'
+    top = users.find()
+    top.sort('length')
+    top = [user for user in top]
+    top.reverse()
+    for index in range(len(top)):
+        user = top[index]
+        tts += f'{index + 1}. {bot.get_link(user["name"], user["id"])} ({user["name"]}): {user["length"]} см\n'
+    bot.reply_to(m, tts)
+    
+    
 @bot.message_handler(commands=['name'])
 def name_handler(m):
     if not m.text.count(' '):
@@ -92,7 +107,7 @@ def cut_handler(m):
 def dick_handler(m):
     if m.from_user.id in gamed and m.from_user.id != config.creator:
         bot.reply_to(m, 'Ты уже сегодня играл. Все игры обновляются в полночь и в полдень. Если вы ходите принудительно'
-                        ' обновить пипирку, позовите Брита.')
+                        ' обновить пипирку, позовите Брита, @ gbball.')
         return
     user = get_user(m.from_user)
     growth = random.randint(-4, 10)
@@ -100,6 +115,8 @@ def dick_handler(m):
     growth_text = 'выросла'
     if growth < 0:
         growth_text = 'уменьшилась'
+    elif growth == 0:
+        grotwth_text = 'хуйня. Сдвинулась'
     tts = f'Ваша пипирка {growth_text} на {growth} см. Теперь его длина - {user["length"] + growth} см.'
     gamed.add(m.from_user.id)
     bot.reply_to(m, tts)
