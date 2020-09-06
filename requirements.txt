@@ -19,3 +19,4 @@ emoji
 dataclass_factory
 pyrogram
 tgcrypto
+openMystatAPI
