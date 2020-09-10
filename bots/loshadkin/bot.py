@@ -1,8 +1,10 @@
+import requests
 import telebot
 
 import config
 from modules.coach import Coach
 from .db import Database
+from threading import Timer
 
 coach = Coach()
 db = Database()

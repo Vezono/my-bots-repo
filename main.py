@@ -1,3 +1,7 @@
+from threading import Timer
+
+import requests
+
 import config
 from modules.funcs import BotUtil
 
@@ -88,6 +92,13 @@ def reboot(m):
     bot.reply_to(m, logs)
 
 
+def pingovalka():
+    requests.get('stickersorter.herokuapp.com')
+    Timer(20 * 60 * 60, pingovalka)
+    bot.send_message(config.creator, 'Pinged.')
+
+
+pingovalka()
 runner = BotsRunner(admins=[config.creator], show_traceback=True)
 runner.add_bots(bots_to_start)
 runner.set_main_bot(bot, 'status')
