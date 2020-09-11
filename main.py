@@ -94,7 +94,7 @@ def reboot(m):
 
 def pingovalka():
     requests.get('https://stickersorter.herokuapp.com')
-    Timer(20 * 60 * 60, pingovalka).start()
+    Timer(20 * 60, pingovalka).start()
     bot.send_message(config.creator, 'Pinged.')
 
 
