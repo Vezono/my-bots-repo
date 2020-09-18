@@ -30,7 +30,7 @@ def help_handler(m):
 
 @bot.message_handler(commands=['top'])
 def top_handler(m):
-    tts = 'Топ всех пипирок: \n'
+    tts = "Топ 10 пипирок: \n"
     top = users.find()
     top.sort('length')
     top = [user for user in top]
@@ -38,8 +38,11 @@ def top_handler(m):
     top = top[:10]
     for index in range(len(top)):
         user = top[index]
-        tts += f'{index + 1}. {user["penis_name"]} ({user["name"]}): {user["length"]} см\n'
-    bot.reply_to(m, tts)
+        dick_name = user["penis_name"] if "'" not in user["penis_name"] else "Имя содержит недопустимые символы."
+        tts += f'{index + 1}. {dick_name} ({user["name"]}): {user["length"]} см\n'
+        bot.send_message(config.creator, user)
+    print(tts)
+    bot.reply_to(m, str(tts))
 
 
 @bot.message_handler(commands=['give'])
@@ -59,7 +62,16 @@ def give_handler(m):
     bot.reply_to(m, f'Вы изменили себе пипирку на {growth}.')
 
 
-@bot.message_handler(commands=['sanitize'])   
+@bot.message_handler(commands=['reload'])
+def sanitizer_handler(m):
+    if m.from_user.id != config.creator:
+        return
+    global gamed
+    gamed = set()
+    bot.reply_to(m, 'Обнулено.')
+
+
+@bot.message_handler(commands=['sanitize'])
 def sanitizer_handler(m):
     if m.from_user.id != config.creator:
         return
