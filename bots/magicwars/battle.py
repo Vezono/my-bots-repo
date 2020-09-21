@@ -57,7 +57,7 @@ class Dungeon(Game):
     def __init__(self, chat_id):
         super().__init__(chat_id)
         self.type = 'dungeon'
-        self.level = 0
+        self.level = -1
         self.max_level = 5
         self.mobs = []
         self.win_text = 'Вы очистили все подземелье и дошли до последнего уровня! Выжившие: {}'
@@ -101,21 +101,24 @@ class Dungeon(Game):
                         mob.states['defence'][element]]
             if defences:
                 tts += '\nЗащита от элементов: ' + ", ".join(defences)
-        for magician in self.magicians:
-            tts += f'\n\n{magician.name}:\n'
-            tts += f'❤️ХП: {magician.xp}'
-            defences = [constants.rus(element) for element in magician.states['defence']
-                        if magician.states['defence'][element]]
-            if defences:
-                tts += '\nЗащита от элементов: ' + ", ".join(defences)
-            if magician.states_cleaning:
-                magician.states_cleaning -= 1
-            else:
-                magician.clean_states()
-            magician.casted = False
-        bot.send_message(self.chat_id, tts)
-        self.timer = Timer(30, self.next_turn)
-        self.timer.run()
+        if self.level != 0:
+            for magician in self.magicians:
+                tts += f'\n\n{magician.name}:\n'
+                tts += f'❤️ХП: {magician.xp}'
+                defences = [constants.rus(element) for element in magician.states['defence']
+                            if magician.states['defence'][element]]
+                if defences:
+                    tts += '\nЗащита от элементов: ' + ", ".join(defences)
+                if magician.states_cleaning:
+                    magician.states_cleaning -= 1
+                else:
+                    magician.clean_states()
+                magician.casted = False
+            bot.send_message(self.chat_id, tts)
+            self.timer = Timer(30, self.next_turn)
+            self.timer.run()
+        else:
+            self.next_turn()
 
 
 class Hell(Dungeon):
