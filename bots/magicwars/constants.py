@@ -46,6 +46,7 @@ mobs = {
     2: [Sceleton, Gnome],
     3: [Troll],
     4: [SpiderQueen],
+    5: [Summoner]
 }
 all_mobs = list()
 for level in mobs:

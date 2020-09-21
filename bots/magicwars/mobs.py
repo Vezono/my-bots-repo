@@ -94,6 +94,7 @@ class Sceleton(Mob):
         self.xp = 110
         self.damage = 30
         self.wobble = 40
+        self.attack_descs = ['ударил', 'выстрелил из лука', 'выстрелил', 'кинул кость']
 
 
 class Gnome(Mob):
@@ -144,3 +145,60 @@ class SpiderQueen(Mob):
     def spawn_spider(self):
         self.game.mobs.append(Spider(self.game, len(self.game.mobs)))
         bot.send_message(self.game.chat_id, f'{self.name} родила паука!')
+
+
+class Summoner(Mob):
+    def __init__(self, game, mob_id):
+        super().__init__(game, mob_id)
+        self.name = 'Призыватель'
+        self.xp = 600
+        self.damage = 100
+        self.wobble = 20
+        self.attack_descs = ['призвал боль у', 'скрутил', 'ударил', 'метнул шар боли в']
+        self.kill_descs = ['отправил в небытие']
+
+    def attack(self):
+        if random.randint(1, 100) <= 20:
+            self.summon()
+        target = random.choice(self.game.magicians)
+        desc = random.choice(self.attack_descs)
+        damage = random.randint(self.damage - self.wobble, self.damage + self.wobble)
+        target.xp -= damage
+        tts = f'{self.name} {desc} мага {target.name} и нанес {damage} урона!'
+        if target.xp <= 0:
+            self.game.magicians.remove(target)
+            desc = random.choice(self.kill_descs)
+            tts = f'{self.name} {desc} мага {target.name} нанеся {damage} урона!'
+            self.summon()
+        return tts
+
+    def summon(self):
+        choise = random.randint(1, 100)
+        if choise == 1:
+            mob = Death(self.game, len(self.game.mobs))
+        else:
+            mob = Pixie(self.game, len(self.game.mobs))
+        self.game.mobs.append(mob)
+        bot.send_message(self.game.chat_id, f'{self.name} призвал {mob.name}!')
+
+
+class Pixie(Mob):
+    def __init__(self, game, mob_id):
+        super().__init__(game, mob_id)
+        self.name = 'Пикси'
+        self.xp = 10
+        self.damage = 10
+        self.wobble = 5
+        self.attack_descs = ['ударила', 'дернула за уши']
+        self.kill_descs = ['убила']
+
+
+class Death(Mob):
+    def __init__(self, game, mob_id):
+        super().__init__(game, mob_id)
+        self.name = 'Смерть'
+        self.xp = 1
+        self.damage = 1000000000000000000
+        self.wobble = 0
+        self.attack_descs = ['унесла']
+        self.kill_descs = ['унесла']
