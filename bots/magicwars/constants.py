@@ -1,6 +1,6 @@
 from .mobs import *
 
-elements = ['water', 'fire', 'electricity', 'life', 'rock', 'cold']
+elements = ['water', 'fire', 'electricity', 'life', 'rock', 'cold', 'death']
 combos = {
     'steam': ['fire', 'water'],
     'ice': ['water', 'cold']
@@ -13,7 +13,8 @@ chars = {
     'life': ['жизн', 'жив', 'хил'],
     'rock': ['кам', 'земл'],
     'cold': ['мерз', 'хол', 'лед'],
-    'defence': ['щит', 'блок', 'деф']
+    'defence': ['щит', 'блок', 'деф'],
+    'death': ['умри']
 }
 
 
@@ -25,7 +26,8 @@ damages = {
     'rock': 20,
     'cold': 30,
     'steam': 15,
-    'ice': 70
+    'ice': 70,
+    'death': 1000000
 }
 
 rus_localisation = {
@@ -46,7 +48,8 @@ mobs = {
     2: [Sceleton, Gnome],
     3: [Troll],
     4: [SpiderQueen],
-    5: [Summoner]
+    5: [Summoner],
+
 }
 all_mobs = list()
 for level in mobs:

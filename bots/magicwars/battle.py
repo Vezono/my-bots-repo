@@ -37,7 +37,7 @@ class Game:
         tts = f'Ход {self.turn + 1}!'
         for magician in self.magicians:
             tts += f'\n\n{magician.name}:\n' \
-                   f'❤️ХП: {magician.xp}'
+                   f'{magician.heart}️ХП: {magician.xp}'
             defences = [constants.rus(element) for element in magician.states['defence']
                         if magician.states['defence'][element]]
             if defences:
@@ -57,7 +57,7 @@ class Dungeon(Game):
     def __init__(self, chat_id):
         super().__init__(chat_id)
         self.type = 'dungeon'
-        self.level = -1
+        self.level = 0
         self.max_level = 5
         self.mobs = []
         self.win_text = 'Вы очистили все подземелье и дошли до последнего уровня! Выжившие: {}'
@@ -85,40 +85,37 @@ class Dungeon(Game):
                 return
             self.turn = 0
             self.init_mobs()
-            self.level += 1
-            if self.mobs and self.level != 1:
+            if not self.mobs and self.level != 0:
                 bot.send_message(self.chat_id, f'Вы убили всех мобов на этом уровне и перешли на следующий,'
                                                f' {self.level} уровень!\nНовые мобы: '
                                                f' {", ".join([mob.name for mob in self.mobs])}')
+            self.level += 1
 
         self.turn += 1
         tts = f'Уровень {self.level}, ход {self.turn}!'
         for mob in self.mobs:
             bot.send_message(self.chat_id, mob.attack())
-            tts += f'\n\n{mob.name}:\n'
-            tts += f'🖤️ХП: {mob.xp}'
+            tts += f'\n\n{mob.name}:\n' \
+                   f'{mob.heart}ХП: {mob.xp}'
             defences = [constants.rus(element) for element in mob.states['defence'] if
                         mob.states['defence'][element]]
             if defences:
                 tts += '\nЗащита от элементов: ' + ", ".join(defences)
-        if self.level != 0:
-            for magician in self.magicians:
-                tts += f'\n\n{magician.name}:\n'
-                tts += f'❤️ХП: {magician.xp}'
-                defences = [constants.rus(element) for element in magician.states['defence']
-                            if magician.states['defence'][element]]
-                if defences:
-                    tts += '\nЗащита от элементов: ' + ", ".join(defences)
-                if magician.states_cleaning:
-                    magician.states_cleaning -= 1
-                else:
-                    magician.clean_states()
-                magician.casted = False
-            bot.send_message(self.chat_id, tts)
-            self.timer = Timer(30, self.next_turn)
-            self.timer.run()
-        else:
-            self.next_turn()
+        for magician in self.magicians:
+            tts += f'\n\n{magician.name}:\n' \
+                   f'{magician.heart}️ХП: {magician.xp}'
+            defences = [constants.rus(element) for element in magician.states['defence']
+                        if magician.states['defence'][element]]
+            if defences:
+                tts += '\nЗащита от элементов: ' + ", ".join(defences)
+            if magician.states_cleaning:
+                magician.states_cleaning -= 1
+            else:
+                magician.clean_states()
+            magician.casted = False
+        bot.send_message(self.chat_id, tts)
+        self.timer = Timer(30, self.next_turn)
+        self.timer.run()
 
 
 class Hell(Dungeon):

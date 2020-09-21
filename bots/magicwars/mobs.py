@@ -6,8 +6,6 @@ from . import constants
 
 bot = BotUtil(config.environ['magic_wars'], config.creator)
 
-elements = ['water', 'fire', 'electricity', 'life', 'rock', 'cold']
-
 
 class Mob:
     def __init__(self, game, mob_id):
@@ -17,11 +15,12 @@ class Mob:
         self.damage = 10
         self.wobble = 5
         self.max_xp = 99999999999999
+        self.heart = '🖤️'
         self.attack_descs = ['ударил']
         self.kill_descs = ['убил']
         self.states = {
             'defence': {
-                element: False for element in elements
+                element: False for element in constants.elements
             }
         }
 

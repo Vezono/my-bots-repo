@@ -14,6 +14,7 @@ class Magician:
         self.xp = 700
         self.max_xp = self.xp
         self.casted = False
+        self.heart = '❤️'
         self.states = {
             'defence': {
                 element: False for element in constants.elements
