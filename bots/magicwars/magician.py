@@ -110,12 +110,6 @@ class Magician:
                     cast.append(self.init_element(element))
                 continue
             cast.append(element)
-
-        for element in cast:
-            self.kd[element] += 1
-            if self.kd[element] > (5 / self.kd_multiplier):
-                self.kd[element] = 0
-                cast.remove(element)
         for element in cast:
             if target.states['defence'][element]:
                 cast.remove(element)
