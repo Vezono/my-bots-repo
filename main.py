@@ -11,7 +11,7 @@ if 'DYNO' in config.environ:
     bot.report('Heroku initialization...')
 else:
     heroku = False
-    bot.report('Local initialization...')
+    bot.report('Local initialization....')
 
 from modules.coach import Coach
 
