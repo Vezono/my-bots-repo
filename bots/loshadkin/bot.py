@@ -25,6 +25,7 @@ def cstats(m):
           f'Пар сообщений (q/a): {pair_stat}\n' \
           f'Список сообщений: {msg_stat}\n' \
           f'Тесты Тьюринга: {turing_stat}'
+    bot.reply_to(m, tts)
 
 
 @bot.message_handler(commands=["alpha"])
