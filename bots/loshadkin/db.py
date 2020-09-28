@@ -13,6 +13,7 @@ class Database:
 
         self.pairs = dict()
         self.message_list = set()
+        self.turing = 0
 
         self.alpha = False
 

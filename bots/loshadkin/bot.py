@@ -1,3 +1,5 @@
+import random
+
 import requests
 import telebot
 
@@ -12,6 +14,17 @@ db = Database()
 token = config.environ['pasuk']
 bot = telebot.TeleBot(token)
 pasuk_id = 441399484
+
+
+@bot.message_handler(commands=["stats"])
+def cstats(m):
+    pair_stat = len(db.pairs)
+    msg_stat = len(db.message_list)
+    turing_stat = db.turing
+    tts = f'Стата по боту:\n\n' \
+          f'Пар сообщений (q/a): {pair_stat}\n' \
+          f'Список сообщений: {msg_stat}\n' \
+          f'Тесты Тьюринга: {turing_stat}'
 
 
 @bot.message_handler(commands=["alpha"])
@@ -31,7 +44,7 @@ def handler(m):
                 bot.unban_chat_member(m.chat.id, m.new_chat_members[0].id)
                 bot.delete_message(m.chat.id, m.message_id + 1)
             except:
-                raise RuntimeError('ААААААААААААААААААААА')
+                pass
         bot.reply_to(m, 'Тут уже 1000000 твоих ботов')
     else:
         bot.reply_to(m, 'Добро пожаловать к нашему шалашу')
@@ -52,12 +65,15 @@ def text_handler(m):
             triggered = True
     if not triggered:
         return
-    bot.send_chat_action(m.chat.id, 'typing')
+
     if db.alpha:
         tts = db.three_g_answer(m.text)
     else:
         tts = db.two_g_answer(m.text)
-    bot.reply_to(m, tts)
+    delay = random.randint(0, 300)
+    typing_time = int(len(tts) / 5)
+    Timer(delay, bot.send_chat_action, args=[m.chat.id, 'typing']).start()
+    Timer(delay + typing_time, bot.reply_to, args=[m, tts]).start()
 
 
 from modules.bot_keeper import keeper
