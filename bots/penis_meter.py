@@ -163,7 +163,7 @@ def get_user(tg_user):
 def poll_time():
     h, m = get_time()
     if m == 0:
-        if h == 12 or h == 0:
+        if h == 3 or h == 15:
             global gamed
             gamed = set()
     threading.Timer(60, poll_time)
