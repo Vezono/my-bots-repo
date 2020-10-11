@@ -1,8 +1,6 @@
 import random
-
-import requests
 import telebot
-
+from telebot import types
 import config
 from modules.coach import Coach
 from .db import Database
@@ -14,6 +12,20 @@ db = Database()
 token = config.environ['pasuk']
 bot = telebot.TeleBot(token)
 pasuk_id = 441399484
+
+
+@bot.message_handler(commands=["tur"])
+def ctur(m):
+    if not m.reply_to_message:
+        bot.reply_to(m, 'Реплайните на то сообщение, которое хотите протестировать.')
+    if db.alpha:
+        tts = db.three_g_answer(m.text)
+    else:
+        tts = db.two_g_answer(m.text)
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton(text='✅', callback_data='yes'))
+    kb.add(types.InlineKeyboardButton(text='❌', callback_data='no'))
+    bot.reply_to(m, f'Подходит ли это сообщение по смыслу?\n\n{tts}', reply_markup=kb)
 
 
 @bot.message_handler(commands=["stats"])
