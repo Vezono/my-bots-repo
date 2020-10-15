@@ -16,8 +16,10 @@ pasuk_id = 441399484
 
 @bot.message_handler(commands=["tur"])
 def ctur(m):
+    return
     if not m.reply_to_message:
         bot.reply_to(m, 'Реплайните на то сообщение, которое хотите протестировать.')
+        return
     if db.alpha:
         tts = db.three_g_answer(m.text)
     else:
