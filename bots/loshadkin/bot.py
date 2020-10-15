@@ -83,7 +83,7 @@ def text_handler(m):
         tts = db.three_g_answer(m.text)
     else:
         tts = db.two_g_answer(m.text)
-    delay = random.randint(0, 300)
+    delay = random.randint(0, 240)
     if m.chat.type == 'private':
         delay = 0
     typing_time = int(len(tts) / 5)
