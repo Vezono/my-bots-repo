@@ -84,6 +84,8 @@ def text_handler(m):
     else:
         tts = db.two_g_answer(m.text)
     delay = random.randint(0, 300)
+    if m.chat.type == 'private':
+        delay = 0
     typing_time = int(len(tts) / 5)
     Timer(delay, bot.send_chat_action, args=[m.chat.id, 'typing']).start()
     Timer(delay + typing_time, bot.reply_to, args=[m, tts]).start()
