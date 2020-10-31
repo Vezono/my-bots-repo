@@ -44,7 +44,7 @@ def ctur(m):
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton(text='✅', callback_data='t_yes'))
     kb.add(types.InlineKeyboardButton(text='❌', callback_data='t_no'))
-    bot.reply_to(m.reply_to_message, f'Подходит ли это сообщение по смыслу?\n\n{tts}', reply_markup=kb)
+    bot.reply(m.chat.id, f'Подходит ли это сообщение по смыслу?\n\n{tts}', c.message.reply_to_message.message_id reply_markup=kb)
 
 
 @bot.message_handler(commands=["stats"])
