@@ -29,7 +29,7 @@ def tur_yes_handler(c):
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton(text='✅', callback_data='t_yes'))
     kb.add(types.InlineKeyboardButton(text='❌', callback_data='t_no'))
-    bot.edit_message_text(f'Повторная генерация.Подходит ли это сообщение по смыслу?\n\n{tts}', 
+    bot.edit_message_text(f'Повторная генерация. Подходит ли это сообщение по смыслу?\n\n{tts}', 
                           c.message.chat.id, c.message.message_id, reply_markup=kb, parse_mode='HTML')
     
 @bot.message_handler(commands=["tur"])
@@ -44,7 +44,7 @@ def ctur(m):
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton(text='✅', callback_data='t_yes'))
     kb.add(types.InlineKeyboardButton(text='❌', callback_data='t_no'))
-    bot.reply_to(m, f'Подходит ли это сообщение по смыслу?\n\n{tts}', reply_markup=kb)
+    bot.reply_to(m.reply_to_message, f'Подходит ли это сообщение по смыслу?\n\n{tts}', reply_markup=kb)
 
 
 @bot.message_handler(commands=["stats"])
