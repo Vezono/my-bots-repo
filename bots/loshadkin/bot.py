@@ -14,19 +14,36 @@ bot = telebot.TeleBot(token)
 pasuk_id = 441399484
 
 
+@bot.callback_query_handler(func=lambda c: c.data=='t_yes')
+def tur_yes_handler(c):
+    answer = c.message.text.split('\n\n')[1]
+    bot.edit_message_text(answer, c.message.chat.id, c.message.message_id, parse_mode='HTML')
+    
+@bot.callback_query_handler(func=lambda c: c.data=='t_no')
+def tur_yes_handler(c):
+    query = c.message.reply_to_message.text
+    if db.alpha:
+        tts = db.three_g_answer(query)
+    else:
+        tts = db.two_g_answer(query)
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton(text='✅', callback_data='t_yes'))
+    kb.add(types.InlineKeyboardButton(text='❌', callback_data='t_no'))
+    bot.edit_message_text(f'Повторная генерация.Подходит ли это сообщение по смыслу?\n\n{tts}', 
+                          c.message.chat.id, c.message.message_id, reply_markup=kb, parse_mode='HTML')
+    
 @bot.message_handler(commands=["tur"])
 def ctur(m):
-    return
     if not m.reply_to_message:
         bot.reply_to(m, 'Реплайните на то сообщение, которое хотите протестировать.')
         return
     if db.alpha:
-        tts = db.three_g_answer(m.text)
+        tts = db.three_g_answer(m.reply_to_message.text)
     else:
-        tts = db.two_g_answer(m.text)
+        tts = db.two_g_answer(m.reply_to_message.text)
     kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton(text='✅', callback_data='yes'))
-    kb.add(types.InlineKeyboardButton(text='❌', callback_data='no'))
+    kb.add(types.InlineKeyboardButton(text='✅', callback_data='t_yes'))
+    kb.add(types.InlineKeyboardButton(text='❌', callback_data='t_no'))
     bot.reply_to(m, f'Подходит ли это сообщение по смыслу?\n\n{tts}', reply_markup=kb)
 
 
