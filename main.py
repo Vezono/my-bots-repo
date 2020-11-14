@@ -31,7 +31,7 @@ if True:
     from bots.simple_bplist import bot as bpl
     from bots import sedbot
     from bots.magicwars import bot as magicwars
-    from bots.amino import main as aminobots
+    # from bots.amino import main as aminobots
     from bots.library import bot as library
     from bots.goatwars import bot as goatwars
     from bots.myvodafone import bot as myvodafone
