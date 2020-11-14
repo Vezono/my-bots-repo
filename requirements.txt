@@ -20,3 +20,4 @@ dataclass_factory
 pyrogram
 tgcrypto
 openMystatAPI
+myvodapi

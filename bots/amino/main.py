@@ -373,6 +373,5 @@ def reload_bar():
 bar, potions = reload_bar()
 from modules.bot_keeper import keeper
 keeper.bots_to_run.update({t_bot.get_me().first_name: t_bot})
-keeper.bots_to_run.update({'Amino bridge': bot})
 print(f'Aminobots booted in {coach.time()}.')
 
