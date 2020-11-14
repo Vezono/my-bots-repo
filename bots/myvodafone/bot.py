@@ -2,6 +2,7 @@ from modules.coach import Coach
 
 coach = Coach()
 
+import traceback
 import telebot
 import config
 from myvodapi import Session
@@ -37,6 +38,7 @@ def login_handler(m):
         tempToken = session.callSmsWithTempToken(number)
     except:
         bot.reply_to(m, 'Какая то ошибка. Попробуйте еще раз.')
+        print(traceback.format_exc())
         return
     waiting_for_code.update({m.from_user.id: {'number': number, 'tempToken': tempToken}})
     print(waiting_for_code)
@@ -73,7 +75,7 @@ def info_handler(m):
     try:
         tts = form_information(m.from_user.id)
     except Exception as e:
-        print(e)
+        print(traceback.format_exc())
         bot.reply_to(m, 'Какая то ошибка. перелогинтесь.')
         return
     bot.reply_to(m, tts, parse_mode="HTML")
