@@ -35,6 +35,7 @@ if True:
     from bots.library import bot as library
     from bots.goatwars import bot as goatwars
     from bots.myvodafone import bot as myvodafone
+    from bots.slavya import main as slavya
 
 from modules.bot_keeper import keeper
 
