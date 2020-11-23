@@ -25,7 +25,7 @@ def pancake_handler(m):
     target = m.reply_to_message.from_user
     cooker = m.from_user
     if target.id == bot.get_me().id:
-        bot.reply_to(m, 'За что?!!!')
+        bot.reply_to(m, 'Не стоило! Но все равно, спасибо большое!')
         db.inc_stat(cooker.id, "rep", 10)
         return
     db.inc_stat(target.id, "pancakes", 1)
@@ -65,10 +65,10 @@ def throw_handler(m):
     target = m.reply_to_message.from_user
     if target.id == bot.get_me().id:
         bot.reply_to(m, 'За что?!!!')
-        db.set_stat(thrower.id, "rep", -50)
+        db.set_stat(thrower["id"], "rep", -50)
         return
     db.inc_stat(target.id, "rep", -4)
-    bot.reply_to(m, f'{thrower.first_name} бросил блинчик в {target.first_name}!')
+    bot.reply_to(m, f'{m.from_user.first_name} бросил блинчик в {target.first_name}!')
 
 
 @bot.message_handler(commands=['faq'])
