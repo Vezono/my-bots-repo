@@ -126,10 +126,10 @@ def throw_handler(m):
     target = m.reply_to_message.from_user
     if target.id == bot.get_me().id:
         bot.reply_to(m, 'За что?!!!')
-        db.set_stat(thrower.id, "rep", -50)
+        db.set_stat(thrower['id'], "rep", -50)
         return
     db.inc_stat(target.id, "rep", -4)
-    bot.reply_to(m, f'{thrower.first_name} бросил блинчик в {target.first_name}!')
+    bot.reply_to(m, f'{thrower["name"]} бросил блинчик в {target.first_name}!')
 
 
 @bot.message_handler(commands=['faq'])
