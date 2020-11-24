@@ -16,19 +16,19 @@ class Database:
             'id': user_id,
             'rep': 0,
             'pancakes': 0,
+            'apples': 0,
             'cooked': 0,
-            'been_cooked': 0,
             'throwed': 0,
-            'been_throwed': 0
         }
         if self.get_user(user_id):
             self.users.update_one({'id': user_id})
         else:
             self.users.insert_one(user)
 
-    def proceed_user(self, user_id):
+    def proceed_user(self, user_id, name):
         if not self.get_user(user_id):
             self.create_user(user_id)
+        self.users.update_one({'id': user_id}, {'$set': {'name': name}})
         return self.get_user(user_id)
 
     def inc_stat(self, user_id, stat, value):
@@ -36,3 +36,6 @@ class Database:
 
     def set_stat(self, user_id, stat, value):
         self.users.update_one({'id': user_id}, {'$set': {stat: value}})
+
+    def get_users(self):
+        return self.db.users.find({})

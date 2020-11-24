@@ -12,10 +12,24 @@ from .db import Database
 
 db = Database()
 
+cache = db.get_users()
+
+
+@bot.message_handler(commands=['apple'])
+def apple_handler(m):
+    db.proceed_user(m.from_user.id, m.from_user.first_name)
+    user = db.get_user(m.from_user.id)
+    if user['pancakes'] < 50:
+        bot.reply_to(m, 'Чтобы получить яблоко, нужно потратить 50 блинов! А у тебя их нет!')
+        return
+    db.inc_stat(user.id, "pancakes", -50)
+    db.inc_stat(user.id, "apple", 1)
+    bot.reply_to(m, 'Вы получили яблоко.')
+
 
 @bot.message_handler(commands=['pancake'])
 def pancake_handler(m):
-    db.proceed_user(m.from_user.id)
+    db.proceed_user(m.from_user.id, m.from_user.first_name)
     db.inc_stat(m.from_user.id, "cooked", 1)
     if not m.reply_to_message:
         bot.reply_to(m, 'Славянские блинчики!')
@@ -25,7 +39,7 @@ def pancake_handler(m):
     target = m.reply_to_message.from_user
     cooker = m.from_user
     if target.id == bot.get_me().id:
-        bot.reply_to(m, 'Не стоило! Но все равно, спасибо большое!')
+        bot.reply_to(m, 'Не стоило! Но все равно, спасибо!')
         db.inc_stat(cooker.id, "rep", 10)
         return
     db.inc_stat(target.id, "pancakes", 1)
@@ -35,24 +49,71 @@ def pancake_handler(m):
 
 @bot.message_handler(commands=['static'])
 def stat_handler(m):
-    db.proceed_user(m.from_user.id)
+    db.proceed_user(m.from_user.id, m.from_user.first_name)
     user = db.get_user(m.from_user.id)
     heart = '❤'
     if user["rep"] < 0:
         heart = '🖤'
     tts = f'Славятистика:\n\n' \
           f'{heart}️Как я к тебе отношусь: {user["rep"]}\n' \
+          f'🍎Яблок в корзинке: {user["apples"]}\n' \
           f'🥞Блинчиков на счету: {user["pancakes"]}\n' \
           f'🥣Приготовлено блинчиков: {user["cooked"]}\n' \
-          f'🎁Получено блинчиков от других: {user["been_cooked"]}\n' \
-          f'⚔️Брошено блинчиков: {user["throwed"]}\n' \
-          f'🛡Брошено блинчиков в тебя: {user["been_throwed"]}'
+          f'⚔️Брошено блинчиков: {user["throwed"]}'
+    bot.reply_to(m, tts)
+
+
+@bot.message_handler(commands=['enemies'])
+def top_enemies_handler(m):
+    users = db.get_users()
+    users.sort('rep')
+    top = [user for user in users]
+    top = top[:10]
+    tts = 'Худшие враги Слави:\n'
+    for index in range(len(top)):
+        user = top[index]
+        name = user.get('name')
+        if user['rep'] >= 0:
+            continue
+        tts += f'{index + 1}. {name} - {user["rep"]}🖤️\n'
+    bot.reply_to(m, tts)
+
+
+@bot.message_handler(commands=['friends'])
+def top_rep_handler(m):
+    users = db.get_users()
+    users.sort('rep')
+    top = [user for user in users]
+    top.reverse()
+    top = top[:10]
+    tts = 'Лучшие друзья Слави:\n'
+    for index in range(len(top)):
+        user = top[index]
+        name = user.get('name')
+        if user['rep'] <= 0:
+            continue
+        tts += f'{index + 1}. {name} - {user["rep"]}❤️\n'
+    bot.reply_to(m, tts)
+
+
+@bot.message_handler(commands=['top_pancakes'])
+def top_rep_handler(m):
+    users = db.get_users()
+    users.sort('pancakes')
+    top = [user for user in users]
+    top.reverse()
+    top = top[:10]
+    tts = 'Самые богатые блиноводы:\n'
+    for index in range(len(top)):
+        user = top[index]
+        name = user.get('name')
+        tts += f'{index + 1}. {name} - {user["pancakes"]} блинов️🥞\n'
     bot.reply_to(m, tts)
 
 
 @bot.message_handler(commands=['throw'])
 def throw_handler(m):
-    db.proceed_user(m.from_user.id)
+    db.proceed_user(m.from_user.id, m.from_user.first_name)
     db.inc_stat(m.from_user.id, "rep", -3)
     thrower = db.get_user(m.from_user.id)
     if thrower["pancakes"] == 0:
@@ -65,10 +126,10 @@ def throw_handler(m):
     target = m.reply_to_message.from_user
     if target.id == bot.get_me().id:
         bot.reply_to(m, 'За что?!!!')
-        db.set_stat(thrower["id"], "rep", -50)
+        db.set_stat(thrower.id, "rep", -50)
         return
     db.inc_stat(target.id, "rep", -4)
-    bot.reply_to(m, f'{m.from_user.first_name} бросил блинчик в {target.first_name}!')
+    bot.reply_to(m, f'{thrower.first_name} бросил блинчик в {target.first_name}!')
 
 
 @bot.message_handler(commands=['faq'])
@@ -85,7 +146,7 @@ def faq_handler(m):
 
 @bot.message_handler()
 def text_handler(m):
-    db.proceed_user(m.from_user.id)
+    db.proceed_user(m.from_user.id, m.from_user.first_name)
 
 
 from modules.bot_keeper import keeper
