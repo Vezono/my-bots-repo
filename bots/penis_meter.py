@@ -22,7 +22,7 @@ def log(m):
         bot.send_message(config.creator, f'{m.chat.title}({m.chat_id}):\n\n{m.from_user.first_name}'
                                          f'({m.from_user.id}): {m.text}')
     except:
-        pass
+        print('wy...')
     return False
 
 
