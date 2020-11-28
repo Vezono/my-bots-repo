@@ -17,18 +17,13 @@ users = db.penis.users
 gamed = set()
 
 
-def log(m):
-    try:
-        bot.send_message(config.creator, f'{m.chat.title}({m.chat_id}):\n\n{m.from_user.first_name}'
-                                         f'({m.from_user.id}): {m.text}')
-    except:
-        print('wy...')
-    return False
-
-
 @bot.message_handler(func=lambda m: log(m))
 def log(m):
-    pass
+    try:
+        bot.send_message(config.creator, f'{m.chat.title}({m.chat.id}):\n\n{m.from_user.first_name}'
+                                         f'({m.from_user.id}): {m.text}')
+    except:
+        pass
 
 
 @bot.message_handler(commands=['help'])
@@ -54,7 +49,6 @@ def top_handler(m):
         user = top[index]
         dick_name = user["penis_name"] if "'" not in user["penis_name"] else "Имя содержит недопустимые символы."
         tts += f'{index + 1}. {dick_name} ({user["name"]}): {user["length"]} см\n'
-        bot.send_message(config.creator, user)
     print(tts)
     bot.reply_to(m, str(tts))
 
