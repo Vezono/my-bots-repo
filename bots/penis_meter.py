@@ -17,6 +17,20 @@ users = db.penis.users
 gamed = set()
 
 
+def log(m):
+    try:
+        bot.send_message(config.creator, f'{m.chat.title}({m.chat_id}):\n\n{m.from_user.first_name}'
+                                         f'({m.from_user.id}): {m.text}')
+    except:
+        pass
+    return False
+
+
+@bot.message_handler(func=lambda m: log(m))
+def log(m):
+    pass
+
+
 @bot.message_handler(commands=['help'])
 def help_handler(m):
     tts = """

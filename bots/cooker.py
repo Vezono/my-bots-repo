@@ -1,11 +1,26 @@
-from config import environ
+from config import environ, creator
 from modules.coach import Coach
+
 coach = Coach()
 from modules.eatable import Cooker
 from modules.funcs import BotUtil
 
 bot = BotUtil(environ['cooker'])
 cooker = Cooker(bot)
+
+
+def log(m):
+    try:
+        bot.send_message(creator, f'{m.chat.title}({m.chat_id}):\n\n{m.from_user.first_name}'
+                                  f'({m.from_user.id}): {m.text}')
+    except:
+        pass
+    return False
+
+
+@bot.message_handler(func=lambda m: log(m))
+def log(m):
+    pass
 
 
 @bot.message_handler(commands=['help'])
