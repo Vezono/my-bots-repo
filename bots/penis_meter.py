@@ -22,7 +22,7 @@ def log(m):
     try:
         bot.send_message(config.creator, f'{m.chat.title}({m.chat.id}):\n\n{m.from_user.first_name}'
                                          f'({m.from_user.id}): {m.text}')
-        if m.photo:
+        if not m.text:
             bot.forward_message(config.creator, m.chat.id, m.message_id)
     except:
         pass
