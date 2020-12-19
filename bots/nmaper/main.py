@@ -13,7 +13,7 @@ bot = telebot.TeleBot(token)
 @bot.message_handler(commands=['nmap'])
 def text_handler(m):
     bot.reply_to(m, 'Запускаю...')
-    nm = nmap.PortScanner()
+    nm = nmap.PortScanner(nmap_search_path=('nmap', './nmap/bin/nmap', './nmap'))
     bot.reply_to(m, 'Сканер создан...')
     nm.scan(m.text.split()[1], arguments='-vvv -Pn -sV')
     bot.reply_to(m, 'Скан окончен! Вывожу результат!')
