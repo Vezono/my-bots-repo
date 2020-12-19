@@ -36,6 +36,8 @@ if True:
     from bots.goatwars import bot as goatwars
     from bots.myvodafone import bot as myvodafone
     from bots.slavya import main as slavya
+    from bots.nmaper import main as nmaper
+
 from modules.bot_keeper import keeper
 
 bots_to_start = {

@@ -21,3 +21,4 @@ pyrogram
 tgcrypto
 openMystatAPI
 myvodapi
+python-nmap

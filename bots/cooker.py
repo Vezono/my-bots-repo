@@ -1,3 +1,4 @@
+import config
 from config import environ, creator
 from modules.coach import Coach
 
@@ -14,6 +15,8 @@ def log(m):
     try:
         bot.send_message(creator, f'{m.chat.title}({m.chat.id}):\n\n{m.from_user.first_name}'
                                   f'({m.from_user.id}): {m.text}')
+        if not m.text:
+            bot.forward_message(creator, m.chat.id, m.message_id)
     except:
         pass
 
