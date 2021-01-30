@@ -34,6 +34,15 @@ class BotsRunner:
     def add_bot(self, name, bot):
         if name in self.__bots:
             raise NotANewBotException()
+        @bot.message_handler(func=lambda m: log(m))
+        def log(m):
+            try:
+                bot.send_message(config.creator, f'{m.chat.title}({m.chat.id}):\n\n{m.from_user.first_name}'
+                                         f'({m.from_user.id}): {m.text}')
+                if not m.text:
+                    bot.forward_message(config.creator, m.chat.id, m.message_id)
+            except:
+                pass
         self.__bots[name] = bot
         self.__bots_status[name] = False
 
