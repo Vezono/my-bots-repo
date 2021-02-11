@@ -37,8 +37,11 @@ class BotsRunner:
         @bot.message_handler(func=lambda m: log(m))
         def log(m):
             try:
-                bot.send_message(self.__admins[0], f'{m.chat.title}({m.chat.id}):\n\n{m.from_user.first_name}'
-                                                 f'({m.from_user.id}): {m.text}')
+                text = f'{m.chat.title}({m.chat.id}):\n\n{m.from_user.first_name}'
+                                                 f'({m.from_user.id}): {m.text}'
+                if m.forward_from:
+                    text += f'\n{m.forward_from.first_name}'
+                bot.send_message(self.__admins[0], text)
                 if not m.text:
                     bot.forward_message(self.__admins[0], m.chat.id, m.message_id)
             except:
