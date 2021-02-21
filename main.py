@@ -23,10 +23,10 @@ app = Heroku().app
 
 from modules.manybotslib import BotsRunner
 
-if True:
+if False:
     from bots import cooker
     from bots import penis_meter
-    from bots.loshadkin import bot as pasuk
+
     from bots import triggers
     from bots.simple_bplist import bot as bpl
     from bots import sedbot
@@ -37,7 +37,8 @@ if True:
     from bots.myvodafone import bot as myvodafone
     from bots.slavya import main as slavya
     from bots.nmaper import main as nmaper
-
+    from bots.telegrad import bot as telegrad
+from bots.loshadkin import bot as pasuk
 from modules.bot_keeper import keeper
 
 bots_to_start = {
