@@ -11,6 +11,7 @@ from telebot import types, TeleBot
 from .bot import Bot
 from .config import *
 
+
 db = MongoClient(mongo_token)
 users = db.amino.users
 bar_db = db.amino.bar
@@ -372,6 +373,7 @@ def reload_bar():
 
 bar, potions = reload_bar()
 from modules.bot_keeper import keeper
-keeper.bots_to_run.update({t_bot.get_me().first_name: t_bot})
+
+# keeper.bots_to_run.update({t_bot.get_me().first_name: t_bot})
 print(f'Aminobots booted in {coach.time()}.')
 

@@ -31,13 +31,13 @@ if True:
     from bots.simple_bplist import bot as bpl
     from bots import sedbot
     from bots.magicwars import bot as magicwars
-    # from bots.amino import main as aminobots
+    from bots.amino import main as aminobots
     from bots.library import bot as library
     from bots.goatwars import bot as goatwars
     from bots.myvodafone import bot as myvodafone
     from bots.slavya import main as slavya
     from bots.nmaper import main as nmaper
-    from bots.telegrad import bot as telegrad
+    # from bots.telegrad import bot as telegrad
     from bots.loshadkin import bot as pasuk
 
 from modules.bot_keeper import keeper
