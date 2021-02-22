@@ -23,7 +23,7 @@ app = Heroku().app
 
 from modules.manybotslib import BotsRunner
 
-if False:
+if True:
     from bots import cooker
     from bots import penis_meter
 
@@ -38,7 +38,8 @@ if False:
     from bots.slavya import main as slavya
     from bots.nmaper import main as nmaper
     from bots.telegrad import bot as telegrad
-from bots.loshadkin import bot as pasuk
+    from bots.loshadkin import bot as pasuk
+
 from modules.bot_keeper import keeper
 
 bots_to_start = {
@@ -69,6 +70,7 @@ def get_dynos(m):
 def deploy_keys(m):
     if m.from_user.id != config.creator:
         return
+    bot.reply_to(m, 'деплою')
     keys = app.config()
     for key in config.environ:
         keys[key] = config.environ[key]
