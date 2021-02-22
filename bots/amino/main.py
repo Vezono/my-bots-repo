@@ -145,13 +145,13 @@ def txt_handler(m):
     if m.chat.id != tg_cn_id:
         return
     tts = f'[tg][{m.from_user.first_name}]: {m.text}'
-    bot.client.send_message(cn_id, tts)
+    # bot.client.send_message(cn_id, tts)
 
 
 @t_bot.message_handler(content_types=['new_chat_members'])
 def txt_handler(m):
     tts = f'[tg]{m.new_chat_members[0].first_name} присоединился к чату'
-    bot.client.send_message(cn_id, tts)
+    # bot.client.send_message(cn_id, tts)
 
 
 @t_bot.callback_query_handler(func=lambda c: c.data in bar)
@@ -254,6 +254,7 @@ def drink_handler(c):
     t_bot.edit_message_text(tts, c.message.chat.id, c.message.message_id, reply_markup=kb)
 
 
+"""
 @bot.message_handler(command='/online')
 def online_handler(m):
     bot.client.activity_status(1)
@@ -322,6 +323,7 @@ def join_handler(m):
 def join_handler(m):
     bot.client.send_message(m['threadId'], f'Пока, {m["author"]["nickname"]}')
     t_bot.send_message(tg_cn_id, f'Из амино чата ливнул  {m["author"]["nickname"]}.')
+"""
 
 
 @t_bot.callback_query_handler(func=lambda c: c.data.split(' ')[0] == 'ban')
@@ -329,7 +331,7 @@ def c_ban_handler(c):
     if c.from_user.id != tg_brit_id:
         return
     user_id = c.data.split(' ')[1]
-    bot.client.kick(user_id, cn_id)
+    # bot.client.kick(user_id, cn_id)
     tts = c.message.text.split(' Что будем делать?')[0] + ' Он успешно заблокирован.'
     t_bot.edit_message_text(tts, tg_cn_id, c.message_id)
 
