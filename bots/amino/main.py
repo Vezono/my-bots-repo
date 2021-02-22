@@ -8,7 +8,6 @@ import time
 from pymongo import MongoClient
 from telebot import types, TeleBot
 
-from .bot import Bot
 from .config import *
 
 
@@ -21,7 +20,6 @@ calendar_db = db.amino.calendar
 calendar = calendar_db.find_one({})
 del calendar['_id']
 
-bot = Bot()
 t_bot = TeleBot(t_token)
 
 
