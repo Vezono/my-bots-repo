@@ -100,6 +100,7 @@ def reboot(m):
 
 def pingovalka():
     requests.get('https://stickersorter.herokuapp.com')
+    requests.get('https://lastuserapi.herokuapp.com')
     Timer(20 * 60, pingovalka).start()
 
 
